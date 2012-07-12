@@ -1,6 +1,6 @@
 package com.geishatokyo.sqlgen.setting
 
-import project.XLSProject
+import project.BaseProject
 import com.geishatokyo.sqlgen.sheet.ColumnType
 
 /**
@@ -9,7 +9,7 @@ import com.geishatokyo.sqlgen.sheet.ColumnType
  * Create: 12/07/12 21:12
  */
 
-trait GTEDefaultProject extends XLSProject {
+trait GTEDefaultProject extends BaseProject {
 
   ignore sheet by pf{
     case s if """sheet\d*""".r.findFirstIn(s).isDefined => true

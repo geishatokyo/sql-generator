@@ -2,9 +2,9 @@ package com.geishatokyo.sqlgen.process.ensure
 
 import com.geishatokyo.sqlgen.process.ProcessProvider
 import process.Proc
-import project.XLSProject
+import project.BaseProject
 import com.geishatokyo.sqlgen.sheet.{Sheet, Workbook}
-import project.XLSProject.{Exists, ColumnDef}
+import project.BaseProject.{Exists, ColumnDef}
 import com.geishatokyo.sqlgen.SQLGenException
 
 /**
@@ -14,7 +14,7 @@ import com.geishatokyo.sqlgen.SQLGenException
  */
 
 trait EnsureProcessProvider extends ProcessProvider {
-  type ProjectType <: XLSProject
+  type ProjectType <: BaseProject
 
   def ensureSettingProc = new EnsureSettingProcess
 
@@ -30,7 +30,7 @@ trait EnsureProcessProvider extends ProcessProvider {
     }
 
     def validateSheet( sheet : Sheet, defs : List[ColumnDef]) = {
-      import XLSProject._
+      import BaseProject._
 
       val sheetName = sheet.name.value
       defs.foreach({

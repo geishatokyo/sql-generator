@@ -42,7 +42,7 @@ object AvatarXlsConverterBuild extends Build {
     XML.loadFile(file("project/pomExtra.xml")).child
   }
 
-  lazy val root = Project(id = "avatar-xls-converter",
+  lazy val root = Project(id = "sql-generator",
     base =  file("."),
     settings = Project.defaultSettings ++ assemblySettings ++ Seq(
       version := "0.0.1-SNAPSHOT",

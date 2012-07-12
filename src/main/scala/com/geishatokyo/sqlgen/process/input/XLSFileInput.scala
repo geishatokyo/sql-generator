@@ -3,7 +3,7 @@ package com.geishatokyo.sqlgen.process.input
 import process.Input
 import java.io.InputStream
 import com.geishatokyo.sqlgen.sheet.Workbook
-import project.XLSProject
+import project.BaseProject
 import com.geishatokyo.sqlgen.sheet.load.hssf.{NameMapper, ColumnTypeGuesser, XLSSheetLoader}
 
 /**
@@ -14,7 +14,7 @@ import com.geishatokyo.sqlgen.sheet.load.hssf.{NameMapper, ColumnTypeGuesser, XL
 
 trait XLSFileInput extends Input{
 
-  type ProjectType <: XLSProject
+  type ProjectType <: BaseProject
 
   class ColumnTypeGuesserWrapper extends ColumnTypeGuesser{
     def guesserFor(sheetName: String) = {

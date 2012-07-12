@@ -1,6 +1,6 @@
 package com.geishatokyo.sqlgen.project
 
-import project.XLSProject
+import project.BaseProject
 import com.geishatokyo.sqlgen.sheet.ColumnType
 import com.geishatokyo.sqlgen.setting.GTEDefaultProject
 import com.geishatokyo.sqlgen.{Context, Executor}
@@ -18,7 +18,7 @@ import org.specs2.mutable.SpecificationWithJUnit
 
 class XLSProjectTest extends SpecificationWithJUnit {
 
-  "XLSProject" should {
+  "BaseProject" should {
     "works" in{
 
       val executor = new ExecutorUsage()
@@ -37,16 +37,16 @@ class XLSProjectTest extends SpecificationWithJUnit {
 
 
 }
-class ExecutorUsage extends Executor[XLSProjectUsage]
+class ExecutorUsage extends Executor[BaseProjectUsage]
   with XLSFileInput
   with EnsureProcessProvider
   with SQLOutputProvider{
 
-  type ProjectType = XLSProjectUsage
+  type ProjectType = BaseProjectUsage
 
   val context: Context = new MapContext
 
-  val project = new XLSProjectUsage()
+  val project = new BaseProjectUsage()
 
   protected def executor  = {
     ensureSettingProc then outputSqlProc
@@ -54,7 +54,7 @@ class ExecutorUsage extends Executor[XLSProjectUsage]
 
 }
 
-class XLSProjectUsage extends XLSProject{
+class BaseProjectUsage extends BaseProject{
 
   ignore sheet "IgnoredSheet"
 

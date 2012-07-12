@@ -2,7 +2,7 @@ package com.geishatokyo.sqlgen.sample
 
 import org.specs2.mutable.SpecificationWithJUnit
 import com.geishatokyo.sqlgen.{Context, Executor}
-import project.XLSProject
+import project.BaseProject
 import com.geishatokyo.sqlgen.process.input.XLSFileInput
 import com.geishatokyo.sqlgen.process.output.SQLOutputProvider
 import com.geishatokyo.sqlgen.process.MapContext
@@ -27,9 +27,9 @@ class PlainProjectTest extends SpecificationWithJUnit {
 
 }
 
-class SimpleExecutor extends Executor[XLSProject] with XLSFileInput with SQLOutputProvider{
+class SimpleExecutor extends Executor[BaseProject] with XLSFileInput with SQLOutputProvider{
 
-  type ProjectType = XLSProject
+  type ProjectType = BaseProject
 
 
   val context: Context = new MapContext

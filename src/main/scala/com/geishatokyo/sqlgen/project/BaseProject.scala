@@ -10,8 +10,8 @@ import scala.collection.mutable
  * Create: 12/07/12 12:46
  */
 
-trait XLSProject extends Project with Scope {
-  import XLSProject._
+trait BaseProject extends Project with Scope {
+  import BaseProject._
 
 
   protected var _sheetNameMaps : MapAndPartialFunc[String] = new MapAndPartialFunc({
@@ -77,10 +77,14 @@ trait XLSProject extends Project with Scope {
     this.synchronized{
       val oldScope = scope
       scope = s
+      beginScope(sheetName)
       func
+      endScope(sheetName)
       scope = oldScope
     }
   }
+  protected def beginScope( sheetName : String) : Unit = {}
+  protected def endScope( sheetName : String) : Unit = {}
 
 
   protected var scope : Scope = this
@@ -262,7 +266,7 @@ trait XLSProject extends Project with Scope {
 
 }
 
-object XLSProject{
+object BaseProject{
 
 
   class SetAndPartialFunc(var innerPartialFunc : PartialFunction[String,Boolean])
@@ -341,7 +345,7 @@ object XLSProject{
 }
 
 private[project] trait Scope{
-  import XLSProject._
+  import BaseProject._
   def __columnNameMaps : MapAndPartialFunc[String]
   def __ignoreColumns : SetAndPartialFunc
   def __columnTypeGuesser : MapAndPartialFunc[ColumnType.Value]
