@@ -62,7 +62,11 @@ class XLSSheetLoader(nameMapper : NameMapper,
       case (index,h) => {
         val cell = row.getCell(index)
         val v = loadCellValue(cell,h.columnType)
-        v
+        if(v != null){
+          v.trim()
+        }else{
+          v
+        }
       }
     })
   }

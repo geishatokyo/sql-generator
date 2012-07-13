@@ -60,11 +60,8 @@ trait MergeSplitProject extends Project with SheetScope with SheetAddress {
       addTask(MergeSheetTask(sheetName , columnsList.flatten.toList))
     }
 
-    def select( columns : String*) = {
-      new Select(sheetName,columns.toList.map(c => c -> c))
-    }
-    def selectM( columns : (String,String)*) = {
-      new Select(sheetName,columns.toList)
+    def select( columns : NameMap*) = {
+      new Select(sheetName,columns.toList.map(c => c.beforeName -> c.afterName))
     }
 
   }
@@ -91,11 +88,12 @@ trait MergeSplitProject extends Project with SheetScope with SheetAddress {
           addTask(MergeSelectTask(sheetName,mergeColumns,fromSheet,func))
         }
       }
-
     }
+  }
 
-
-
+  implicit def toNameMap( v : String) = new NameMap(v,v)
+  case class NameMap(beforeName :String , afterName : String){
+    def as( afterName : String) = NameMap(beforeName,afterName)
   }
 
 
