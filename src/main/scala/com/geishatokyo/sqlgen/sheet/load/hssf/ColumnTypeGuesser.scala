@@ -14,4 +14,6 @@ trait ColumnTypeGuesser {
 
   def isIgnoreColumn_?(sheetName : String) : String => Boolean
 
+  def isIdColumn_?(sheetName : String) : String => Boolean
+
 }

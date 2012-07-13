@@ -114,6 +114,7 @@ class XLSSheetLoader(nameMapper : NameMapper,
     val nameMap = nameMapper.columnNameMapperFor(sheetName)
     val typeMap = typeGuesser.guesserFor(sheetName)
     val ignoreCols = typeGuesser.isIgnoreColumn_?(sheetName)
+    val idColumns = typeGuesser.isIdColumn_?(sheetName)
 
     val headersOnFile = (0 until size).map(i => {
       val cell = row.getCell(i)
@@ -131,6 +132,10 @@ class XLSSheetLoader(nameMapper : NameMapper,
       ch.output_? = !ignoreCols(ch.name)
       logger.log("Column:%s@%s is %s".format(ch.name,sheetName,ch.columnType))
     })
+    //find and set ids
+    val ids = sheet.headers.withFilter(h => idColumns(h.name)).map(_.name.value)
+    logger.log("Sheet:%s's IDs are %s".format(sheetName,ids))
+    sheet.replaceIds(ids:_*)
     headersOnFile.map(_._1).zip(sheet.headers)
   }
 

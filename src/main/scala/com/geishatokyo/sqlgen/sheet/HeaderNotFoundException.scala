@@ -9,6 +9,6 @@ import com.geishatokyo.sqlgen.SQLGenException
  */
 
 class HeaderNotFoundException(sheetName : String,headerName : String) extends
-  SQLGenException("Header:%s is not found in Sheet:%s".format(headerName,sheetName),null) {
+  SQLGenException("Header:%s is not found in Sheet:%s".format(headerName,sheetName)) {
 
 }

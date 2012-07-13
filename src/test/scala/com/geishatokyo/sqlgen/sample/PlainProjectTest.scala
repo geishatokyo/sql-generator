@@ -2,7 +2,7 @@ package com.geishatokyo.sqlgen.sample
 
 import org.specs2.mutable.SpecificationWithJUnit
 import com.geishatokyo.sqlgen.{Context, Executor}
-import project.BaseProject
+import com.geishatokyo.sqlgen.project.BaseProject
 import com.geishatokyo.sqlgen.process.input.XLSFileInput
 import com.geishatokyo.sqlgen.process.output.SQLOutputProvider
 import com.geishatokyo.sqlgen.process.MapContext

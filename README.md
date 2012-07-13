@@ -3,7 +3,7 @@
 
 # Grammer
 
-basic
+Base
 
     ignore sheet  { sheetName }
            sheets { sheetName*}
@@ -26,6 +26,28 @@ basic
                                             whenEmpty
                                             when { String => Boolean }
 
-scoping
+Scoping sheet
 
-    onSheet({SheetName}) { ... }
+    onSheet({sheetName}) { ... }
+
+ColumnAddress
+
+    column({columnName}) at {SheetName}
+                         @@ {SheetName}
+    at({sheetName}) { ... }
+
+Merge and split
+
+    # can declare outside of SheetScope
+    merge sheet {sheetName} from {columnAddress*}
+    split sheet {sheetName} into {columnAddress*}
+    modify sheet {sheetName} rename {newName}
+                             delete
+    modify column {columnAddress} ... # => same as below
+    # can declare only inside of SheetScope
+    modify column {columnName} rename {newName}
+                               convert { String => String }
+                               delete
+                               ignore
+                               copyFrom {columnAddress}
+                               copyTo   {columnAddress*}

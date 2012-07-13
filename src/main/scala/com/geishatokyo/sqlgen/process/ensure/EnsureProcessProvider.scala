@@ -1,10 +1,10 @@
 package com.geishatokyo.sqlgen.process.ensure
 
 import com.geishatokyo.sqlgen.process.ProcessProvider
-import process.Proc
-import project.BaseProject
+import com.geishatokyo.sqlgen.process.Proc
+import com.geishatokyo.sqlgen.project.BaseProject
 import com.geishatokyo.sqlgen.sheet.{Sheet, Workbook}
-import project.BaseProject.{Exists, ColumnDef}
+import com.geishatokyo.sqlgen.project.BaseProject.{Exists, ColumnDef}
 import com.geishatokyo.sqlgen.SQLGenException
 
 /**

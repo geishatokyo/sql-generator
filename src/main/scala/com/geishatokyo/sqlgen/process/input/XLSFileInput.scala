@@ -1,9 +1,9 @@
 package com.geishatokyo.sqlgen.process.input
 
-import process.Input
+import com.geishatokyo.sqlgen.process.Input
 import java.io.InputStream
 import com.geishatokyo.sqlgen.sheet.Workbook
-import project.BaseProject
+import com.geishatokyo.sqlgen.project.BaseProject
 import com.geishatokyo.sqlgen.sheet.load.hssf.{NameMapper, ColumnTypeGuesser, XLSSheetLoader}
 
 /**
@@ -23,6 +23,10 @@ trait XLSFileInput extends Input{
 
     def isIgnoreColumn_?(sheetName: String) : String => Boolean = {
       project(sheetName).ignoreColumns
+    }
+
+    def isIdColumn_?(sheetName: String): (String) => Boolean = {
+      project(sheetName).idColumnGuesser
     }
   }
 

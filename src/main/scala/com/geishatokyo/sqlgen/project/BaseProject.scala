@@ -1,6 +1,6 @@
-package project
+package com.geishatokyo.sqlgen.project
 
-import com.geishatokyo.sqlgen.sheet.ColumnType
+import com.geishatokyo.sqlgen.sheet.{ ColumnType}
 import com.geishatokyo.sqlgen.Project
 import scala.collection.mutable
 
@@ -10,7 +10,7 @@ import scala.collection.mutable
  * Create: 12/07/12 12:46
  */
 
-trait BaseProject extends Project with Scope {
+trait BaseProject extends Project with Scope with SheetScope {
   import BaseProject._
 
 
@@ -42,10 +42,18 @@ trait BaseProject extends Project with Scope {
   protected var _globalColumnDef : MultiRepository[ColumnDef] = new MultiRepository[ColumnDef]
 
 
+  protected var _globalIdColumnGuesser : SetAndPartialFunc = new SetAndPartialFunc({
+      case "id" => true
+      case _ => false
+    })
+  def globalIdColumnGuesser : PartialFunction[String,Boolean] = _globalIdColumnGuesser
+
+
   def __columnNameMaps : MapAndPartialFunc[String] = _globalColumnNameMaps
   def __ignoreColumns: SetAndPartialFunc = _globalIgnoreColumns
   def __columnTypeGuesser: MapAndPartialFunc[ColumnType.Value] = _globalColumnTypeGuesser
   def __columnDef: MultiRepository[ColumnDef] = _globalColumnDef
+  def __idColumnGuesser : SetAndPartialFunc = _globalIdColumnGuesser
 
   def globalColumnTypeGuesser : PartialFunction[String, ColumnType.Value] = _globalColumnTypeGuesser
 
@@ -72,13 +80,18 @@ trait BaseProject extends Project with Scope {
     }
   }
 
+  var scopedSheet = ""
+  var inScope_? = false
   def onSheet(sheetName : String)( func : => Any) = {
     val s = getOrCreateSheetSetting(sheetName)
     this.synchronized{
       val oldScope = scope
+      scopedSheet = sheetName
       scope = s
       beginScope(sheetName)
+      inScope_? = true
       func
+      inScope_? = false
       endScope(sheetName)
       scope = oldScope
     }
@@ -89,6 +102,15 @@ trait BaseProject extends Project with Scope {
 
   protected var scope : Scope = this
 
+
+  // Grammer
+
+  object by
+  type ByType = by.type
+  object be
+  type BeType = be.type
+  object error
+  type ErrorType = error.type
 
   object ignore {
 
@@ -221,15 +243,19 @@ trait BaseProject extends Project with Scope {
       }
     }
 
+    def idColumn( columnName : String) {
+      scope.__idColumnGuesser += columnName
+    }
+
+    def idColumn( by : ByType) {
+      new Object{
+        def pf(_pf : PartialFunction[String,Boolean]) = {
+          scope.__idColumnGuesser += _pf
+        }
+      }
+    }
 
   }
-
-  object by
-  type ByType = by.type
-  object be
-  type BeType = be.type
-  object error
-  type ErrorType = error.type
 
 
 
@@ -247,20 +273,22 @@ trait BaseProject extends Project with Scope {
     }
 
     protected var _columnDef : MultiRepository[ColumnDef] = new MultiRepository[ColumnDef]
-
     def columnDef = {
       _columnDef.allValues ::: _globalColumnDef.allValues
     }
 
-
     protected var _columnNameMaps : MapAndPartialFunc[String] = new MapAndPartialFunc
     def columnNameMaps : PartialFunction[String,String] = _columnNameMaps orElse globalColumnNameMaps
+
+    protected var _idColumnGuesser : SetAndPartialFunc = new SetAndPartialFunc
+    def idColumnGuesser : PartialFunction[String,Boolean] = _idColumnGuesser orElse _globalIdColumnGuesser
 
 
     def __columnNameMaps: MapAndPartialFunc[String] = _columnNameMaps
     def __ignoreColumns: SetAndPartialFunc = _ignoreColumns
     def __columnTypeGuesser: MapAndPartialFunc[ColumnType.Value] = _columnTypeGuesser
     def __columnDef: MultiRepository[ColumnDef] = _columnDef
+    def __idColumnGuesser : SetAndPartialFunc = _idColumnGuesser
   }
 
 
@@ -276,23 +304,23 @@ object BaseProject{
 
     var list : Set[String] = Set()
 
-    def +=( name : String) = list = list + name
+    def +=( name : String) = list = list + name.toLowerCase
 
-    def ++=( names : Seq[String]) = list = list ++ names
+    def ++=( names : Seq[String]) = list = list ++ names.map(_.toLowerCase)
 
     def +=( pf : PartialFunction[String,Boolean]) = {
       innerPartialFunc = pf.orElse(innerPartialFunc)
     }
 
     def apply(v1: String): Boolean = {
-      if (list.contains(v1)) true
+      if (list.contains(v1.toLowerCase)) true
       else{
         innerPartialFunc(v1)
       }
     }
 
     def isDefinedAt(x: String): Boolean = {
-      list.contains(x) || innerPartialFunc.isDefinedAt(x)
+      list.contains(x.toLowerCase) || innerPartialFunc.isDefinedAt(x)
     }
   }
 
@@ -303,21 +331,23 @@ object BaseProject{
     def this() = this(Map.empty)
     var map : Map[String,T] = Map.empty
 
-    def +=( kv : (String,T)) = map = map + kv
-    def ++=( kvs : Seq[(String,T)]) = map = map ++ kvs
+    def +=( kv : (String,T)) = map = map + (kv._1.toLowerCase -> kv._2)
+    def ++=( kvs : Seq[(String,T)]) = map = map ++ kvs.map({
+      case (k,v) => k.toLowerCase -> v
+    })
 
     def +=( pf : PartialFunction[String,T]) = {
       innerPartialFunc = pf.orElse(innerPartialFunc)
     }
 
     def apply(v1: String): T = {
-      map.getOrElse(v1 , {
+      map.getOrElse(v1.toLowerCase , {
         innerPartialFunc(v1)
       })
     }
 
     def isDefinedAt(x: String): Boolean = {
-      map.isDefinedAt(x) || innerPartialFunc.isDefinedAt(x)
+      map.isDefinedAt(x.toLowerCase) || innerPartialFunc.isDefinedAt(x)
     }
   }
 
@@ -326,7 +356,7 @@ object BaseProject{
     val multiMap = new mutable.HashMap[String,mutable.Set[T]]() with mutable.MultiMap[String,T]
 
     def +=( kv : (String,T)) = {
-      multiMap.addBinding(kv._1 , kv._2)
+      multiMap.addBinding(kv._1.toLowerCase , kv._2)
     }
 
     def allValues : List[T] = {
@@ -350,4 +380,5 @@ private[project] trait Scope{
   def __ignoreColumns : SetAndPartialFunc
   def __columnTypeGuesser : MapAndPartialFunc[ColumnType.Value]
   def __columnDef : MultiRepository[ColumnDef]
+  def __idColumnGuesser : SetAndPartialFunc
 }

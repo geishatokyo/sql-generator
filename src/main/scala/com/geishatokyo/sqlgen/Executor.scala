@@ -1,6 +1,6 @@
 package com.geishatokyo.sqlgen
 
-import _root_.process.{Proc, Input}
+import com.geishatokyo.sqlgen.process.{Proc, Input}
 import process.ProcessProvider
 import sheet.Workbook
 import java.io.InputStream
@@ -37,6 +37,7 @@ trait Executor[ProjectType <: Project] extends Input with ProcessProvider {
     executor(wb)
   }
 
+  def skipOnError(proc : Proc) = proc.skipOnError
 
   protected def executor : Proc
 

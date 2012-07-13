@@ -1,7 +1,8 @@
-package process
+package com.geishatokyo.sqlgen.process
 
 import com.geishatokyo.sqlgen.Project
 import com.geishatokyo.sqlgen.sheet.Workbook
+import com.geishatokyo.sqlgen.logger.Logger
 
 /**
  *
@@ -21,6 +22,30 @@ trait Proc {
 
   def split( mainStream : Proc, subStream : Proc) : Proc = {
     new SplitProc(mainStream,subStream)
+  }
+
+  def skipOnError : Proc = {
+    if(this.isInstanceOf[ErrorSkipProc]){
+      this
+    }else{
+      new ErrorSkipProc(this)
+    }
+  }
+}
+
+class ErrorSkipProc(innerProc : Proc) extends Proc {
+  def name: String = innerProc.name
+
+  def apply(workbook: Workbook): Workbook = {
+    val cp = workbook.copy()
+    try{
+      innerProc(cp)
+    }catch{
+      case e : Exception => {
+        Logger.log("Exception occured while processing %s".format(name),e)
+        workbook
+      }
+    }
   }
 }
 

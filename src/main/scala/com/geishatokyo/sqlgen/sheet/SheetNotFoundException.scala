@@ -9,6 +9,6 @@ import com.geishatokyo.sqlgen.SQLGenException
  */
 
 class SheetNotFoundException(sheetName : String)
-  extends SQLGenException("Sheet:%s is not found".format(sheetName),null) {
+  extends SQLGenException("Sheet:%s is not found".format(sheetName)) {
 
 }

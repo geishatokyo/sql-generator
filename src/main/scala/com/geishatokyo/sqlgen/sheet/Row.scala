@@ -33,6 +33,9 @@ class Row(val parent : Sheet,val index : Int,val headers : List[ColumnHeader],va
       throw new HeaderNotFoundException(parent.name, columnName)
     }
   }
+  def existColumn(columnName : String) = {
+    headers.indexWhere( h => h.name =~= columnName) >= 0
+  }
 
   override def equals(obj: Any): Boolean = {
     obj match{

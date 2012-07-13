@@ -26,4 +26,8 @@ class Column(val parent : Sheet,val header : ColumnHeader,val cells : List[Cell]
       case _ => false
     }
   }
+
+  override def toString: String = {
+    """Header:%s RowSize:%s""".format(header,size)
+  }
 }

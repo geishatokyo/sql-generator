@@ -15,9 +15,16 @@ class Sheet(val name : VersionedValue) {
   protected var _headers : List[ColumnHeader] = Nil
   def headers = _headers
 
+  protected var _ids : List[ColumnHeader] = Nil
+  def ids = _ids
+
   protected var cells : List[List[Cell]] = Nil
   protected var rows : List[Row] = Nil
   protected var columns : List[Column] = Nil
+
+  var ignore = false
+
+
 
   protected def cellsToRows() = {
     rows = cells.zipWithIndex.map({
@@ -34,11 +41,16 @@ class Sheet(val name : VersionedValue) {
   }
 
   protected def columnsToCells() = {
-    val rowSize = rows.size
-    cells = (0 until rowSize).map(i => {
-      columns.map(c => c.cells(i))
-    }).toList
-    _headers = columns.map(_.header)
+    if(columns.size == 0){
+      cells = Nil
+      _headers = Nil
+    }else{
+      val rowSize = columns(0).cells.size
+      cells = (0 until rowSize).map(i => {
+        columns.map(c => c.cells(i))
+      }).toList
+      _headers = columns.map(_.header)
+    }
   }
 
   def apply( row : Int, col : Int) = {
@@ -101,12 +113,37 @@ class Sheet(val name : VersionedValue) {
   def headerIndex(columnName : String) = {
     _headers.indexWhere( h => h.name =~= columnName)
   }
+  def findFirstRowWhere( columnName : String, value : String, caseInsensitive : Boolean = false) : Option[Row] = {
+    val index = headerIndex(columnName)
+    if (index < 0) return None
+    rows.find( r => {
+      if (caseInsensitive){
+        r.cells(index) =~= value
+      }else{
+        r(index) == value
+      }
+    })
+  }
+  def findRowsWhere(columnName : String, value : String, caseInsensitive : Boolean = false) : List[Row] = {
+    val index = headerIndex(columnName)
+    if (index < 0) return Nil
+    rows.filter( r => {
+      if (caseInsensitive){
+        r.cells(index) =~= value
+      }else{
+        r(index) == value
+      }
+    })
+  }
+  def findFirstRowWhere( func : Row => Boolean) : Option[Row] = {
+    rows.find(func(_))
+  }
 
 
   def addRow( values : List[String]) = {
     if(values.size != _headers.size) {
       throw new SQLGenException(
-        "Column size missmatch.Sheet:%s Passed:%s".format(_headers.size,values.size),null)
+        "Column size missmatch.Sheet:%s Passed:%s".format(_headers.size,values.size))
     }
     cells = cells :+ values.map(v => new Cell(this,v))
     cellsToRows()
@@ -115,7 +152,7 @@ class Sheet(val name : VersionedValue) {
   def addRows( rows : List[List[String]]) = {
     if (!rows.forall(row => row.size == _headers.size)){
       throw new SQLGenException(
-      "Column size missmatch.SheetRowSize:%s".format(_headers.size),null)
+      "Column size missmatch.SheetRowSize:%s".format(_headers.size))
     }
     cells = cells ::: rows.map( row => row.map(v => new Cell(this,v)))
     cellsToRows()
@@ -123,17 +160,27 @@ class Sheet(val name : VersionedValue) {
 
   }
 
+  def replaceIds( idColumnNames : String*) = {
+    _ids = idColumnNames.map(n => header(n)).toList
+  }
   def addEmptyRow() = {
     cells = cells :+ List.fill(_headers.size)(new Cell(this,""))
     cellsToRows()
     cellsToColumns()
   }
 
-  def addColumn(columnName : String,values : List[String]) = {
-    if (values.size != cells.size) {
-      throw new SQLGenException(
-        "Row size missmatch.Sheet:%s Passed:%s".format(cells.size,values.size),null)
+  protected def checkColumnExist(columnName : String){
+    if (existColumn(columnName)){
+      throw new Exception("Column:%s already exists".format(columnName))
     }
+  }
+
+  def addColumn(columnName : String,values : List[String]) = {
+    if (columnSize > 0 && values.size != cells.size) {
+      throw new SQLGenException(
+        "Row size missmatch.Sheet:%s Passed:%s".format(cells.size,values.size))
+    }
+    checkColumnExist(columnName)
     columns = columns :+ new Column(
       this,
       new ColumnHeader(this,new VersionedValue(columnName)),
@@ -148,6 +195,9 @@ class Sheet(val name : VersionedValue) {
    * @param columnNames
    */
   def addColumns(columnNames : String*) = {
+    columnNames.foreach( cn => {
+      checkColumnExist(cn)
+    })
     val rowSize = this.rowSize
     def genColumn(columnName : String) = {
       new Column(
@@ -161,6 +211,18 @@ class Sheet(val name : VersionedValue) {
     cellsToRows
   }
 
+  def overwriteColumn(columnName : String, values : List[String]) = {
+
+    if (columnSize >0 && values.size != cells.size) {
+      throw new SQLGenException(
+        "Row size missmatch.Sheet:%s Passed:%s".format(cells.size,values.size))
+    }
+    checkColumnExist(columnName)
+    column(columnName).cells.zip(values).foreach({
+      case (c,v) => c := v
+    })
+  }
+
 
   def deleteRow(index : Int) : Unit = {
     rows = rows.take(index) ::: rows.drop(index + 1)
@@ -168,16 +230,18 @@ class Sheet(val name : VersionedValue) {
     cellsToColumns
   }
 
-  def deleteColumn(index : Int) : Unit = {
+  def deleteColumn(index : Int) : Boolean = {
     columns = columns.take(index) ::: columns.drop(index + 1)
     columnsToCells
     cellsToRows
+    true
   }
 
-  def deleteColumn(columnName : String) : Unit = {
+  def deleteColumn(columnName : String) : Boolean = {
     val index = headerIndex(columnName)
     if(index < 0){
-      throw new HeaderNotFoundException(name, columnName)
+      //throw new HeaderNotFoundException(name, columnName)
+      false
     }else{
       deleteColumn(index)
     }

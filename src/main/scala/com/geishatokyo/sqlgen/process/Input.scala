@@ -1,10 +1,9 @@
-package process
+package com.geishatokyo.sqlgen.process
 
 import com.geishatokyo.sqlgen.sheet.Workbook
 import java.io._
 import com.geishatokyo.sqlgen.util.{NoneFile, SomeFile, FileUtil}
 import com.geishatokyo.sqlgen.Project
-import com.geishatokyo.sqlgen.process.ProcessProvider
 import java.util.UUID
 
 /**

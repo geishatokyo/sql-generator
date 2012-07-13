@@ -1,6 +1,5 @@
 package com.geishatokyo.sqlgen.project
 
-import project.BaseProject
 import com.geishatokyo.sqlgen.sheet.ColumnType
 import com.geishatokyo.sqlgen.setting.GTEDefaultProject
 import com.geishatokyo.sqlgen.{Context, Executor}

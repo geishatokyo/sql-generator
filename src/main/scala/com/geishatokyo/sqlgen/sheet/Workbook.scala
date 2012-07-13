@@ -8,6 +8,8 @@ package com.geishatokyo.sqlgen.sheet
 
 class Workbook {
 
+  var name : String = "Workbook1"
+
   protected var sheets : List[Sheet] = Nil
 
   def apply(index : Int) : Sheet  = sheets(index)
@@ -28,14 +30,26 @@ class Workbook {
     this.sheets = this.sheets ::: sheets
   }
 
+  def deleteSheet(sheetName : String) = {
+    getSheet(sheetName) match{
+      case Some(_) => {
+        sheets = sheets.filterNot(s => s.name =~= sheetName)
+        true
+      }
+      case _ => false
+    }
+  }
+
   def copy() = {
     val wb = new Workbook()
+    wb.name = name
     wb.sheets = sheets.map(_.copy())
     wb
   }
 
   def copyWithoutHistory() = {
     val wb = new Workbook()
+    wb.name = name
     wb.sheets = sheets.map(_.copyWithoutHistory())
     wb
   }

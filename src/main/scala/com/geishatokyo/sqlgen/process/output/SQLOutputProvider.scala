@@ -1,7 +1,7 @@
 package com.geishatokyo.sqlgen.process.output
 
 import com.geishatokyo.sqlgen.process.ProcessProvider
-import process.{SeqProc, Proc}
+import com.geishatokyo.sqlgen.process.{SeqProc, Proc}
 import com.geishatokyo.sqlgen.sheet.Workbook
 import com.geishatokyo.sqlgen.sheet.convert.MySQLConverter
 import com.geishatokyo.sqlgen.util.FileUtil
