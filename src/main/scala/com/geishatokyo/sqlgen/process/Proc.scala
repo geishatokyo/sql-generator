@@ -33,6 +33,17 @@ trait Proc {
   }
 }
 
+object Proc{
+  implicit def funcToProc(func : Workbook => Workbook) = {
+    new FuncWrapper(func)
+  }
+}
+
+/**
+ * Marker interface
+ */
+trait OutputProc extends Proc
+
 class ErrorSkipProc(innerProc : Proc) extends Proc {
   def name: String = innerProc.name
 
@@ -77,4 +88,16 @@ case class SplitProc(main : Proc,sub : Proc) extends Proc{
     sub(cp)
     main(workbook)
   }
+}
+
+case class NoProc() extends Proc{
+  def name: String = "NoProc"
+
+  def apply(workbook: Workbook): Workbook = workbook
+
+}
+
+case class FuncWrapper(func : Workbook => Workbook) extends Proc{
+  def name: String = "WrapProc:" + func.toString()
+  def apply(workbook: Workbook): Workbook = func(workbook)
 }

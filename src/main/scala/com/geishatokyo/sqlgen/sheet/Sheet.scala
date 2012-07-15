@@ -250,6 +250,7 @@ class Sheet(val name : VersionedValue) {
   def copy() = {
     val newSheet = new Sheet(name.copy())
     newSheet._headers = this.headers.map(_.copy(newSheet))
+    newSheet._ids = this._ids
     newSheet.cells = this.cells.map(row => row.map(_.copy(newSheet)))
     newSheet.cellsToRows
     newSheet.cellsToColumns
@@ -259,6 +260,7 @@ class Sheet(val name : VersionedValue) {
   def copyWithoutHistory() = {
     val newSheet = new Sheet(new VersionedValue(name.value))
     newSheet._headers = this.headers.map(h => new ColumnHeader(newSheet,h.name.value))
+    newSheet._ids = this._ids
     newSheet.cells = this.cells.map(row => row.map(r => new Cell(newSheet,r.value)))
     newSheet.cellsToRows
     newSheet.cellsToColumns

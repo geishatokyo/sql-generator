@@ -23,7 +23,9 @@ trait Input extends ProcessProvider {
     context.name = name
     val stream = new FileInputStream(new File(path))
     try{
-      _load(stream)
+      val wb = _load(stream)
+      wb.name = name
+      wb
     }finally{
       stream.close()
     }

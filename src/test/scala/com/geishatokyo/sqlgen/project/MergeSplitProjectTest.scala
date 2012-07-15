@@ -43,7 +43,7 @@ with XLSOutputProvider{
   protected def executor: Proc = {
     ensureSettingProc then
     mergeAndSplitProc then
-    outputSqlProc.skipOnError then
+    outputSqlProc().skipOnError then
     outputXlsProc().skipOnError
   }
 }

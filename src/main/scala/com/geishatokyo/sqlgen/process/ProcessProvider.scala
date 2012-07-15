@@ -16,5 +16,5 @@ trait ProcessProvider {
   type ProjectType <: Project
 
   val project : ProjectType
-  def context : Context
+  val context : Context
 }

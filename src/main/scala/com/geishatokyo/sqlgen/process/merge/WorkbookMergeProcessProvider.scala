@@ -13,16 +13,18 @@ import com.geishatokyo.sqlgen.util.I18NUtil
 trait WorkbookMergeProcessProvider extends ProcessProvider {
   self : Input =>
 
-  def mergeWorkbookProc( workbook : String , preProcess : Proc) : Proc = {
-    new WorkbookMergeProcess(workbook,preProcess)
+  def mergeWorkbookProc( workbook : Workbook) : Proc = {
+    new WorkbookMergeProcess(workbook)
+  }
+  def mergeWorkbookProc( filename : String) : Proc = {
+    new WorkbookMergeProcess(load(filename))
   }
 
 
-  class WorkbookMergeProcess(filename : String, proc : Proc) extends Proc{
+  class WorkbookMergeProcess( merge : Workbook) extends Proc{
     def name: String = "MergeWorkbook"
 
     def apply(base: Workbook ): Workbook = {
-      val merge = proc(load(filename))
 
       base.foreachSheet(sheet => {
         merge.getSheet(sheet.name) match{
@@ -43,6 +45,7 @@ trait WorkbookMergeProcessProvider extends ProcessProvider {
         val ids = base.ids.map(h => row(h.name).value)
         merge.findFirstRowWhere( searchRow => {
           val mergeRowId = base.ids.map(h => searchRow(h.name).value)
+          println("&%&" + ids + " : " + mergeRowId)
           ids == mergeRowId
         }) match{
           case Some( toMerge) => {

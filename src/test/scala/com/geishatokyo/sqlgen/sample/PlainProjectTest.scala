@@ -41,7 +41,7 @@ class SimpleExecutor extends Executor[BaseProject] with XLSFileInput with SQLOut
   }
 
   protected def executor  = {
-    outputSqlProc
+    outputSqlProc()
   }
 
 }

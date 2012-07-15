@@ -47,4 +47,8 @@ class Row(val parent : Sheet,val index : Int,val headers : List[ColumnHeader],va
       case _ => false
     }
   }
+
+  override def toString: String = {
+    cells.mkString(",")
+  }
 }

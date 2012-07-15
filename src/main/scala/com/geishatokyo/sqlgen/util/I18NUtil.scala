@@ -15,7 +15,7 @@ object I18NUtil {
 
   def findI18NFiles(dir : String,baseName : String) : List[String] = {
     val currentDir = new File(dir)
-    val files = currentDir.list().flatMap( f=> {
+    val files = currentDir.listFiles().flatMap( f=> {
       filterI18NFiles(baseName,f)
     })
     files.toList
@@ -25,9 +25,10 @@ object I18NUtil {
     findI18NFiles(dir,baseName)
   }
 
-  private def filterI18NFiles(baseName : String,filename : String) : Option[String] = {
+  private def filterI18NFiles(baseName : String,f : File) : Option[String] = {
+    val filename = f.getAbsolutePath
     val (dir,fn,ext) = FileUtil.splitPathAndNameAndExt(filename)
-    if (fn.startsWith(baseName)){
+    if (fn.startsWith(baseName) && fn != baseName){
       Some(filename)
     }else{
       None

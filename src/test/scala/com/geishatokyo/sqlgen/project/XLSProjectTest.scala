@@ -48,7 +48,7 @@ class ExecutorUsage extends Executor[BaseProjectUsage]
   val project = new BaseProjectUsage()
 
   protected def executor  = {
-    ensureSettingProc then outputSqlProc
+    ensureSettingProc then outputSqlProc()
   }
 
 }
