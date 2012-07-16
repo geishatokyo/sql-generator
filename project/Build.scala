@@ -6,8 +6,8 @@ import AssemblyKeys._
 object AvatarXlsConverterBuild extends Build {
 
   val poi = "org.apache.poi" % "poi" % "3.7"
-  val mySqlDriver = "mysql" % "mysql-connector-java" % "5.1.18"
-  val amazonEC2 = "com.amazonaws" % "aws-java-sdk" % "1.2.6"
+  val mySqlDriver = "mysql" % "mysql-connector-java" % "5.1.18" % "provided"
+  val amazonEC2 = "com.amazonaws" % "aws-java-sdk" % "1.2.6" % "provided"
   val junit = "junit" % "junit" % "4.8.1" % "test"
   val specs2 = (scalaVersion : String ) => {
     val version = scalaVersion match{
