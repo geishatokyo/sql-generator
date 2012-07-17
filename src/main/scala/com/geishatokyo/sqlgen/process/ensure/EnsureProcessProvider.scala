@@ -8,7 +8,8 @@ import com.geishatokyo.sqlgen.project.BaseProject.{Exists, ColumnDef}
 import com.geishatokyo.sqlgen.SQLGenException
 
 /**
- *
+ * To ensure input file data is correct.
+ * This process should be invoked before process other convertin process.
  * User: takeshita
  * Create: 12/07/12 22:37
  */

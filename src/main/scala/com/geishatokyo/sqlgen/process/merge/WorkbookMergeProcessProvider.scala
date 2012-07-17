@@ -45,7 +45,6 @@ trait WorkbookMergeProcessProvider extends ProcessProvider {
         val ids = base.ids.map(h => row(h.name).value)
         merge.findFirstRowWhere( searchRow => {
           val mergeRowId = base.ids.map(h => searchRow(h.name).value)
-          println("&%&" + ids + " : " + mergeRowId)
           ids == mergeRowId
         }) match{
           case Some( toMerge) => {
