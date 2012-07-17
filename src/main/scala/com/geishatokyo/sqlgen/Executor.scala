@@ -34,10 +34,13 @@ trait Executor[ProjectType <: Project] extends Input with ProcessProvider {
 
   private def execute( wb : Workbook) : Workbook = {
     preModifyContext(context)
-    executor(wb)
+    val exe = selectExecutor(wb)
+    exe(wb)
   }
 
   def skipOnError(proc : Proc) = proc.skipOnError
+
+  protected def selectExecutor(workbook : Workbook) = executor
 
   protected def executor : Proc
 

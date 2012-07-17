@@ -58,6 +58,7 @@ class XLSSheetLoader(nameMapper : NameMapper,
   }
 
   def loadRow(headers: List[(Int, ColumnHeader)], row: HSSFRow) : List[String] = {
+    if(row == null) return Nil
     headers.map({
       case (index,h) => {
         val cell = row.getCell(index)

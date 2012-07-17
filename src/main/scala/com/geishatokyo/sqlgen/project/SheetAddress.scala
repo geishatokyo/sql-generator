@@ -24,6 +24,10 @@ trait SheetAddress extends SheetScope {
     c
   }
 
+  def columns( columnNames : String*) : Seq[ColumnAddress] = {
+    columnNames.map(cn => column(cn))
+  }
+
   protected var _generatedColumns : List[ColumnAddress] = Nil
   protected var _addressScope : Option[String] = None
 

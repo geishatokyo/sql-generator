@@ -3,6 +3,7 @@ package com.geishatokyo.sqlgen.project
 import com.geishatokyo.sqlgen.sheet.{ ColumnType}
 import com.geishatokyo.sqlgen.Project
 import scala.collection.mutable
+import java.util.Date
 
 /**
  *
@@ -175,25 +176,46 @@ trait BaseProject extends Project with Scope with SheetScope {
   object ensure{
 
     def column(name : String) = {
-      new Object{
-        def throws(error : ErrorType) = {
-          new ThrowErrorDetail(name)
-        }
-
-        def exists : Unit = {
-          scope.__columnDef +=(name -> Exists(name))
-        }
-        def set( v : String) = {
-          new SetValueDetail(name,v)
-        }
-
-        def convert( f : String => String) = {
-          scope.__columnDef +=( name -> Convert(name,f))
-        }
-
-      }
+      new EnsureColumn(name)
     }
   }
+  class EnsureColumn(name : String){
+    def throws(error : ErrorType) = {
+      new ThrowErrorDetail(name)
+    }
+
+    def exists : Unit = {
+      scope.__columnDef +=(name -> Exists(name))
+    }
+    def set( v : String) : SetValueDetail = {
+      new SetValueDetail(name,v)
+    }
+    def set(v : Int ) : SetValueDetail = {
+      set(v.toString)
+    }
+    def set(v : Double ) : SetValueDetail = {
+      set(v.toString)
+    }
+    def set(v : Float ) : SetValueDetail = {
+      set(v.toString)
+    }
+    def set(v : Long ) : SetValueDetail = {
+      set(v.toString)
+    }
+    def set(v : Date ) : SetValueDetail = {
+      set(v.getTime.toString)
+    }
+
+    def refer(columnName : String) = {
+      new ReferColumnDetail(name,columnName)
+    }
+
+    def convert( f : String => String) = {
+      scope.__columnDef +=( name -> Convert(name,f))
+    }
+
+  }
+
 
   class ThrowErrorDetail( columnName : String) {
     def whenNotExists : Unit = {
@@ -215,11 +237,36 @@ trait BaseProject extends Project with Scope with SheetScope {
         empty
       ))
     }
+    def always = {
+      scope.__columnDef +=( columnName -> SetDefaultValue(
+        columnName,value,
+        _ => true
+      ))
+    }
+
     def when( f : String => Boolean) = {
       scope.__columnDef +=( columnName -> SetDefaultValue(
         columnName,value,
         f
       ))
+    }
+  }
+
+  class ReferColumnDetail( columnName : String, referColumnName : String,
+                           converting : String => String = s => s) {
+
+    def converting( convertFunc : String => String) = {
+      new ReferColumnDetail(columnName,referColumnName,convertFunc)
+    }
+
+    def whenEmpty = {
+      scope.__columnDef +=( columnName -> ReferColumn(columnName,referColumnName,converting,empty))
+    }
+    def always = {
+      scope.__columnDef +=( columnName -> ReferColumn(columnName,referColumnName,converting,_ => true))
+    }
+    def when(f : String => Boolean) = {
+      scope.__columnDef +=( columnName -> ReferColumn(columnName,referColumnName,converting,f))
     }
   }
 
@@ -369,6 +416,10 @@ object BaseProject{
   case class SetDefaultValue(
                               columnName : String, defaultValue : String,
                               when : String => Boolean) extends ColumnDef(2)
+  case class ReferColumn(columnName : String,
+                         referenceColumnName : String,
+                         convertFunc : String => String,
+                         when : String => Boolean) extends ColumnDef(2)
   case class Convert(columnName : String, func : String => String) extends ColumnDef(3)
   case class ThrowErrorWhenNotExist(columnName : String) extends ColumnDef(4)
   case class ThrowErrorWhen(columnName : String, when : String => Boolean) extends ColumnDef(5)

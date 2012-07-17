@@ -34,7 +34,13 @@ class XLSConverter {
               header.columnType match{
                 case ColumnType.Integer => c.setCellValue(cell.asDouble)
                 case ColumnType.Double => c.setCellValue(cell.asDouble)
-                case ColumnType.Date => c.setCellValue(cell.asDate)
+                case ColumnType.Date => {
+                  if(cell.asDate != null){
+                    c.setCellValue(cell.asDate)
+                  }else{
+                    c.setCellValue("")
+                  }
+                }
                 case ColumnType.String => c.setCellValue(cell.asString)
                 case ColumnType.Any => c.setCellValue(cell.asString)
               }

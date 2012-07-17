@@ -21,6 +21,10 @@ Base
     ensure column {columnName} exists
            column {columnName} set {value} whenEmpty
                                            when { String => Boolean }
+                                           always
+           column {columnName} refer {columnName} whenEmpty
+                                                  when { String => Boolean}
+                                                  always
            column {columnName} convert { String => String }
            column {columnName} throws error whenNotExists
                                             whenEmpty

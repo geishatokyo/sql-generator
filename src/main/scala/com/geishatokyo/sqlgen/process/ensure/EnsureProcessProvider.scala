@@ -3,13 +3,14 @@ package com.geishatokyo.sqlgen.process.ensure
 import com.geishatokyo.sqlgen.process.ProcessProvider
 import com.geishatokyo.sqlgen.process.Proc
 import com.geishatokyo.sqlgen.project.BaseProject
-import com.geishatokyo.sqlgen.sheet.{Sheet, Workbook}
+import com.geishatokyo.sqlgen.sheet.{Column, Sheet, Workbook}
 import com.geishatokyo.sqlgen.project.BaseProject.{Exists, ColumnDef}
 import com.geishatokyo.sqlgen.SQLGenException
 
 /**
  * To ensure input file data is correct.
- * This process should be invoked before process other convertin process.
+ * This process should be invoked before process other conversion process.
+ * Ensure functions don't throw exception except ThrowError.
  * User: takeshita
  * Create: 12/07/12 22:37
  */
@@ -36,10 +37,7 @@ trait EnsureProcessProvider extends ProcessProvider {
       val sheetName = sheet.name.value
       defs.foreach({
         case Exists(cn) => {
-          if (!sheet.existColumn(cn)){
-            logger.log("Add column:%s@%s".format(cn,sheetName))
-            sheet.addColumns(cn)
-          }
+          getOrAddColumn(sheet,cn)
         }
         case ThrowErrorWhenNotExist(cn) => {
           if (!sheet.existColumn(cn)){
@@ -47,29 +45,19 @@ trait EnsureProcessProvider extends ProcessProvider {
           }
         }
         case Convert(cn, func) => {
-          sheet.getColumn(cn) match{
-            case Some(c) =>{
-              logger.log("Convert values column:%s@%s".format(cn,sheetName))
-              c.cells.foreach(c => {
-                c := func(c.value)
-              })
-            }
-            case None =>
-          }
+          logger.log("Convert values column:%s@%s".format(cn,sheetName))
+          getOrAddColumn(sheet,cn).cells.foreach(c => {
+            c := func(c.value)
+          })
         }
         case SetDefaultValue(cn,dv, when) => {
-          sheet.getColumn(cn) match{
-            case Some(c) =>{
-              logger.log("Set defalt values to column:%s@%s".format(cn,sheetName))
-              c.cells.foreach(c => {
-                val v = c.value
-                if (when(v)){
-                  c := dv
-                }
-              })
+          logger.log("Set defalt values to column:%s@%s".format(cn,sheetName))
+          getOrAddColumn(sheet,cn).cells.foreach(c => {
+            val v = c.value
+            if (when(v)){
+              c := dv
             }
-            case None =>
-          }
+          })
         }
         case ThrowErrorWhen(cn,when) => {
           sheet.getColumn(cn) match{
@@ -89,9 +77,38 @@ trait EnsureProcessProvider extends ProcessProvider {
             case None =>
           }
         }
+        case ReferColumn(cn, reference,convertFunc , when ) => {
+          sheet.getColumn(reference) match{
+            case Some(refC) => {
+              logger.log("Check value of column:%s@%s".format(cn,sheetName))
+              var index = 0
+              getOrAddColumn(sheet,cn).cells.foreach(c => {
+                val v = c.value
+                if (when(v)){
+                  c :=  convertFunc(refC(index))
+                }
+                index += 1
+              })
+            }
+            case None => {
+            }
+          }
+        }
       })
 
+    }
 
+    protected def getOrAddColumn(sheet : Sheet,columnName : String) : Column = {
+      sheet.getColumn(columnName) match{
+        case Some(c) =>{
+          c
+        }
+        case None => {
+          logger.log("Add column:%s@%s".format(columnName,sheet.name))
+          sheet.addColumns(columnName)
+          sheet.column(columnName)
+        }
+      }
     }
   }
 
