@@ -1,6 +1,6 @@
 package com.geishatokyo.sqlgen
 
-import com.geishatokyo.sqlgen.process.{Proc, Input}
+import com.geishatokyo.sqlgen.process.{Proc}
 import process.ProcessProvider
 import sheet.Workbook
 import java.io.InputStream
@@ -11,25 +11,16 @@ import java.io.InputStream
  * Create: 12/07/12 17:28
  */
 
-trait Executor[ProjectType <: Project] extends Input with ProcessProvider {
+trait Executor[ProjectType <: Project] extends ProcessProvider {
 
 
   def preModifyContext(context : Context) {
 
   }
 
-  def execute(filename : String) : Workbook  = {
-    execute(load(filename))
-  }
-
-  def execute(inputStream : InputStream) : Workbook = {
-    execute(load(inputStream))
-  }
-  def executeFromBytes(v : Array[Byte]) = {
-    execute(loadFromBytes(v))
-  }
-  def executeFromString(v : String) = {
-    execute(loadFromString(v))
+  def execute(dataLoader : DataLoader[ProjectType]) : Workbook = {
+    val workbook = dataLoader.load(project,context)
+    execute(workbook)
   }
 
   private def execute( wb : Workbook) : Workbook = {

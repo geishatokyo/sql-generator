@@ -18,9 +18,11 @@ import com.geishatokyo.sqlgen.SQLGenException
 trait EnsureProcessProvider extends ProcessProvider {
   type ProjectType <: BaseProject
 
-  def ensureSettingProc = new EnsureSettingProcess
+  def ensureSettingProc = new EnsureSettingProcess(this.project)
 
-  class EnsureSettingProcess extends Proc{
+  def ensureSettingProcFor(otherProject : BaseProject) = new EnsureSettingProcess(otherProject)
+
+  class EnsureSettingProcess(project : BaseProject) extends Proc{
     def name: String = "EnsureSetting"
 
     def apply(workbook: Workbook): Workbook = {
@@ -91,6 +93,7 @@ trait EnsureProcessProvider extends ProcessProvider {
               })
             }
             case None => {
+              logger.log("Reference column:%s is not found".format(reference))
             }
           }
         }
@@ -104,8 +107,10 @@ trait EnsureProcessProvider extends ProcessProvider {
           c
         }
         case None => {
-          logger.log("Add column:%s@%s".format(columnName,sheet.name))
+          logger.log("Add column:%s@%s".format(columnName,sheet.name.value))
+          val setting = project(sheet.name.value)
           sheet.addColumns(columnName)
+          sheet.header(columnName).columnType = setting.columnTypeGuesser(columnName)
           sheet.column(columnName)
         }
       }

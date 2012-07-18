@@ -112,7 +112,17 @@ object StringCell {
   def unapply(cell: HSSFCell) = {
     if (cell == null) Some((""))
     else {
-      Some((cell.toString))
+      if(cell.getCellType == Cell.CELL_TYPE_STRING){
+        Some((cell.getStringCellValue))
+      }else if(cell.getCellType == Cell.CELL_TYPE_NUMERIC){
+        if (cell.getNumericCellValue % 1.0 == 0){
+          Some(cell.getNumericCellValue.toLong.toString)
+        }else{
+          Some(cell.toString)
+        }
+      }else{
+        Some(cell.toString)
+      }
     }
   }
 }

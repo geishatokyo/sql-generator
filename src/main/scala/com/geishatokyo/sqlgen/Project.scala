@@ -8,4 +8,5 @@ package com.geishatokyo.sqlgen
 
 trait Project {
 
+
 }

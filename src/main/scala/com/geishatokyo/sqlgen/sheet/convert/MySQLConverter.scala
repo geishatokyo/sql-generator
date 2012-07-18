@@ -1,6 +1,6 @@
 package com.geishatokyo.sqlgen.sheet.convert
 
-import com.geishatokyo.sqlgen.sheet.Sheet
+import com.geishatokyo.sqlgen.sheet.{CellUnit, Sheet}
 
 /**
  *
@@ -50,4 +50,42 @@ class MySQLConverter extends SQLConverter {
     )
 
   }
+
+  def toUpdateSQL(sheet : Sheet, primaryKeys : List[String]) : String = {
+    if(primaryKeys.size == 0) return ""
+    if (sheet.rowSize == 0) return ""
+
+    val primaryKeySet = primaryKeys.map(_.toLowerCase).toSet
+    val idHeaders = sheet.headers.withFilter( h => {
+      primaryKeys.exists(pk => h.name =~= pk)
+    }).map(_.name.toString)
+
+    sheet.foreachRow(row => {
+
+      val setClause = row.units.filter({
+        case CellUnit(h,c) => {
+          h.output_? &&
+          !primaryKeySet.contains(h.name.value.toLowerCase)
+        }
+      }).map({
+        case CellUnit(h,c) => {
+          h.name.toString + "=" + asSQLString(h.columnType,c)
+        }
+      }).mkString(",")
+      val whereClause = row.units.filter({
+        case CellUnit(h,c) => {
+          h.output_? &&
+          primaryKeySet.contains(h.name.value.toLowerCase)
+        }
+      }).map({
+        case CellUnit(h,c) => {
+          h.name.toString + "=" + asSQLString(h.columnType,c)
+        }
+      }).mkString(" and ")
+
+      """UPDATE %s SET %S WHERE %s;""".format(sheet.name,setClause,whereClause)
+    }).mkString("\n")
+
+  }
+
 }

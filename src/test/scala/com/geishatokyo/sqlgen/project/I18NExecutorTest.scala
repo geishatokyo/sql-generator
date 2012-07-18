@@ -4,9 +4,10 @@ import com.geishatokyo.sqlgen.process.merge.I18NProcessProvider
 import com.geishatokyo.sqlgen.{Executor, Project, Context}
 import com.geishatokyo.sqlgen.process.output.SQLOutputProvider
 import com.geishatokyo.sqlgen.process.{Proc, MapContext}
-import com.geishatokyo.sqlgen.process.input.XLSFileInput
+import com.geishatokyo.sqlgen.process.input.{InputHelpers, SingleXLSLoader}
 import com.geishatokyo.sqlgen.process.ensure.EnsureProcessProvider
 import org.specs2.mutable.SpecificationWithJUnit
+import InputHelpers._
 
 /**
  *
@@ -19,9 +20,8 @@ class I18NExecutorTest extends SpecificationWithJUnit {
   "i18nExecutor" should{
 
     "merge i18n files" in{
-
       val executor = new I18NExecutorSample()
-      val wb = executor.execute("i18n/i18n.xls")
+      val wb = executor.execute( file("i18n/i18n.xls"))
 
       println(wb)
       ok
@@ -31,7 +31,6 @@ class I18NExecutorTest extends SpecificationWithJUnit {
 }
 
 class I18NExecutorSample extends Executor[BaseProject]
-with XLSFileInput
 with EnsureProcessProvider
 with I18NProcessProvider
 with SQLOutputProvider{

@@ -1,12 +1,13 @@
 package com.geishatokyo.sqlgen.project
 
 import com.geishatokyo.sqlgen.{Context, Executor}
-import com.geishatokyo.sqlgen.process.input.XLSFileInput
+import com.geishatokyo.sqlgen.process.input.{InputHelpers, SingleXLSLoader}
 import com.geishatokyo.sqlgen.process.ensure.EnsureProcessProvider
 import com.geishatokyo.sqlgen.process.output.{XLSOutputProvider, SQLOutputProvider}
 import com.geishatokyo.sqlgen.process.merge.MergeSplitProcessProvider
 import com.geishatokyo.sqlgen.process.{MapContext, Proc}
 import org.specs2.mutable.SpecificationWithJUnit
+import InputHelpers._
 
 /**
  *
@@ -19,7 +20,7 @@ class MergeSplitProjectTest extends SpecificationWithJUnit {
   "MergeAndSplit executor" should{
     "work" in{
       val e = new MergeSplitExecutorSample
-      val wb = e.execute("MergeSplitTest.xls")
+      val wb = e.execute(file("MergeSplitTest.xls"))
 
       wb("User").column("name").cells.map(_.value) must_== List("test","test2","あああ")
     }
@@ -28,7 +29,6 @@ class MergeSplitProjectTest extends SpecificationWithJUnit {
 }
 
 class MergeSplitExecutorSample extends Executor[MergeSplitProjectSample]
-with XLSFileInput
 with EnsureProcessProvider
 with MergeSplitProcessProvider
 with SQLOutputProvider

@@ -1,8 +1,9 @@
 package com.geishatokyo.sqlgen.process.merge
 
-import com.geishatokyo.sqlgen.process.{OutputProc, Input, Proc}
+import com.geishatokyo.sqlgen.process.{OutputProc,  Proc}
 import com.geishatokyo.sqlgen.sheet.Workbook
 import com.geishatokyo.sqlgen.util.I18NUtil
+import com.geishatokyo.sqlgen.process.input.SingleXLSLoader
 
 /**
  *
@@ -11,7 +12,15 @@ import com.geishatokyo.sqlgen.util.I18NUtil
  */
 
 trait I18NProcessProvider extends WorkbookMergeProcessProvider {
-  self : Input =>
+
+
+  def findAndLoadI18NWorkbooks(name : String) = {
+    val files = I18NUtil.findI18NFiles(context.workingDir,name)
+    files.map( fn => {
+      logger.log("Find i18n file:" + fn)
+      load(fn)
+    })
+  }
 
   def i18nProc( preProcess  : Proc , afterProcess : Proc) = {
     new I18NProc(preProcess,afterProcess)
@@ -21,12 +30,9 @@ trait I18NProcessProvider extends WorkbookMergeProcessProvider {
     def name: String = "MergeI19NFiles"
 
     def apply(workbook: Workbook): Workbook = {
-      val files = I18NUtil.findI18NFiles(context.workingDir,workbook.name)
-      files.foreach( fn => {
-        logger.log("Find i18n file:" + fn)
+      findAndLoadI18NWorkbooks(workbook.name).foreach( wb => {
         val cp = workbook.copy()
-
-        val mergeFile = preProcess(load(fn))
+        val mergeFile = preProcess(wb)
         cp.name = mergeFile.name
         val p = new WorkbookMergeProcess(mergeFile)
         afterProc(p(cp))

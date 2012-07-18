@@ -72,18 +72,21 @@ class XLSSheetLoader(nameMapper : NameMapper,
     })
   }
 
-  def loadCellValue( cell : HSSFCell , columnType : ColumnType.Value) = {
+  def loadCellValue( cell : HSSFCell , columnType : ColumnType.Value) : String = {
+    if(cell == null) return null
     columnType match{
       case ColumnType.Integer => {
         cell match{
           case EmptyCell(_) => null
           case LongCell(v) => v.toString
+          case _ => null
         }
       }
       case ColumnType.Double => {
         cell match{
           case EmptyCell(_) => null
           case DoubleCell(v) => v.toString
+          case _ => null
         }
 
       }
@@ -91,12 +94,14 @@ class XLSSheetLoader(nameMapper : NameMapper,
         cell match{
           case EmptyCell(_) => null
           case StringCell(v) => v
+          case _ => null
         }
       }
       case ColumnType.Date => {
         cell match{
           case EmptyCell(_) => null
           case DateCell(v) => v.getTime.toString
+          case _ => null
         }
 
       }
@@ -104,6 +109,7 @@ class XLSSheetLoader(nameMapper : NameMapper,
         cell match{
           case EmptyCell(_) => null
           case StringCell(v) => v
+          case _ => null
         }
       }
     }
@@ -134,6 +140,9 @@ class XLSSheetLoader(nameMapper : NameMapper,
     sheet.addColumns(headersOnFile.map(_._2): _*)
     sheet.headers.foreach(ch => {
       ch.columnType = typeMap(ch.name)
+      if(ch.columnType == ColumnType.Any){
+        ch.columnType = typeMap(ch.name.toLowerCase)
+      }
       ch.output_? = !ignoreCols(ch.name)
       logger.log("Column:%s@%s is %s".format(ch.name,sheetName,ch.columnType))
     })

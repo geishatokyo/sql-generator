@@ -1,8 +1,10 @@
 package com.geishatokyo.sqlgen.process.merge
 
-import com.geishatokyo.sqlgen.process.{Input, Proc, ProcessProvider}
+import com.geishatokyo.sqlgen.process.{ Proc, ProcessProvider}
 import com.geishatokyo.sqlgen.sheet.{CellUnit, Sheet, Workbook}
 import com.geishatokyo.sqlgen.util.I18NUtil
+import com.geishatokyo.sqlgen.process.input.SingleXLSLoader
+import com.geishatokyo.sqlgen.project.BaseProject
 
 /**
  *
@@ -11,7 +13,12 @@ import com.geishatokyo.sqlgen.util.I18NUtil
  */
 
 trait WorkbookMergeProcessProvider extends ProcessProvider {
-  self : Input =>
+
+  type ProjectType <: BaseProject
+
+  def load(filename : String) = {
+    SingleXLSLoader.apply(filename).load(project,context)
+  }
 
   def mergeWorkbookProc( workbook : Workbook) : Proc = {
     new WorkbookMergeProcess(workbook)

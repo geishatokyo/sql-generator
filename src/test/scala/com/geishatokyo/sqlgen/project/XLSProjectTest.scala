@@ -3,11 +3,12 @@ package com.geishatokyo.sqlgen.project
 import com.geishatokyo.sqlgen.sheet.ColumnType
 import com.geishatokyo.sqlgen.setting.GTEDefaultProject
 import com.geishatokyo.sqlgen.{Context, Executor}
-import com.geishatokyo.sqlgen.process.input.XLSFileInput
+import com.geishatokyo.sqlgen.process.input.SingleXLSLoader
 import com.geishatokyo.sqlgen.process.output.SQLOutputProvider
 import com.geishatokyo.sqlgen.process.ensure.EnsureProcessProvider
 import com.geishatokyo.sqlgen.process.MapContext
 import org.specs2.mutable.SpecificationWithJUnit
+import com.geishatokyo.sqlgen.process.input.InputHelpers._
 
 /**
  *
@@ -22,7 +23,7 @@ class XLSProjectTest extends SpecificationWithJUnit {
 
       val executor = new ExecutorUsage()
 
-      val workbook = executor.execute("sample2.xls")
+      val workbook = executor.execute(file("sample2.xls"))
 
       workbook.getSheet("IgnoredSheet") must beNone
 
@@ -37,7 +38,6 @@ class XLSProjectTest extends SpecificationWithJUnit {
 
 }
 class ExecutorUsage extends Executor[BaseProjectUsage]
-  with XLSFileInput
   with EnsureProcessProvider
   with SQLOutputProvider{
 

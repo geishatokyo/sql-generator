@@ -3,10 +3,11 @@ package com.geishatokyo.sqlgen.sample
 import org.specs2.mutable.SpecificationWithJUnit
 import com.geishatokyo.sqlgen.{Context, Executor}
 import com.geishatokyo.sqlgen.project.BaseProject
-import com.geishatokyo.sqlgen.process.input.XLSFileInput
+import com.geishatokyo.sqlgen.process.input.SingleXLSLoader
 import com.geishatokyo.sqlgen.process.output.SQLOutputProvider
 import com.geishatokyo.sqlgen.process.MapContext
 import com.geishatokyo.sqlgen.setting.GTEDefaultProject
+import com.geishatokyo.sqlgen.process.input.InputHelpers._
 
 /**
  *
@@ -19,7 +20,7 @@ class PlainProjectTest extends SpecificationWithJUnit {
   "Executor" should{
     "load xls and save sql" in {
       val exe = new SimpleExecutor
-      exe.execute("sample.xls")
+      exe.execute(file("sample.xls"))
 
       ok
     }
@@ -27,7 +28,7 @@ class PlainProjectTest extends SpecificationWithJUnit {
 
 }
 
-class SimpleExecutor extends Executor[BaseProject] with XLSFileInput with SQLOutputProvider{
+class SimpleExecutor extends Executor[BaseProject] with SQLOutputProvider{
 
   type ProjectType = BaseProject
 

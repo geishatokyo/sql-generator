@@ -25,10 +25,15 @@ Base
            column {columnName} refer {columnName} whenEmpty
                                                   when { String => Boolean}
                                                   always
+                                                  converting {String => String} *=> whenEmpty,when,always
            column {columnName} convert { String => String }
            column {columnName} throws error whenNotExists
                                             whenEmpty
                                             when { String => Boolean }
+    guess columnTypes { (String -> ColumnType.Value) *}
+          columnType by pf { String => ColumnTypeValue}
+          idColumn {columnName}
+          idColumn by {String => Boolean}
 
 Scoping sheet
 
@@ -55,3 +60,13 @@ Merge and split
                                ignore
                                copyFrom {columnAddress}
                                copyTo   {columnAddress*}
+
+Validation
+
+    # can declare outside of SheetScope
+    validate eachRows {Row => Boolean}
+    validate column {columnName} isNotEmpty
+                                 isValidXML
+                                 isSingleLine
+                                 is { String => Boolean}
+                                 is( notEmpty && validXml && singleLine && (f => f.lengh == 20))
