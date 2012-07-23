@@ -9,7 +9,10 @@ object AvatarXlsConverterBuild extends Build {
   val junit = "junit" % "junit" % "4.8.1" % "test"
   val specs2 = (scalaVersion : String ) => {
     val version = scalaVersion match{
+      case "2.9.1-1" => "1.11"
       case "2.9.1" => "1.11"
+      case "2.9.0-1" => "1.8.2"
+      case "2.9.0" => "1.7.1"
       case _ => "1.11"
     }
     "org.specs2" %% "specs2" % version % "test"
