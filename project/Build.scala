@@ -1,7 +1,5 @@
 import sbt._
 import Keys._
-import sbtassembly.Plugin._
-import AssemblyKeys._
 
 object AvatarXlsConverterBuild extends Build {
 
@@ -44,7 +42,7 @@ object AvatarXlsConverterBuild extends Build {
 
   lazy val root = Project(id = "sql-generator",
     base =  file("."),
-    settings = Project.defaultSettings ++ assemblySettings ++ Seq(
+    settings = Project.defaultSettings ++ Seq(
       version := "0.0.1-SNAPSHOT",
       organization := "com.geishatokyo",
       description := "Converter from xls to sql",
