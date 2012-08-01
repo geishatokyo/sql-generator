@@ -51,6 +51,8 @@ trait SQLOutputProvider extends ProcessProvider with OutputHelper{
     def name: String = "GenerateDeleteSQL"
     def apply(workbook: Workbook): Workbook = {
       val sql = workbook.foreachSheet(sheet => {
+        sheet
+      }).reverse.map(sheet => {
         mysqlConverter.toDeleteSQL(sheet,sheet.ids.map(_.name.toString))
       })
       val path = getPath(workbook)

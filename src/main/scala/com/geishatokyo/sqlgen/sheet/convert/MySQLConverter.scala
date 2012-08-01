@@ -83,7 +83,7 @@ class MySQLConverter extends SQLConverter {
         }
       }).mkString(" and ")
 
-      """UPDATE %s SET %S WHERE %s;""".format(sheet.name,setClause,whereClause)
+      """UPDATE %s SET %s WHERE %s;""".format(sheet.name,setClause,whereClause)
     }).mkString("\n")
 
   }

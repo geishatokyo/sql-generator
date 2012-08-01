@@ -2,12 +2,10 @@ package com.geishatokyo.sqlgen.sample
 
 import org.specs2.mutable.SpecificationWithJUnit
 import com.geishatokyo.sqlgen.{Context, Executor}
-import com.geishatokyo.sqlgen.project.BaseProject
-import com.geishatokyo.sqlgen.process.input.SingleXLSLoader
-import com.geishatokyo.sqlgen.process.output.SQLOutputProvider
+import com.geishatokyo.sqlgen.importall._
+import com.geishatokyo.sqlgen.process.input.InputHelpers._
 import com.geishatokyo.sqlgen.process.MapContext
 import com.geishatokyo.sqlgen.setting.GTEDefaultProject
-import com.geishatokyo.sqlgen.process.input.InputHelpers._
 
 /**
  *
