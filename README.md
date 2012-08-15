@@ -1,21 +1,21 @@
 # SQL Generator
 
-This library supports generating sql from Excel file(.xls),CSV and so on.
+This library supports generating SQL from Excel sheets (.xls), CSV files and other formats.
 
 # Getting started
 
-First you install sbt and giter8.
+First, install sbt and giter8.
 
-You can create simple project by giter8 template.<br />
-You download template at directory where data xls are put.
+You can create a simple project with a giter8 template.<br />
+Download template at the directory where the source .xls are.
 
-   g8 geishatokyo/sql-gen
+		> g8 geishatokyo/sql-gen
 
 Then
 
-   sbt run
+		> sbt run
 
-It searches all xls file in same directory and generate insert,delete,update sqls from them.
+The library finds all the .xls files in the directory and generates insert, delete and update SQL files from them.
 
 # Data sheet formats
 
