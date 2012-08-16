@@ -25,6 +25,9 @@ class MergeSplitProjectTest extends SpecificationWithJUnit {
       val wb = e.execute(file("MergeSplitTest.xls"))
 
       wb("User").column("name").cells.map(_.value) must_== List("test","test2","あああ")
+      wb("User").column("familyname").cells.map(_.value) must_== List("tanaka","yamada","satou")
+      wb("User").column("gender").cells.map(_.value) must_== List("male","female","female")
+
     }
   }
 
