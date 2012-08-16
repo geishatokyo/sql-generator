@@ -34,15 +34,18 @@ class I18NExecutorSample extends Executor[BaseProject]
 with EnsureProcessProvider
 with I18NProcessProvider
 with SQLOutputProvider{
+
   type ProjectType = BaseProject
+
+
+  val context: Context = new MapContext
+
   val project = new SampleProject()
 
   protected def executor: Proc = ensureSettingProc then i18nProc(
-    ensureSettingProc,
-    outputSqlProc("i18n")
-  )
-
-  val context: Context = new MapContext
+      ensureSettingProc,
+      outputSqlProc("i18n")
+      )
 
   class SampleProject extends BaseProject{
 

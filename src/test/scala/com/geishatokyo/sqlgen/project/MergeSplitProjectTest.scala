@@ -17,8 +17,10 @@ import InputHelpers._
 
 class MergeSplitProjectTest extends SpecificationWithJUnit {
 
-  "MergeAndSplit executor" should{
-    "work" in{
+  "MergeSplit executor" should{
+
+    "apply project specification" in{
+
       val e = new MergeSplitExecutorSample
       val wb = e.execute(file("MergeSplitTest.xls"))
 

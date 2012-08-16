@@ -18,8 +18,9 @@ import com.geishatokyo.sqlgen.process.input.InputHelpers._
 
 class XLSProjectTest extends SpecificationWithJUnit {
 
-  "BaseProject" should {
-    "works" in{
+  "BaseProject executor" should {
+
+    "apply project specification" in{
 
       val executor = new ExecutorUsage()
 
