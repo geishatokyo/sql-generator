@@ -27,7 +27,7 @@ trait I18NProcessProvider extends WorkbookMergeProcessProvider {
   }
 
   class I18NProc(preProcess : Proc,afterProc : Proc) extends Proc {
-    def name: String = "MergeI19NFiles"
+    def name: String = "MergeI18NFiles"
 
     def apply(workbook: Workbook): Workbook = {
       findAndLoadI18NWorkbooks(workbook.name).foreach( wb => {

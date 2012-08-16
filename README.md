@@ -41,7 +41,7 @@ You can extend processes by mixin ProcessProvider traits.<br />
 Convenient ProcessProvider traits are placed under the package com.geishatokyo.sqlgen.process.
 
 
-# Grammer
+# Grammar
 
 ## @BaseProject
 
@@ -49,16 +49,16 @@ Base
 
     ignore sheet  { sheetName }
            sheets { sheetName*}
-           sheet by pf { PratialFunction[String,Boolean] }
+           sheet by pf { PartialFunction[String,Boolean] }
            column  { columnName }
            columns { columnNames }
-           column by pf { PratialFunction[String,Boolean] }
+           column by pf { PartialFunction[String,Boolean] }
 
     map    sheetName  { (sheetName -> sheetName) }
            sheetNames { (sheetName -> sheetName)*}
            columnName { (columnName -> columnName) }
            columnNames { (columnName -> columnName)*}
-           columnName by pf { PratialFunction[String,String] }
+           columnName by pf { PartialFunction[String,String] }
 
     ensure column {columnName} exists
            column {columnName} set {value} whenEmpty
