@@ -15,10 +15,10 @@ trait Executor[ProjectType <: Project] extends ProcessProvider {
 
 
   def preModifyContext(context : Context) {
-
+    
   }
 
-  def execute(dataLoader : DataLoader[ProjectType]) : Workbook = {
+  def execute[T >: ProjectType <: Project](dataLoader : DataLoader[T]) : Workbook = {
     val workbook = dataLoader.load(project,context)
     execute(workbook)
   }
