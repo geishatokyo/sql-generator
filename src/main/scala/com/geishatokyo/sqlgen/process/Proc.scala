@@ -34,6 +34,10 @@ trait Proc {
 }
 
 object Proc{
+  def apply(func : Workbook => Workbook ) = {
+    funcToProc(func)
+  }
+
   implicit def funcToProc(func : Workbook => Workbook) = {
     new FuncWrapper(func)
   }

@@ -54,4 +54,10 @@ class Workbook {
     wb
   }
 
+  override def toString: String = {
+    """SheetName:%s
+%s
+    """.stripMargin.format(name,sheets.mkString("\n"))
+
+  }
 }

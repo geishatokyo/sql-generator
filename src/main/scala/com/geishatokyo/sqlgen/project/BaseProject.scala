@@ -123,6 +123,13 @@ trait BaseProject extends Project with Scope with SheetScope {
       _ignoreSheetNames ++= sheetNames
     }
 
+    def sheets_except(sheetNames : String*) = {
+      val pf : PartialFunction[String,Boolean] = {
+        case s : String => !sheetNames.contains(s)
+      }
+      _ignoreSheetNames += pf
+    }
+
     def sheet(by : ByType) = {
       new Object{
         def pf(_pf : PartialFunction[String,Boolean]) = {
@@ -136,6 +143,13 @@ trait BaseProject extends Project with Scope with SheetScope {
     }
     def columns(columnNames : String*) = {
       scope.__ignoreColumns ++= columnNames
+    }
+
+    def columns_except(columnNames : String*) = {
+      val pf : PartialFunction[String,Boolean] = {
+        case s : String => !columnNames.contains(s)
+      }
+      scope.__ignoreColumns += pf
     }
 
     def column( by : ByType) : Unit= {

@@ -7,6 +7,7 @@ package object importall{
   type MergeSplitProject = com.geishatokyo.sqlgen.project.MergeSplitProject
   type TimeHelper = com.geishatokyo.sqlgen.project.TimeHelper
   type ValidateProject = com.geishatokyo.sqlgen.project.ValidateProject
+  type ReferenceProject = com.geishatokyo.sqlgen.project.ReferenceProject
 
   type SQLOutputProvider = com.geishatokyo.sqlgen.process.output.SQLOutputProvider
   type XLSOutputProvider = com.geishatokyo.sqlgen.process.output.XLSOutputProvider
@@ -15,5 +16,6 @@ package object importall{
   type I18NProcessProvider = com.geishatokyo.sqlgen.process.merge.I18NProcessProvider
   type WorkbookMergeProcessProvider = com.geishatokyo.sqlgen.process.merge.WorkbookMergeProcessProvider
   type ValidateProcessProvider = com.geishatokyo.sqlgen.process.validate.ValidateProcessProvider
+  type ReferenceProcessProvider = com.geishatokyo.sqlgen.process.ensure.ReferenceProcessProvider
 
 }

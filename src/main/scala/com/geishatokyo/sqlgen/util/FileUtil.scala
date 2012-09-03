@@ -5,6 +5,7 @@ import java.io._
 import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import java.security.MessageDigest
 import io.Source
+import util.matching.Regex
 
 
 /**
@@ -18,6 +19,15 @@ object FileUtil extends FileFinder {
 
   var subDirectories = List("swf","png")
 
+
+  def findFilesWithRegex(dir : File,regex : Regex) : List[File] = {
+
+    val fileOrDirs = dir.listFiles()
+    if (fileOrDirs == null) return Nil
+    val (files,dirs) = fileOrDirs.partition(_.isFile)
+    files.filter( f => regex.findFirstIn(f.getAbsolutePath).isDefined).toList :::
+      dirs.flatMap(d => findFilesWithRegex(d,regex)).toList
+  }
 
 
   def findFile(filename : String) : String = {

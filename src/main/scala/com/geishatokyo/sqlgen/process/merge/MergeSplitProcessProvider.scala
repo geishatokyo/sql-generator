@@ -88,10 +88,19 @@ trait MergeSplitProcessProvider extends ProcessProvider {
 
     def doSplit(sheetName : String, columns : List[ColumnAddress]) {
       val sheet = workbook(sheetName)
+      if(sheet.rowSize == 0) return
 
       columns.foreach(ca => {
         val c = sheet.column(ca.columnName)
-        val targetSheet = workbook(ca.sheetName)
+        val targetSheet = workbook.getSheet(ca.sheetName) match{
+          case Some(sheet) => sheet
+          case None => {
+            val newSheet = new Sheet(ca.sheetName)
+            logger.log("Create new sheet:%s".format(ca.sheetName))
+            workbook.addSheet(newSheet)
+            newSheet
+          }
+        }
         targetSheet.addColumn(c.columnName,c.cells.map(_.value))
       })
 
