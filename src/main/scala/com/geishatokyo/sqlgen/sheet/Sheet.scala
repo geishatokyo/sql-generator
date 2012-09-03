@@ -140,7 +140,7 @@ class Sheet(val name : VersionedValue) {
   }
 
 
-  def addRow( values : List[String]) = {
+  def addRow( values : List[String]) : Unit = {
     if(values.size != _headers.size) {
       throw new SQLGenException(
         "Column size missmatch.Sheet:%s Passed:%s".format(_headers.size,values.size))
@@ -149,6 +149,28 @@ class Sheet(val name : VersionedValue) {
     cellsToRows()
     cellsToColumns()
   }
+
+  /**
+   * Add row by map
+   * @param values
+   */
+  def addRow( values : Map[String,String], throwErrorOnColumnMissMatch : Boolean = false): Unit = {
+    val row = headers.map(h => {
+      values.get(h.name()) match{
+        case Some(v) => v
+        case None => {
+          if (throwErrorOnColumnMissMatch){
+            throw new SQLGenException(
+              "Column:%s is not passed".format(h.name()))
+          }else{
+            ""
+          }
+        }
+      }
+    })
+    addRow(row)
+  }
+
   def addRows( rows : List[List[String]]) = {
     if (!rows.forall(row => row.size == _headers.size)){
       throw new SQLGenException(

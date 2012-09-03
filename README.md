@@ -49,9 +49,11 @@ Base
 
     ignore sheet  { sheetName }
            sheets { sheetName*}
+           sheets_except { sheetName*}
            sheet by pf { PartialFunction[String,Boolean] }
            column  { columnName }
-           columns { columnNames }
+           columns { columnName* }
+           columns_except {columnName*}
            column by pf { PartialFunction[String,Boolean] }
 
     map    sheetName  { (sheetName -> sheetName) }
@@ -72,6 +74,7 @@ Base
            column {columnName} throws error whenNotExists
                                             whenEmpty
                                             when { String => Boolean }
+           sheet {sheetName} exists
     guess columnTypes { (String -> ColumnType.Value) *}
           columnType by pf { String => ColumnTypeValue}
           idColumn {columnName}
@@ -118,6 +121,20 @@ Validation
                                  isSingleLine
                                  is { String => Boolean}
                                  is( notEmpty && validXml && singleLine && (f => f.lengh == 20))
+
+## @ReferenceProject
+
+Refer and set other sheet value.
+
+    # columnName -- column to set value
+    # SheetName  -- refer sheet
+    # where      -- (MyRow,ReferRow) return match
+    # value      -- extract value from ReferRow which returned true in where function.
+    set column {columnName} from {SheetName} where {(Row,Row) => Boolean} value {Row => String} whenEmpty
+                                                                                                always
+                                                                                                when { String => Boolean}
+
+
 
 ## For example
 

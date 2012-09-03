@@ -26,6 +26,13 @@ trait EnsureProcessProvider extends ProcessProvider {
     def name: String = "EnsureSetting"
 
     def apply(workbook: Workbook): Workbook = {
+
+      project.sheetsEnsureExists.foreach(name => {
+        if (workbook.getSheet(name).isEmpty){
+          workbook.addSheet(new Sheet(name))
+        }
+      })
+
       workbook.foreachSheet(sheet => {
         val defs = project(sheet.name).columnDef.sortBy(_.priority)
         validateSheet(sheet,defs)

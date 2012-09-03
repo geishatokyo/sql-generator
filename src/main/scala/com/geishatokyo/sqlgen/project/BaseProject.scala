@@ -55,10 +55,13 @@ trait BaseProject extends Project with Scope with SheetScope {
   def __columnTypeGuesser: MapAndPartialFunc[ColumnType.Value] = _globalColumnTypeGuesser
   def __columnDef: MultiRepository[ColumnDef] = _globalColumnDef
   def __idColumnGuesser : SetAndPartialFunc = _globalIdColumnGuesser
+  def sheetsEnsureExists : List[String] = _sheetsEnsureExists
 
   def globalColumnTypeGuesser : PartialFunction[String, ColumnType.Value] = _globalColumnTypeGuesser
 
   protected var _sheetSettings : List[SheetSetting] = Nil
+  protected var _sheetsEnsureExists : List[String] = Nil
+
   def sheetSettings = _sheetSettings
 
   def apply(sheetName : String) = getOrCreateSheetSetting(sheetName)
@@ -192,6 +195,10 @@ trait BaseProject extends Project with Scope with SheetScope {
     def column(name : String) = {
       new EnsureColumn(name)
     }
+
+    def sheet(name : String) = {
+      new EnsureSheet(name)
+    }
   }
   class EnsureColumn(name : String){
     def throws(error : ErrorType) = {
@@ -228,6 +235,12 @@ trait BaseProject extends Project with Scope with SheetScope {
       scope.__columnDef +=( name -> Convert(name,f))
     }
 
+  }
+
+  class EnsureSheet(name : String) {
+    def exists = {
+      _sheetsEnsureExists :+= name
+    }
   }
 
 
