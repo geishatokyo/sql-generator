@@ -32,22 +32,33 @@ class MySQLConverter extends SQLConverter {
   def toDeleteSQL(sheet: Sheet,primaryKeys: List[String]): String = {
     if(primaryKeys.size == 0) return ""
     if (sheet.rowSize == 0) return ""
-    val headers = sheet.headers.withFilter( h => {
-      primaryKeys.exists(pk => h.name =~= pk)
-    }).map(_.name.toString)
-    val values =  sheet.foreachRow(row => {
-      row.units.withFilter( cu => {
-        headers.contains(cu.header.name.toString)
-      }).map(cu => {
-        asSQLString(cu.header.columnType,cu.value)
+
+    if (primaryKeys.size == 1){
+      val pkH = sheet.header(primaryKeys(0))
+      val pk = pkH.name()
+      val ids = sheet.foreachRow(row => asSQLString(pkH.columnType, row(pk)))
+      """DELETE FROM %s WHERE %s in %s;""".format(
+        sheet.name.toString,
+        pk,ids.mkString("(",",",")")
+      )
+    }else{
+      val headers = sheet.headers.withFilter( h => {
+        primaryKeys.exists(pk => h.name =~= pk)
+      }).map(_.name.toString)
+      val values =  sheet.foreachRow(row => {
+        row.units.withFilter( cu => {
+          headers.contains(cu.header.name.toString)
+        }).map(cu => {
+          asSQLString(cu.header.columnType,cu.value)
+        })
       })
-    })
-    """DELETE FROM %s WHERE %s;""".format(
-      sheet.name.toString,
-      values.map( row => headers.zip(row).map(p => {
-        "(" + p._1 + " = " + p._2 + ")"
-      }).mkString("("," and ",")")).mkString(" or\n")
-    )
+      """DELETE FROM %s WHERE %s;""".format(
+        sheet.name.toString,
+        values.map( row => headers.zip(row).map(p => {
+          "(" + p._1 + " = " + p._2 + ")"
+        }).mkString("("," and ",")")).mkString(" or\n")
+      )
+    }
 
   }
 
