@@ -19,26 +19,27 @@ The library finds all the .xls files in the directory and generates insert, dele
 
 # Data sheet formats
 
-## Excel file
+## Excel (.xls) files
 
-Sheet corresponds with Database Table.
+Each sheet corresponds to a database table.
 
-So sheet name should be table name.<br />
-In sheet, first row must be column names, and after rows are record.
+The sheet name should be the desired table name.<br />
+Within the sheet, the first row must be composed of the column names.<br />
+Later rows are interpreted as records.
 
 # Structure
 
 ## Project class
 
-You write settings to this class.There is prepared DSL for setting.See below.<br />
-You can extend setting grammer by mixin Project traits.<br />
-Convenient project traits are placed in the package com.geishatokyo.sqlgen.project.
+You write settings to this class. See below for the setting DSL.<br />
+You can extend the setting grammar with mixin Project traits.<br />
+Convenient Project traits are placed in the package com.geishatokyo.sqlgen.project.
 
 ## Executor class
 
-This class controls sql generating processes.<br />
-You can extend processes by mixin ProcessProvider traits.<br />
-Convenient ProcessProvider traits are placed under the package com.geishatokyo.sqlgen.process.
+This class controls the processes that generate SQL.<br />
+You can extend processes with mixin ProcessProvider traits.<br />
+Convenient ProcessProvider traits are placed in the package com.geishatokyo.sqlgen.process.
 
 
 # Grammar
@@ -75,6 +76,7 @@ Base
                                             whenEmpty
                                             when { String => Boolean }
            sheet {sheetName} exists
+
     guess columnTypes { (String -> ColumnType.Value) *}
           columnType by pf { String => ColumnTypeValue}
           idColumn {columnName}
@@ -102,6 +104,7 @@ Merge and split
     modify sheet {sheetName} rename {newName}
                              delete
     modify column {columnAddress} ... # => same as below
+
     # can declare only inside of SheetScope
     modify column {columnName} rename {newName}
                                convert { String => String }
@@ -124,26 +127,26 @@ Validation
 
 ## @ReferenceProject
 
-Refer and set other sheet value.
+Refer and set other sheet values.
 
-    # columnName -- column to set value
-    # SheetName  -- refer sheet
-    # where      -- (MyRow,ReferRow) return match
-    # value      -- extract value from ReferRow which returned true in where function.
-    set column {columnName} from {SheetName} where {(Row,Row) => Boolean} value {Row => String} whenEmpty
+    # columnName   -- column whose value will be set
+    # sheetName    -- sheet (table) to be modified
+    # where clause -- (MyRow,ReferRow) return match
+    # value clause -- value computed from ReferRow when the _where_ function is true.
+    set column {columnName} from {sheetName} where {(Row,Row) => Boolean} value {Row => String} whenEmpty
                                                                                                 always
                                                                                                 when { String => Boolean}
 
 
 
-## For example
+## Example
 
     class YourProject extends Project with ...{
-      // These become global setting.
+      // These become global settings.
       map sheetName ("SheetName" -> "NewSheetName");
       ensure column "name" exists;
 
-      // These settings are enabled on only select sheet
+      // These settings are enabled on only chosen sheets.
       onSheet("SheetName"){
         guess idColumn "HogeID";
         validate column "name" is(v => v.startsWith("Mr."));
