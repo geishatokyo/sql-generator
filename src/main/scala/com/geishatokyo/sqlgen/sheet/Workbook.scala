@@ -10,7 +10,10 @@ class Workbook {
 
   var name : String = "Workbook1"
 
-  protected var sheets : List[Sheet] = Nil
+  protected var _sheets : List[Sheet] = Nil
+
+  def sheets : List[Sheet] = _sheets
+  protected def sheets_=( v : List[Sheet]) = _sheets = v
 
   def apply(index : Int) : Sheet  = sheets(index)
   def apply(name : String) : Sheet = getSheet(name).getOrElse(
@@ -28,6 +31,15 @@ class Workbook {
 
   def addSheets(sheets : List[Sheet]) = {
     this.sheets = this.sheets ::: sheets
+  }
+
+  /**
+   * Replace sheet.
+   * @param sheet
+   */
+  def replaceSheet(sheet : Sheet) = {
+    deleteSheet(sheet.name.value)
+    addSheet(sheet)
   }
 
   def deleteSheet(sheetName : String) = {

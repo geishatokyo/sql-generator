@@ -18,11 +18,19 @@ class Row(val parent : Sheet,val index : Int,val headers : List[ColumnHeader],va
       cells(index)
     }
   }
-  def update(index : Int, value : String) = cells(index) := value
+  def update(index : Int, value : String) : Unit  = cells(index) := value
+  def update(columnName : String,value : String) : Unit = {
+    val index = indexOf(columnName)
+    if (index >= 0) cells(index) := value
+  }
 
   def unit(index : Int) = CellUnit(headers(index),cells(index))
 
   def units = headers.zip(cells).map(p => CellUnit(p._1,p._2))
+
+  def indexOf(columnName : String) = {
+    headers.indexWhere(h => h.name =~= columnName)
+  }
 
   def size = cells.size
 
@@ -50,5 +58,14 @@ class Row(val parent : Sheet,val index : Int,val headers : List[ColumnHeader],va
 
   override def toString: String = {
     cells.mkString(",")
+  }
+
+  def replace( columnName : String, conversion : Cell => String) = {
+    val index = indexOf(columnName)
+    if (index >= 0) cells(index) := conversion(cells(index))
+  }
+
+  def copy() = {
+    new Row(this.parent,this.index,this.headers,this.cells.map(_.copy()))
   }
 }

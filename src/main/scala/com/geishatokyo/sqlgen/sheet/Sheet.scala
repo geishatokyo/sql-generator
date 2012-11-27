@@ -3,6 +3,19 @@ package com.geishatokyo.sqlgen.sheet
 import com.geishatokyo.sqlgen.SQLGenException
 
 
+object Sheet{
+
+  /**
+   * Create new sheet copy only headers
+   * @param sheet
+   */
+  def apply(sheet : Sheet) = {
+    val newSheet = new Sheet(sheet.name.toString)
+    newSheet._headers = sheet._headers.map(_.copy(newSheet))
+    newSheet
+  }
+}
+
 /**
  *
  * User: takeshita
@@ -19,8 +32,14 @@ class Sheet(val name : VersionedValue) {
   def ids = _ids
 
   protected var cells : List[List[Cell]] = Nil
-  protected var rows : List[Row] = Nil
-  protected var columns : List[Column] = Nil
+  protected var _rows : List[Row] = Nil
+  protected var _columns : List[Column] = Nil
+
+  def rows = _rows
+  protected def rows_=(v : List[Row]) = _rows = v
+
+  def columns = _columns
+  protected def columns_=(v : List[Column]) = _columns = v
 
   var ignore = false
 
@@ -139,6 +158,10 @@ class Sheet(val name : VersionedValue) {
     rows.find(func(_))
   }
 
+  def addRow( row : Row) : Unit = {
+    val values = row.units.map(u => u.header.name.toString -> u.value.asString).toMap
+    addRow(values,true)
+  }
 
   def addRow( values : List[String]) : Unit = {
     if(values.size != _headers.size) {
