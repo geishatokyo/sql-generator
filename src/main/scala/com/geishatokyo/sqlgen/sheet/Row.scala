@@ -66,6 +66,6 @@ class Row(val parent : Sheet,val index : Int,val headers : List[ColumnHeader],va
   }
 
   def copy() = {
-    new Row(this.parent,this.index,this.headers,this.cells.map(_.copy()))
+    new Row(this.parent,this.index,this.headers,this.cells.map(_.copy(this.parent)))
   }
 }
