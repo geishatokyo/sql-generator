@@ -151,6 +151,11 @@ object FileUtil extends FileFinder {
       workbook.write(output)
     })
   }
+  def saveTo(filename : String, data : Array[Byte]) = {
+    _saveTo(filename,output => {
+      output.write(data)
+    })
+  }
 
 
   def hashSha1(data : Array[Byte]) = {

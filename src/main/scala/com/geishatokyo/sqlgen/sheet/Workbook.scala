@@ -6,7 +6,7 @@ package com.geishatokyo.sqlgen.sheet
  * Create: 12/07/11 21:05
  */
 
-class Workbook {
+class Workbook extends scala.collection.mutable.Map[String,Sheet]{
 
   var name : String = "Workbook1"
 
@@ -15,8 +15,25 @@ class Workbook {
   def sheets : List[Sheet] = _sheets
   protected def sheets_=( v : List[Sheet]) = _sheets = v
 
+
+  def +=(kv: (String, Sheet)) = {
+    addSheet(kv._2)
+    this
+  }
+
+  def -=(key: String) = {
+    deleteSheet(key)
+    this
+  }
+
+  def get(key: String) = sheets.find(_.name =~= name)
+
+  def iterator = _sheets.map(s => s.name.value -> s).iterator
+
+
+
   def apply(index : Int) : Sheet  = sheets(index)
-  def apply(name : String) : Sheet = getSheet(name).getOrElse(
+  override def apply(name : String) : Sheet = getSheet(name).getOrElse(
     throw new SheetNotFoundException(name)
   )
   def getSheet(name : String) = sheets.find(_.name =~= name)
@@ -32,6 +49,7 @@ class Workbook {
   def addSheets(sheets : List[Sheet]) = {
     this.sheets = this.sheets ::: sheets
   }
+
 
   /**
    * Replace sheet.
