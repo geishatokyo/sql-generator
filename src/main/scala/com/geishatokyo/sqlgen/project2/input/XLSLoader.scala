@@ -6,6 +6,7 @@ import com.geishatokyo.sqlgen.sheet.{ColumnType, ColumnHeader, Sheet, Workbook}
 import com.geishatokyo.sqlgen.sheet.load.hssf._
 import scala.Some
 import com.geishatokyo.sqlgen.logger.Logger
+import com.geishatokyo.sqlgen.util.FileUtil
 
 /**
  * 
@@ -16,17 +17,16 @@ object XLSLoader {
   val logger = Logger.logger
 
   def load(filename : String) : Workbook = {
-    val input = new FileInputStream(filename)
-    try{
-      load(input)
-    }finally{
-      input.close()
-    }
+    load(new File(filename))
   }
   def load(file : File) : Workbook = {
     val input = new FileInputStream(file)
     try{
-      load(input)
+      val wb = load(input)
+      val (dir,name,ext) = FileUtil.splitPathAndNameAndExt(file.getAbsolutePath)
+      wb.name = name
+
+      wb
     }finally{
       input.close()
     }
