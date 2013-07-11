@@ -130,7 +130,9 @@ trait Project {
       processes :+= ((w : Workbook) => {
         w.get(sheetName).foreach(s => {
           s.headers.foreach(h => {
-            guess.applyOrElse(h.name.value, (_ : String) => {})
+            if (guess.isDefinedAt(h.name)){
+              h.columnType = guess(h.name)
+            }
           })
         })
       })
