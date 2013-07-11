@@ -1,9 +1,10 @@
 package com.geishatokyo.sqlgen.project2
 
 import util.DynamicVariable
-import com.geishatokyo.sqlgen.sheet.{ColumnType, Row, Sheet, Workbook}
+import com.geishatokyo.sqlgen.sheet._
 import sun.rmi.server.InactiveGroupException
-import collection.immutable.ListMap
+import collection.immutable.{StringOps, StringLike, ListMap}
+import scala.Some
 
 /**
  * 
@@ -53,8 +54,22 @@ trait Project {
   implicit def columnAddressToString(ca : ColumnAddress) = {
     ca.toString()
   }
+  implicit def columnAddressToStringOps(ca : ColumnAddress) = {
+    new StringOps(ca.toString())
+  }
+
+  implicit def cellToString( v : Cell) = {
+    v.value
+  }
+  implicit def cellToStringOps( v : Cell) = {
+    new StringOps( v.value)
+  }
+
   case class ColumnAddress(sheetName : Option[String],columnName : String){
     override def toString = currentRow.value.apply(columnName).value
+
+    def toLong = toString().toLong
+
   }
 
 
