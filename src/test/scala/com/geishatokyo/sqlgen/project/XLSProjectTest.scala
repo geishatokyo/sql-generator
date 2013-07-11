@@ -7,7 +7,7 @@ import com.geishatokyo.sqlgen.process.input.SingleXLSLoader
 import com.geishatokyo.sqlgen.process.output.SQLOutputProvider
 import com.geishatokyo.sqlgen.process.ensure.EnsureProcessProvider
 import com.geishatokyo.sqlgen.process.MapContext
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 import com.geishatokyo.sqlgen.process.input.InputHelpers._
 
 /**
@@ -16,7 +16,7 @@ import com.geishatokyo.sqlgen.process.input.InputHelpers._
  * Create: 12/07/12 16:48
  */
 
-class XLSProjectTest extends SpecificationWithJUnit {
+class XLSProjectTest extends Specification {
 
   "BaseProject executor" should {
 

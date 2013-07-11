@@ -220,6 +220,11 @@ class Sheet(val name : VersionedValue) {
     }
   }
 
+  def addEmptyColumn( columnName : String) = {
+    val values = List.fill(rowSize)( "")
+    addColumn(columnName,values)
+  }
+
   def addColumn(columnName : String,values : List[String]) = {
     if (columnSize > 0 && values.size != cells.size) {
       throw new SQLGenException(
@@ -313,9 +318,9 @@ class Sheet(val name : VersionedValue) {
   }
 
   override def toString: String = {
-    """Header
-%s
-Row
-%s""".format(headers.mkString(","),cells.map(row => row.map(_.value).mkString(",")).mkString("\r\n"))
+    """SheetName: %s
+Header: %s
+Rows
+%s""".format(name,headers.mkString(","),cells.map(row => row.map(_.value).mkString(",")).mkString("\r\n"))
   }
 }

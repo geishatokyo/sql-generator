@@ -6,7 +6,7 @@ import com.geishatokyo.sqlgen.process.ensure.EnsureProcessProvider
 import com.geishatokyo.sqlgen.process.output.{XLSOutputProvider, SQLOutputProvider}
 import com.geishatokyo.sqlgen.process.merge.MergeSplitProcessProvider
 import com.geishatokyo.sqlgen.process.{MapContext, Proc}
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 import InputHelpers._
 
 /**
@@ -15,7 +15,7 @@ import InputHelpers._
  * Create: 12/07/13 11:47
  */
 
-class MergeSplitProjectTest extends SpecificationWithJUnit {
+class MergeSplitProjectTest extends Specification {
 
   "MergeSplit executor" should{
 

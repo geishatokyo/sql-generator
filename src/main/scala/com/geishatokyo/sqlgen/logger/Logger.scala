@@ -15,7 +15,7 @@ trait Logger {
 }
 
 object Logger extends Logger{
-  val logger = new ConsoleLogger
+  val logger : Logger = new ConsoleLogger
 
   def log(message: String) {logger.log(message)}
 

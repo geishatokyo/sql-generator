@@ -87,7 +87,7 @@ object ValidateProject{
       XML.loadString("<root>%s</root>".format(v))
       true
     }catch{
-      case e => false
+      case e : Throwable => false
     }
   },"NotValidXML")
 
@@ -102,7 +102,7 @@ object ValidateProject{
         case None => false
       }
     }catch{
-      case e => false
+      case e : Throwable=> false
     }
   },"NotValidJson")
 

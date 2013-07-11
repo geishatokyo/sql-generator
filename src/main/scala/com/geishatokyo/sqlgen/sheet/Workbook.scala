@@ -38,6 +38,8 @@ class Workbook extends scala.collection.mutable.Map[String,Sheet]{
   )
   def getSheet(name : String) = sheets.find(_.name =~= name)
 
+  def hasSheet(name : String) = sheets.exists(_.name =~= name)
+
   def foreachSheet[T]( func : Sheet => T) : List[T] = {
     sheets.map(func(_))
   }
@@ -85,7 +87,7 @@ class Workbook extends scala.collection.mutable.Map[String,Sheet]{
   }
 
   override def toString: String = {
-    """SheetName:%s
+    """WorkbookName:%s
 %s
     """.stripMargin.format(name,sheets.mkString("\n"))
 

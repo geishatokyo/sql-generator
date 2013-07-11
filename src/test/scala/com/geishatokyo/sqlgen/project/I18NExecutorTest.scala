@@ -6,7 +6,7 @@ import com.geishatokyo.sqlgen.process.output.SQLOutputProvider
 import com.geishatokyo.sqlgen.process.{Proc, MapContext}
 import com.geishatokyo.sqlgen.process.input.{InputHelpers, SingleXLSLoader}
 import com.geishatokyo.sqlgen.process.ensure.EnsureProcessProvider
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 import InputHelpers._
 
 /**
@@ -15,7 +15,7 @@ import InputHelpers._
  * Create: 12/07/14 2:31
  */
 
-class I18NExecutorTest extends SpecificationWithJUnit {
+class I18NExecutorTest extends Specification {
 
   "i18nExecutor" should{
 

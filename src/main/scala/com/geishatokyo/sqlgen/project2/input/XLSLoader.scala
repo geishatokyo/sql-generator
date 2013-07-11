@@ -1,45 +1,55 @@
-package com.geishatokyo.sqlgen.sheet.load.hssf
+package com.geishatokyo.sqlgen.project2.input
 
-import java.io.{FileInputStream, InputStream}
-import com.geishatokyo.sqlgen.sheet.{ColumnType, ColumnHeader, Sheet, Workbook}
+import java.io.{File, FileInputStream, InputStream}
 import org.apache.poi.hssf.usermodel.{HSSFCell, HSSFRow, HSSFSheet, HSSFWorkbook}
-import com.geishatokyo.sqlgen.sheet.load.SheetLoader
-import java.text.SimpleDateFormat
+import com.geishatokyo.sqlgen.sheet.{ColumnType, ColumnHeader, Sheet, Workbook}
+import com.geishatokyo.sqlgen.sheet.load.hssf._
+import scala.Some
 import com.geishatokyo.sqlgen.logger.Logger
 
 /**
- *
+ * 
  * User: takeshita
- * Create: 12/07/12 11:42
+ * DateTime: 13/07/12 2:27
  */
+object XLSLoader {
+  val logger = Logger.logger
 
-class XLSSheetLoader(nameMapper : NameMapper = null,
-                     typeGuesser : ColumnTypeGuesser = null) extends SheetLoader {
+  def load(filename : String) : Workbook = {
+    val input = new FileInputStream(filename)
+    try{
+      load(input)
+    }finally{
+      input.close()
+    }
+  }
+  def load(file : File) : Workbook = {
+    val input = new FileInputStream(file)
+    try{
+      load(input)
+    }finally{
+      input.close()
+    }
+  }
 
-  val logger = Logger
 
-  def load(input: InputStream): Workbook = {
+  def load(input : InputStream) : Workbook = {
+
     val xls = new HSSFWorkbook(input)
     val wb = new Workbook()
     val sheetSize = xls.getNumberOfSheets
     wb.addSheets((0 until sheetSize).flatMap(i => loadSheet(xls.getSheetAt(i))).toList)
     wb
+
   }
 
+  private def loadSheet(xls: HSSFSheet) : Option[Sheet] = {
 
-  def loadSheet(xls: HSSFSheet) : Option[Sheet] = {
+    val sheetName = xls.getSheetName
 
-    val sheetName = nameMapper.mapSheetName(xls.getSheetName)
-    if(sheetName != xls.getSheetName){
-      logger.log("Convert sheet name from %s to %s.".format(xls.getSheetName,sheetName))
-    }
     val rowSize = xls.getPhysicalNumberOfRows
     if(rowSize <= 0) {
       logger.log("Sheet:%s is empty".format(sheetName))
-      return None
-    }
-    if (nameMapper.isIgnoreSheet_?(sheetName)){
-      logger.log("Sheet:%s is ignored".format(sheetName))
       return None
     }
 
@@ -57,7 +67,7 @@ class XLSSheetLoader(nameMapper : NameMapper = null,
     Some(sheet)
   }
 
-  def loadRow(headers: List[(Int, ColumnHeader)], row: HSSFRow) : List[String] = {
+  private def loadRow(headers: List[(Int, ColumnHeader)], row: HSSFRow) : List[String] = {
     if(row == null) return Nil
     headers.map({
       case (index,h) => {
@@ -72,7 +82,7 @@ class XLSSheetLoader(nameMapper : NameMapper = null,
     })
   }
 
-  def loadCellValue( cell : HSSFCell , columnType : ColumnType.Value) : String = {
+  private def loadCellValue( cell : HSSFCell , columnType : ColumnType.Value) : String = {
     if(cell == null) return null
     columnType match{
       case ColumnType.Integer => {
@@ -113,16 +123,12 @@ class XLSSheetLoader(nameMapper : NameMapper = null,
   }
 
 
-  def loadHeaders(xls: HSSFSheet,sheet : Sheet): List[(Int, ColumnHeader)] = {
+  private def loadHeaders(xls: HSSFSheet,sheet : Sheet): List[(Int, ColumnHeader)] = {
     val row = xls.getRow(0)
     val sheetName = sheet.name.value
     if(row == null) return Nil
     val size = row.getPhysicalNumberOfCells
 
-    val nameMap = nameMapper.columnNameMapperFor(sheetName)
-    val typeMap = typeGuesser.guesserFor(sheetName)
-    val ignoreCols = typeGuesser.isIgnoreColumn_?(sheetName)
-    val idColumns = typeGuesser.isIdColumn_?(sheetName)
 
     val headersOnFile = (0 until size).map(i => {
       val cell = row.getCell(i)
@@ -132,22 +138,11 @@ class XLSSheetLoader(nameMapper : NameMapper = null,
         }
         //case _ => throw new Exception("There is wrong header column.row:0 column:%s".format(i))
       }
-    }).filter(p => p._2.length > 0).map(p => p._1 -> nameMap(p._2)).toList
+    }).filter(p => p._2.length > 0).toList
 
     sheet.addColumns(headersOnFile.map(_._2): _*)
-    sheet.headers.foreach(ch => {
-      ch.columnType = typeMap(ch.name)
-      if(ch.columnType == ColumnType.Any){
-        ch.columnType = typeMap(ch.name.toLowerCase)
-      }
-      ch.output_? = !ignoreCols(ch.name)
-      logger.log("Column:%s@%s is %s".format(ch.name,sheetName,ch.columnType))
-    })
+
     //find and set ids
-    val ids = sheet.headers.withFilter(h => idColumns(h.name)).map(_.name.value)
-    logger.log("Sheet:%s's IDs are %s".format(sheetName,ids))
-    sheet.replaceIds(ids:_*)
     headersOnFile.map(_._1).zip(sheet.headers)
   }
-
 }

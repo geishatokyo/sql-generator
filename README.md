@@ -27,134 +27,93 @@ The sheet name should be the desired table name.<br />
 Within the sheet, the first row must be composed of the column names.<br />
 Later rows are interpreted as records.
 
-# Structure
+# Define project
 
-## Project class
+You write your conversion rules in your project class.
+Sample code is below.
 
-You write settings to this class. See below for the setting DSL.<br />
-You can extend the setting grammar with mixin Project traits.<br />
-Convenient Project traits are placed in the package com.geishatokyo.sqlgen.project.
+    import com.geishatokyo.sqlgen.project2._
+    object YourProject extends DefaultProject{
 
-## Executor class
-
-This class controls the processes that generate SQL.<br />
-You can extend processes with mixin ProcessProvider traits.<br />
-Convenient ProcessProvider traits are placed in the package com.geishatokyo.sqlgen.process.
-
-
-# Grammar
-
-## @BaseProject
-
-Base
-
-    ignore sheet  { sheetName }
-           sheets { sheetName*}
-           sheets_except { sheetName*}
-           sheet by pf { PartialFunction[String,Boolean] }
-           column  { columnName }
-           columns { columnName* }
-           columns_except {columnName*}
-           column by pf { PartialFunction[String,Boolean] }
-
-    map    sheetName  { (sheetName -> sheetName) }
-           sheetNames { (sheetName -> sheetName)*}
-           columnName { (columnName -> columnName) }
-           columnNames { (columnName -> columnName)*}
-           columnName by pf { PartialFunction[String,String] }
-
-    ensure column {columnName} exists
-           column {columnName} set {value} whenEmpty
-                                           when { String => Boolean }
-                                           always
-           column {columnName} refer {columnName} whenEmpty
-                                                  when { String => Boolean}
-                                                  always
-                                                  converting {String => String} *=> whenEmpty,when,always
-           column {columnName} convert { String => String }
-           column {columnName} throws error whenNotExists
-                                            whenEmpty
-                                            when { String => Boolean }
-           sheet {sheetName} exists
-
-    guess columnTypes { (String -> ColumnType.Value) *}
-          columnType by pf { String => ColumnTypeValue}
-          idColumn {columnName}
-          idColumn by {String => Boolean}
-
-Scoping sheet
-
-    onSheet({sheetName}) { ... }
-
-## @SheetAddress trait
-
-ColumnAddress
-
-    column({columnName}) at {SheetName}
-                         @@ {SheetName}
-    at({sheetName}) { ... }
-
-## @MergeSplitProject
-
-Merge and split
-
-    # can declare outside of SheetScope
-    merge sheet {sheetName} from {columnAddress*}
-    split sheet {sheetName} into {columnAddress*}
-    modify sheet {sheetName} rename {newName}
-                             delete
-    modify column {columnAddress} ... # => same as below
-
-    # can declare only inside of SheetScope
-    modify column {columnName} rename {newName}
-                               convert { String => String }
-                               delete
-                               ignore
-                               copyFrom {columnAddress}
-                               copyTo   {columnAddress*}
-
-## @ValidateProject
-
-Validation
-
-    # can declare outside of SheetScope
-    validate eachRows {Row => Boolean}
-    validate column {columnName} isNotEmpty
-                                 isValidXML
-                                 isSingleLine
-                                 is { String => Boolean}
-                                 is( notEmpty && validXml && singleLine && (f => f.lengh == 20))
-
-## @ReferenceProject
-
-Refer and set other sheet values.
-
-    # columnName   -- column whose value will be set
-    # sheetName    -- sheet (table) to be modified
-    # where clause -- (MyRow,ReferRow) return match
-    # value clause -- value computed from ReferRow when the _where_ function is true.
-    set column {columnName} from {sheetName} where {(Row,Row) => Boolean} value {Row => String} whenEmpty
-                                                                                                always
-                                                                                                when { String => Boolean}
-
-
-
-## Example
-
-    class YourProject extends Project with ...{
-      // These become global settings.
-      map sheetName ("SheetName" -> "NewSheetName");
-      ensure column "name" exists;
-
-      // These settings are enabled on only chosen sheets.
-      onSheet("SheetName"){
-        guess idColumn "HogeID";
-        validate column "name" is(v => v.startsWith("Mr."));
+      def main(args : Array[String]) {
+        inDir("hgoe") >> YourProject >> asXls
       }
-      onSheet("FugaSheet"){
-        map columnName by pf{
-          case v if v.startsWith("_") => v.substring(1)
-        }
+
+      addSheet("NewSheet");
+
+      onSheet("Sheet1"){
+        forColumn("column1") map(v => "Map to " + v) ifEmpty;
+        forColumn("column2") set("0") always;
+        forColumn("column3") renameTo("NewColumnName");
+      }
+
+      onSheet("Sheet2"){
+        forColumn("ref other column") set( {
+          column("name") + "_" + sheet("Sheet3").searchIdIs( column("foreignKey") )("name")
+        })
+
       }
 
     }
+
+
+## Grammer
+
+
+### Outside sheet rules
+
+    onSheet( _sheetName){
+      ...Inside sheet rules
+    }
+
+    addSheet( _sheetName)
+
+    ignore( sheet(_sheetName) )
+    ignore( coluimn(_column) )
+    guessColumnType( {
+      case _patten => _ColumnType
+    })
+    guessId( _columnName => _isId)
+
+
+
+### Inside sheet rules
+
+only use in onSheet scope.
+
+    forColumn( _columnName) map( _columnValue => _newColumnValue) when( _columnValue => _bool)
+                                                                  ifEmpty
+                                                                  always
+                            set( _newColumnValue)                 when( _columnValue => _bool)
+                                                                  ifEmpty
+                                                                  always
+                            ignore
+                            isId
+                            type_=( _ColumnType)
+                            renameTo(_newColumnName)
+
+    renameTo(_newSheetName)
+
+If you don't set when,ifEmpty, nor always, ifEmpty is default.
+
+### Refer other sheet or column
+
+    sheet( _sheetName) search( _row => _bool) : Row
+                       searchIdIs( _idValue) : Row
+                       find( _row => _bool) : Option[Row]
+                       findIdIs( _idValue) : Option[Row]
+
+    column( _columnName) : String
+
+    _row( _rowName) : String
+
+
+
+### Processing
+
+       Input                 Project         Output
+    inDir( _dir)                            console
+    file(_file)         >>  _Project     >> asXls
+    workbook(_workbook)                     asSql
+
+

@@ -1,6 +1,6 @@
 package com.geishatokyo.sqlgen.sample
 
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 import com.geishatokyo.sqlgen.{Context, Executor}
 import com.geishatokyo.sqlgen.importall._
 import com.geishatokyo.sqlgen.process.input.InputHelpers._
@@ -13,7 +13,7 @@ import com.geishatokyo.sqlgen.setting.GTEDefaultProject
  * Create: 12/07/12 18:32
  */
 
-class PlainProjectTest extends SpecificationWithJUnit {
+class PlainProjectTest extends Specification {
 
   "Executor" should{
     "load xls and save sql" in {

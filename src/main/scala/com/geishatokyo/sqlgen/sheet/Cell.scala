@@ -32,27 +32,27 @@ case class Cell(parent : Sheet,override val initialValue : String) extends Versi
   def asInt = try{
     value.toInt
   }catch{
-    case e => 0
+    case e : Throwable => 0
   }
   def asLong = try{
     value.toLong
   }catch{
-    case e => 0
+    case e : Throwable => 0
   }
 
   def asDouble = try{
     value.toDouble
   }catch{
-    case e => 0
+    case e : Throwable => 0
   }
 
   def asDate = try{
     new Date(value.toLong)
   }catch{
-    case e => try{
+    case e : Throwable => try{
       new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(value)
     }catch{
-      case e => null
+      case e : Throwable => null
     }
   }
 

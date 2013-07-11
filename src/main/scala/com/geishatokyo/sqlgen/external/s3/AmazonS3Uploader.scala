@@ -76,7 +76,7 @@ class AmazonS3Uploader(bucketName: String, accessKey: String, secretKey: String)
       case _ => "image/svg+xml"
     }
   } catch {
-    case e => "image/svg+xml"
+    case e : Throwable => "image/svg+xml"
   }
 
   def generateObjectMetadata(key: String, data: Array[Byte]) = {

@@ -1,6 +1,6 @@
 package com.geishatokyo.sqlgen.sheet
 
-import org.specs2.mutable.SpecificationWithJUnit
+import org.specs2.mutable.Specification
 
 /**
  *
@@ -8,7 +8,7 @@ import org.specs2.mutable.SpecificationWithJUnit
  * Create: 12/07/12 17:39
  */
 
-class SheetTest extends SpecificationWithJUnit {
+class SheetTest extends Specification {
 
   "Sheet " should{
     "add column" in {
