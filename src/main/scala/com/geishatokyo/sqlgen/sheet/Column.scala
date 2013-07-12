@@ -30,4 +30,8 @@ class Column(val parent : Sheet,val header : ColumnHeader,val cells : List[Cell]
   override def toString: String = {
     """Header:%s RowSize:%s""".format(header,size)
   }
+
+  def copy(parent : Sheet) = {
+    new Column(parent,header.copy(parent),cells.map(_.copy(parent)))
+  }
 }

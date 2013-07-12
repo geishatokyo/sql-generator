@@ -11,14 +11,14 @@ import scala.Some
  * User: takeshita
  * DateTime: 13/07/11 21:46
  */
-trait Project {
+trait Project extends Function1[Workbook,Workbook] {
 
-  private val onSheetName = new DynamicVariable[String](null)
-  private val currentWorkbook = new DynamicVariable[Workbook](null)
-  private val currentSheet = new DynamicVariable[Sheet](null)
-  private val currentRow = new DynamicVariable[Row](null)
+  protected val onSheetName = new DynamicVariable[String](null)
+  protected val currentWorkbook = new DynamicVariable[Workbook](null)
+  protected val currentSheet = new DynamicVariable[Sheet](null)
+  protected val currentRow = new DynamicVariable[Row](null)
 
-  private var processes : List[Workbook => Any] = Nil
+  protected var processes : List[Workbook => Any] = Nil
 
   def addSheet(sheetName : String) = {
     processes :+=( (w: Workbook) => {
@@ -27,6 +27,9 @@ trait Project {
       }
     })
   }
+
+  def newSheet(newSheetName : String) = new NewSheet(newSheetName)
+
 
   def onSheet(sheetName : String)( func : => Unit) = {
     onSheetName.withValue( sheetName){
@@ -70,6 +73,14 @@ trait Project {
 
     def toLong = toString().toLong
 
+    def at (sheetAddress : SheetAddress) = {
+      ColumnAddress(Some(sheetAddress.sheetName),columnName)
+    }
+
+    def apply( rowIndex : Int) = {
+      currentSheet.value.column(columnName).cells(rowIndex)
+    }
+
   }
 
 
@@ -102,6 +113,13 @@ trait Project {
         val id = r.parent.ids(0)
         r(id.name) == v
       })
+    }
+
+    def row(rowIndex : Int) = {
+      currentWorkbook.value(sheetName).row(rowIndex)
+    }
+    def column(columnName : String) = {
+      currentWorkbook.value(sheetName).column(columnName)
     }
 
 
@@ -278,10 +296,80 @@ trait Project {
     w
   }
 
-  def ++(p : Project) = {
+  def modifyRows(sheetName : String)( func : Row => Any) = {
+    processes :+=( (w : Workbook) => {
+      w.getSheet(sheetName).foreach(s => {
+        currentSheet.withValue(s){
+          s.rows.foreach( r => {
+            currentRow.withValue(r){
+              func(r)
+            }
+          })
+        }
+      })
+
+    })
+  }
+
+
+  def +(p : Project) = {
     val merge = new PlainProject()
     merge.processes = this.processes ++ p.processes
     merge
+  }
+
+  class NewSheet(newSheetName : String) {
+    def extractFrom(sheetName : String)(columns : String*) = {
+      processes :+=( (w : Workbook) => {
+        val s = w(sheetName)
+
+        if (!w.hasSheet(newSheetName)){
+          w.addSheet(new Sheet(newSheetName))
+        }
+        val newSheet = w(newSheetName)
+
+        columns.foreach(c => {
+          val c2 = s.column(c)
+          newSheet.addColumn(c2)
+        })
+      })
+    }
+    def extractThenFilter(sheetName : String)(columns : String*)(filterFunc : Row => Boolean) = {
+      processes :+=( (w : Workbook) => {
+        val s = w(sheetName)
+
+        val newSheet = new Sheet(newSheetName)
+
+        columns.foreach(c => {
+          val c2 = s.column(c)
+          newSheet.addColumn(c2)
+        })
+        val resultSheet = newSheet.copyEmpty()
+        newSheet.rows.foreach(r => {
+          if(filterFunc(r)){
+            resultSheet.addRow(r)
+          }
+        })
+        w.addSheet(resultSheet)
+
+      })
+    }
+    def copy(sheetName : String) : Unit = {
+      processes :+=( (w : Workbook) => {
+        val s = w(sheetName)
+        val s2 = s.copy()
+        s2.name := newSheetName
+        w.addSheet(s2)
+      })
+    }
+    def copyThenModify(sheetName : String )( modify : Sheet => Sheet) : Unit = {
+      processes :+=( (w : Workbook) => {
+        val s = w(sheetName)
+        val s2 = s.copy()
+        s2.name := newSheetName
+        w.addSheet(modify(s2))
+      })
+    }
   }
 
 }

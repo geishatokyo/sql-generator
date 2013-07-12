@@ -240,6 +240,18 @@ class Sheet(val name : VersionedValue) {
     cellsToRows
   }
 
+  def addColumn(column : Column) = {
+    if (columnSize > 0 && column.size != cells.size) {
+      throw new SQLGenException(
+        "Row size missmatch.Sheet:%s Passed:%s".format(cells.size,column.size))
+    }
+    checkColumnExist(column.columnName)
+    columns = columns :+ column.copy(this)
+
+    columnsToCells()
+    cellsToRows()
+  }
+
   /**
    * Append empty columns
    * @param columnNames
@@ -312,6 +324,15 @@ class Sheet(val name : VersionedValue) {
     newSheet._headers = this.headers.map(h => new ColumnHeader(newSheet,h.name.value))
     newSheet._ids = this._ids
     newSheet.cells = this.cells.map(row => row.map(r => new Cell(newSheet,r.value)))
+    newSheet.cellsToRows
+    newSheet.cellsToColumns
+    newSheet
+  }
+
+  def copyEmpty() = {
+    val newSheet = new Sheet(name.copy())
+    newSheet._headers = this.headers.map(_.copy(newSheet))
+    newSheet._ids = this._ids
     newSheet.cellsToRows
     newSheet.cellsToColumns
     newSheet

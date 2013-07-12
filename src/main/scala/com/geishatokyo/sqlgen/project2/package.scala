@@ -11,7 +11,7 @@ import sheet.Workbook
  */
 package object project2 {
 
-  def workbook(wb : Workbook) = {
+  def withWorkbook(wb : Workbook) = {
     new WorkbookInput(wb)
   }
 

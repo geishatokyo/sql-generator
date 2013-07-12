@@ -37,6 +37,13 @@ class ProjectTest  extends Specification{
 
     ignore( column("id") )
 
+    newSheet("Sheet3") copy("Sheet2")
+
+    newSheet("Sheet4").copyThenModify("Sheet2" )((s : Sheet) => {
+      s.addColumns("aaa")
+      s
+    })
+
     onSheet("Sheet1"){
       ignore( column("age") )
       forColumn("name") map(v => v + v) when(_ == "Tom");
@@ -75,8 +82,8 @@ class ProjectTest  extends Specification{
 
     }
 
-    "" in {
-      inDir("hoge") >> new SampleProject >> asXls
+    "input then output" in {
+      withWorkbook(this.workbook) >> new SampleProject >> console
 
       ok
     }
