@@ -121,7 +121,7 @@ trait Project extends Function1[Workbook,Workbook] {
      */
     def findFirstAbove(cond : String => Boolean) : Option[String] = {
       val sheet = currentSheet.value
-      (currentRow.value.index - 1 until 0 by -1).view.map(index => {
+      (currentRow.value.index - 1 to 0 by -1).view.map(index => {
         sheet.row(index)(columnName).value
       }).find( cond(_))
     }
