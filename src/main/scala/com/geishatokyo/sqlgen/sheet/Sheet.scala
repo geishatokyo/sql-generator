@@ -288,6 +288,9 @@ class Sheet(val name : VersionedValue) {
 
   def deleteRow(index : Int) : Unit = {
     rows = rows.take(index) ::: rows.drop(index + 1)
+    for (newIndex <- index until _rows.size){
+      rows(newIndex).index = newIndex
+    }
     rowsToCells
     cellsToColumns
   }

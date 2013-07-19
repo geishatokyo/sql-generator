@@ -6,7 +6,7 @@ package com.geishatokyo.sqlgen.sheet
  * Create: 12/07/11 21:05
  */
 
-class Row(val parent : Sheet,val index : Int,val headers : List[ColumnHeader],val cells : List[Cell]) {
+class Row(val parent : Sheet,var index : Int,val headers : List[ColumnHeader],val cells : List[Cell]) {
 
   def apply( index : Int) = cells(index).value
 
