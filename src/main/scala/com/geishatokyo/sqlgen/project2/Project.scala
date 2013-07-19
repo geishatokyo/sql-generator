@@ -86,6 +86,7 @@ trait Project extends Function1[Workbook,Workbook] {
     SheetAddress(sheetName)
   }
 
+
   implicit def columnAddressToString(ca : ColumnAddress) = {
     ca.toString()
   }
@@ -112,6 +113,31 @@ trait Project extends Function1[Workbook,Workbook] {
     def apply( rowIndex : Int) = {
       currentSheet.value.column(columnName).cells(rowIndex)
     }
+
+    /**
+     * Find nearest cell value which row index is lower than this.
+     * @param cond
+     * @return
+     */
+    def findFirstAbove(cond : String => Boolean) : Option[String] = {
+      val sheet = currentSheet.value
+      (currentRow.value.index - 1 until 0 by -1).view.map(index => {
+        sheet.row(index)(columnName).value
+      }).find( cond(_))
+    }
+    def searchFirstAbove(cond : String => Boolean) = findFirstAbove(cond).get
+    /**
+     * Find nearest cell value which row index is higher than this.
+     * @param cond
+     * @return
+     */
+    def findFirstBelow(cond : String => Boolean): Option[String] = {
+      val sheet = currentSheet.value
+      (currentRow.value.index + 1 until sheet.rowSize).view.map(index => {
+        sheet.row(index)(columnName).value
+      }).find( cond(_))
+    }
+    def searchFirstBelow(cond : String => Boolean) = findFirstBelow(cond).get
 
   }
 
@@ -153,6 +179,7 @@ trait Project extends Function1[Workbook,Workbook] {
     def column(columnName : String) = {
       currentWorkbook.value(sheetName).column(columnName)
     }
+
 
 
   }
