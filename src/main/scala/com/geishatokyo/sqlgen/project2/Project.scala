@@ -50,6 +50,24 @@ trait Project extends Function1[Workbook,Workbook] {
     }, columnName)
   }
 
+
+  def filterRow( func : Row => Boolean) = {
+    val sheetName = onSheetName.value
+    processes :+=( (w : Workbook) => {
+      val s = w(sheetName)
+      currentSheet.withValue(s){
+        for (i <- ((s.rowSize -1 ) to 0 by -1)){
+          val row = s.row(i)
+          currentRow.withValue(row){
+            if (!func(s.row(i))){
+              s.deleteRow(i)
+            }
+          }
+        }
+      }
+    })
+  }
+
   def sheet(sheetName : String) = {
     SheetAddress(sheetName)
   }
@@ -200,11 +218,25 @@ trait Project extends Function1[Workbook,Workbook] {
 
   class ColumnMapping(sheetName : String,columnName : String) {
 
-    var condition : Row => Boolean = null
+    var condition : Option[Row => Boolean] = None
 
-    ifEmpty // default condition
+    private val _always = (_ : Row) => true
+    private val _ifEmpty = {
+      (r : Row) => {
+        val v = r(columnName).asString
+        v == null || v.length == 0
+      }
+    }
 
     def map( func : String => String) : ColumnMapping = {
+      mapOrSet(func,condition.getOrElse(_always))
+    }
+
+    def set( v : => String) : ColumnMapping = {
+      mapOrSet(s => v, condition.getOrElse(_ifEmpty))
+    }
+
+    private def mapOrSet(func : String => String, condition : Row => Boolean) = {
       processes :+=( (w : Workbook) => {
         currentSheet.withValue(w(sheetName)){
           val sheet = w(sheetName)
@@ -224,25 +256,18 @@ trait Project extends Function1[Workbook,Workbook] {
       this
     }
 
-    def set( v : => String) : ColumnMapping = {
-      map(s => v)
-    }
-
     def always : ColumnMapping = {
-      condition = (_ : Row) => true
+      condition = Some(_always)
       this
     }
 
     def when( func : String => Boolean) = {
-      condition = r => func( r(columnName))
+      condition = Some(r => func( r(columnName)))
       this
     }
 
     def ifEmpty = {
-      condition = (r => {
-        val v = r(columnName).asString
-        v == null || v.length == 0
-      })
+      condition = Some(_ifEmpty)
       this
     }
 

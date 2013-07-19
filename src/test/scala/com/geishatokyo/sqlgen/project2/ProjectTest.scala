@@ -54,6 +54,8 @@ class ProjectTest  extends Specification{
 
       forColumn("age") renameTo("ageeee")
 
+      filterRow(r => r("nickname") != "Apple")
+
     }
 
     onSheet("Sheet2"){

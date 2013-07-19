@@ -36,14 +36,14 @@ Sample code is below.
     object YourProject extends DefaultProject{
 
       def main(args : Array[String]) {
-        inDir("hgoe") >> YourProject >> asXls
+        inDir("hoge") >> YourProject >> asXls
       }
 
       addSheet("NewSheet");
 
       onSheet("Sheet1"){
-        forColumn("column1") map(v => "Map to " + v) ifEmpty;
-        forColumn("column2") set("0") always;
+        forColumn("column1") map(v => "Map to " + v) always;
+        forColumn("column2") set("0") ifEmpty;
         forColumn("column3") renameTo("NewColumnName");
       }
 
@@ -57,10 +57,11 @@ Sample code is below.
     }
 
 
+
 ## Grammer
 
 
-### Outside sheet rules
+### Outside sheet
 
     onSheet( _sheetName){
       ...Inside sheet rules
@@ -77,15 +78,15 @@ Sample code is below.
 
 
 
-### Inside sheet rules
+### Inside sheet
 
 only use in onSheet scope.
 
-    forColumn( _columnName) map( _columnValue => _newColumnValue) when( _columnValue => _bool)
+    forColumn( _columnName) map( _columnValue => _newColumnValue) always // (default)
                                                                   ifEmpty
-                                                                  always
-                            set( _newColumnValue)                 when( _columnValue => _bool)
-                                                                  ifEmpty
+                                                                  when( _columnValue => _bool)
+                            set( _newColumnValue)                 ifEmpty // (default)
+                                                                  when( _columnValue => _bool)
                                                                   always
                             ignore
                             isId
@@ -94,9 +95,12 @@ only use in onSheet scope.
 
     renameTo(_newSheetName)
 
-If you don't set when,ifEmpty, nor always, ifEmpty is default.
+    filterRow( _row => Boolean) // remain rows which return true.
+
 
 ### Refer other sheet or column
+
+These are use inside functions.
 
     sheet( _sheetName) search( _row => _bool) : Row
                        searchIdIs( _idValue) : Row
@@ -105,7 +109,6 @@ If you don't set when,ifEmpty, nor always, ifEmpty is default.
 
     column( _columnName) : String
 
-    _row( _rowName) : String
 
 
 

@@ -35,6 +35,7 @@ package object project2 {
   def asSql = {
     new MySQLOutput()
   }
+
 }
 
 
