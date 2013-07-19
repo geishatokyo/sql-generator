@@ -287,15 +287,16 @@ trait Project extends Function1[Workbook,Workbook] {
     }
 
     def map( func : String => String) : ColumnMapping = {
-      mapOrSet(func,condition.getOrElse(_always))
+      mapOrSet(func,_always)
     }
 
     def set( v : => String) : ColumnMapping = {
-      mapOrSet(s => v, condition.getOrElse(_ifEmpty))
+      mapOrSet(s => v,_ifEmpty)
     }
 
-    private def mapOrSet(func : String => String, condition : Row => Boolean) = {
+    private def mapOrSet(func : String => String, defaultCond : Row => Boolean) = {
       processes :+=( (w : Workbook) => {
+        val condition = this.condition.getOrElse(defaultCond)
         w.sheetsMatchingTo(sheetNameRegex).foreach(sheet => {
           currentSheet.withValue(sheet){
             if(!sheet.existColumn(columnName)){
