@@ -66,6 +66,9 @@ Sample code is below.
     onSheet( _sheetName){
       ...Inside sheet rules
     }
+    onSheet( _sheetNameRegex.r){ // example onSheet("""(S|s)heet\n+""".r){...}
+      ...Inside sheet rules
+    }
 
     addSheet( _sheetName)
 

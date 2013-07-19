@@ -1,5 +1,7 @@
 package com.geishatokyo.sqlgen.sheet
 
+import util.matching.Regex
+
 /**
  *
  * User: takeshita
@@ -39,6 +41,10 @@ class Workbook extends scala.collection.mutable.Map[String,Sheet]{
   def getSheet(name : String) = sheets.find(_.name =~= name)
 
   def hasSheet(name : String) = sheets.exists(_.name =~= name)
+
+  def sheetsMatchingTo(sheetNameRegex : Regex) = {
+    sheets.filter( s => sheetNameRegex.findFirstIn(s.name.value).isDefined)
+  }
 
   def foreachSheet[T]( func : Sheet => T) : List[T] = {
     sheets.map(func(_))

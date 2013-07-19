@@ -5,6 +5,8 @@ import com.geishatokyo.sqlgen.sheet._
 import sun.rmi.server.InactiveGroupException
 import collection.immutable.{StringOps, StringLike, ListMap}
 import scala.Some
+import util.matching.Regex
+import java.util.regex.Pattern
 
 /**
  * 
@@ -13,7 +15,7 @@ import scala.Some
  */
 trait Project extends Function1[Workbook,Workbook] {
 
-  protected val onSheetName = new DynamicVariable[String](null)
+  protected val onSheetName = new DynamicVariable[Regex](null)
   protected val currentWorkbook = new DynamicVariable[Workbook](null)
   protected val currentSheet = new DynamicVariable[Sheet](null)
   protected val currentRow = new DynamicVariable[Row](null)
@@ -32,7 +34,13 @@ trait Project extends Function1[Workbook,Workbook] {
 
 
   def onSheet(sheetName : String)( func : => Unit) = {
-    onSheetName.withValue( sheetName){
+    onSheetName.withValue( ("^" + Pattern.quote(sheetName) + "$").r){
+      func
+    }
+  }
+
+  def onSheet( sheetNameRegex : Regex)(func : => Unit) = {
+    onSheetName.withValue( sheetNameRegex){
       func
     }
   }
@@ -40,32 +48,38 @@ trait Project extends Function1[Workbook,Workbook] {
   def forColumn(columnName : String) : ColumnMapping = {
     return new ColumnMapping(onSheetName.value, columnName)
   }
-  def column(columnName : String) = {
-    new ColumnAddress({
-      if(onSheetName.value == null){
-        None
-      }else{
-        Some(onSheetName.value)
-      }
-    }, columnName)
-  }
 
 
   def filterRow( func : Row => Boolean) = {
     val sheetName = onSheetName.value
     processes :+=( (w : Workbook) => {
-      val s = w(sheetName)
-      currentSheet.withValue(s){
-        for (i <- ((s.rowSize -1 ) to 0 by -1)){
-          val row = s.row(i)
-          currentRow.withValue(row){
-            if (!func(s.row(i))){
-              s.deleteRow(i)
+      w.sheets.foreach(s => s.name.value match {
+        case sheetName() => {
+          currentSheet.withValue(s){
+            for (i <- ((s.rowSize -1 ) to 0 by -1)){
+              val row = s.row(i)
+              currentRow.withValue(row){
+                if (!func(s.row(i))){
+                  s.deleteRow(i)
+                }
+              }
             }
           }
         }
-      }
+        case _ =>
+      })
     })
+  }
+  // Reference
+
+
+  /**
+   * Use only in condition functions
+   * @param columnName
+   * @return
+   */
+  def column(columnName : String) = {
+    new ColumnAddress(None,columnName)
   }
 
   def sheet(sheetName : String) = {
@@ -143,6 +157,14 @@ trait Project extends Function1[Workbook,Workbook] {
 
   }
 
+  def useOnly(sheets : SheetAddress*) : Unit = {
+    processes :+= ( (w : Workbook) => {
+      val names = sheets.map(_.sheetName).toSet
+      w.sheets.foreach(s => {
+        s.ignore = !names.contains(s.name.value)
+      })
+    })
+  }
 
   def ignore(sa : SheetAddress) : Unit = {
     processes :+= ( (w : Workbook) => {
@@ -153,13 +175,20 @@ trait Project extends Function1[Workbook,Workbook] {
   }
   def ignore(ca : ColumnAddress) : Unit = {
 
+    val sheetNameRegex = {
+      if( onSheetName.value == null){
+        ".*".r
+      }else{
+        onSheetName.value
+      }
+    }
     processes :+= ( (w : Workbook) => {
       if (ca.sheetName.isDefined){
         w.getSheet(ca.sheetName.get).foreach( s => {
           s.header(ca.columnName).output_? = false
         })
       }else{
-        w.sheets.foreach( s => {
+        w.sheetsMatchingTo(sheetNameRegex).foreach( s => {
           s.header(ca.columnName).output_? = false
         })
       }
@@ -170,7 +199,9 @@ trait Project extends Function1[Workbook,Workbook] {
   def renameTo(newSheetName : String) {
     val sheetName = onSheetName.value
     processes :+=( (w : Workbook) => {
-      w(sheetName).name := newSheetName
+      w.sheetsMatchingTo(sheetName).foreach(s => {
+        s.name := newSheetName
+      })
     })
   }
 
@@ -179,7 +210,7 @@ trait Project extends Function1[Workbook,Workbook] {
     if (onSheetName.value != null){
       val sheetName = onSheetName.value
       processes :+= ((w : Workbook) => {
-        w.get(sheetName).foreach(s => {
+        w.sheetsMatchingTo(sheetName).foreach(s => {
           s.headers.foreach(h => {
             if (guess.isDefinedAt(h.name)){
               h.columnType = guess(h.name)
@@ -216,7 +247,7 @@ trait Project extends Function1[Workbook,Workbook] {
 
 
 
-  class ColumnMapping(sheetName : String,columnName : String) {
+  class ColumnMapping(sheetNameRegex : Regex,columnName : String) {
 
     var condition : Option[Row => Boolean] = None
 
@@ -238,21 +269,21 @@ trait Project extends Function1[Workbook,Workbook] {
 
     private def mapOrSet(func : String => String, condition : Row => Boolean) = {
       processes :+=( (w : Workbook) => {
-        currentSheet.withValue(w(sheetName)){
-          val sheet = w(sheetName)
-          if(!sheet.existColumn(columnName)){
-            sheet.addEmptyColumn(columnName)
-          }
-          sheet.rows.foreach( r => {
-            currentRow.withValue(r){
-              if (condition(r)){
-                val c = r(columnName)
-                c := func(c.value)
-              }
+        w.sheetsMatchingTo(sheetNameRegex).foreach(sheet => {
+          currentSheet.withValue(sheet){
+            if(!sheet.existColumn(columnName)){
+              sheet.addEmptyColumn(columnName)
             }
-          })
-        }})
-
+            sheet.rows.foreach( r => {
+              currentRow.withValue(r){
+                if (condition(r)){
+                  val c = r(columnName)
+                  c := func(c.value)
+                }
+              }
+            })
+          }})
+        })
       this
     }
 
@@ -274,32 +305,36 @@ trait Project extends Function1[Workbook,Workbook] {
     def renameTo( newName : String ) = {
 
       processes :+=( (w : Workbook) => {
-        val sheet = w(sheetName)
-        sheet.header(columnName).name := newName
+        w.sheetsMatchingTo(sheetNameRegex).foreach(sheet => {
+          sheet.header(columnName).name := newName
+        })
       })
       this
     }
 
     def ignore = {
       processes :+=( (w : Workbook) => {
-        val sheet = w(sheetName)
-        sheet.header(columnName).output_? = false
+        w.sheetsMatchingTo(sheetNameRegex).foreach(sheet => {
+          sheet.header(columnName).output_? = false
+        })
       })
       this
     }
 
     def type_=(columnType : ColumnType.Value) = {
       processes :+=( (w : Workbook) => {
-        val sheet = w(sheetName)
-        sheet.header(columnName).columnType = columnType
+        w.sheetsMatchingTo(sheetNameRegex).foreach(sheet => {
+          sheet.header(columnName).columnType = columnType
+        })
       })
       this
     }
 
     def isId = {
       processes :+=( (w : Workbook) => {
-        val sheet = w(sheetName)
-        sheet.replaceIds(columnName)
+        w.sheetsMatchingTo(sheetNameRegex).foreach(sheet => {
+          sheet.replaceIds(columnName)
+        })
       })
       this
     }
