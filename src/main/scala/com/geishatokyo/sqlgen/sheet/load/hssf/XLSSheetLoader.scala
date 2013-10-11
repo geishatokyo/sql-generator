@@ -1,11 +1,13 @@
 package com.geishatokyo.sqlgen.sheet.load.hssf
 
 import java.io.{FileInputStream, InputStream}
-import com.geishatokyo.sqlgen.sheet.{ColumnType, ColumnHeader, Sheet, Workbook}
+import com.geishatokyo.sqlgen.sheet._
 import org.apache.poi.hssf.usermodel.{HSSFCell, HSSFRow, HSSFSheet, HSSFWorkbook}
 import com.geishatokyo.sqlgen.sheet.load.SheetLoader
 import java.text.SimpleDateFormat
 import com.geishatokyo.sqlgen.logger.Logger
+import scala.Some
+import org.apache.poi.ss.usermodel.FormulaEvaluator
 
 /**
  *
@@ -22,12 +24,13 @@ class XLSSheetLoader(nameMapper : NameMapper = null,
     val xls = new HSSFWorkbook(input)
     val wb = new Workbook()
     val sheetSize = xls.getNumberOfSheets
+    implicit val formulaEvaluator = xls.getCreationHelper.createFormulaEvaluator()
     wb.addSheets((0 until sheetSize).flatMap(i => loadSheet(xls.getSheetAt(i))).toList)
     wb
   }
 
 
-  def loadSheet(xls: HSSFSheet) : Option[Sheet] = {
+  def loadSheet(xls: HSSFSheet)(implicit formulaEvaluator : FormulaEvaluator) : Option[Sheet] = {
 
     val sheetName = nameMapper.mapSheetName(xls.getSheetName)
     if(sheetName != xls.getSheetName){
@@ -57,7 +60,7 @@ class XLSSheetLoader(nameMapper : NameMapper = null,
     Some(sheet)
   }
 
-  def loadRow(headers: List[(Int, ColumnHeader)], row: HSSFRow) : List[String] = {
+  def loadRow(headers: List[(Int, ColumnHeader)], row: HSSFRow)(implicit formulaEvaluator : FormulaEvaluator) : List[String] = {
     if(row == null) return Nil
     headers.map({
       case (index,h) => {
@@ -72,8 +75,14 @@ class XLSSheetLoader(nameMapper : NameMapper = null,
     })
   }
 
-  def loadCellValue( cell : HSSFCell , columnType : ColumnType.Value) : String = {
-    if(cell == null) return null
+  def loadCellValue( _cell : HSSFCell , columnType : ColumnType.Value)(implicit formulaEvaluator : FormulaEvaluator) : String = {
+    if(_cell == null) return null
+
+    val cell = if(_cell.getCellType == org.apache.poi.ss.usermodel.Cell.CELL_TYPE_FORMULA){
+      formulaEvaluator.evaluate(_cell)
+    }else _cell
+
+
     columnType match{
       case ColumnType.Integer => {
         cell match{
