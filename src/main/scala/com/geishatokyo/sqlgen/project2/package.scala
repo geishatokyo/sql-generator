@@ -1,7 +1,7 @@
 package com.geishatokyo.sqlgen
 
 import project2.input.{WorkbookInput, XLSFileInput, AllXlsFileInDirInput}
-import project2.output.{MySQLOutput, XlsOutput, ConsoleOutput}
+import com.geishatokyo.sqlgen.project2.output.{SQLiteOutput, MySQLOutput, XlsOutput, ConsoleOutput}
 import sheet.Workbook
 
 /**
@@ -34,6 +34,10 @@ package object project2 {
 
   def asSql = {
     new MySQLOutput()
+  }
+
+  def asSqlite = {
+    new SQLiteOutput()
   }
 
 }
