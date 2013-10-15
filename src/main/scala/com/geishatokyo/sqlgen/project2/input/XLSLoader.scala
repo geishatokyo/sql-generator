@@ -7,6 +7,7 @@ import com.geishatokyo.sqlgen.sheet.load.hssf._
 import scala.Some
 import com.geishatokyo.sqlgen.logger.Logger
 import com.geishatokyo.sqlgen.util.FileUtil
+import org.apache.poi.ss.usermodel.FormulaEvaluator
 
 /**
  * 
@@ -36,6 +37,9 @@ object XLSLoader {
   def load(input : InputStream) : Workbook = {
 
     val xls = new HSSFWorkbook(input)
+
+    implicit val formulaEvaluator = xls.getCreationHelper.createFormulaEvaluator()
+
     val wb = new Workbook()
     val sheetSize = xls.getNumberOfSheets
     wb.addSheets((0 until sheetSize).flatMap(i => loadSheet(xls.getSheetAt(i))).toList)
@@ -43,7 +47,7 @@ object XLSLoader {
 
   }
 
-  private def loadSheet(xls: HSSFSheet) : Option[Sheet] = {
+  private def loadSheet(xls: HSSFSheet)(implicit formulaEvaluator : FormulaEvaluator) : Option[Sheet] = {
 
     val sheetName = xls.getSheetName
 
@@ -67,7 +71,7 @@ object XLSLoader {
     Some(sheet)
   }
 
-  private def loadRow(headers: List[(Int, ColumnHeader)], row: HSSFRow) : List[String] = {
+  private def loadRow(headers: List[(Int, ColumnHeader)], row: HSSFRow)(implicit formulaEvaluator : FormulaEvaluator) : List[String] = {
     if(row == null) return Nil
     headers.map({
       case (index,h) => {
@@ -82,41 +86,54 @@ object XLSLoader {
     })
   }
 
-  private def loadCellValue( cell : HSSFCell , columnType : ColumnType.Value) : String = {
+  private def loadCellValue( cell : HSSFCell , columnType : ColumnType.Value)(implicit formulaEvaluator : FormulaEvaluator) : String = {
     if(cell == null) return null
-    columnType match{
-      case ColumnType.Integer => {
-        cell match{
-          case EmptyCell(_) => null
-          case LongCell(v) => v.toString
-          case _ => null
-        }
-      }
-      case ColumnType.Double => {
-        cell match{
-          case EmptyCell(_) => null
-          case DoubleCell(v) => v.toString
-          case _ => null
-        }
 
-      }
-      case ColumnType.String => {
-        cell match{
-          case EmptyCell(_) => null
-          case StringCell(v) => v
-        }
-      }
-      case ColumnType.Date => {
-        cell match{
-          case EmptyCell(_) => null
-          case DateCell(v) => v.getTime.toString
-        }
+    if(cell.getCellType == org.apache.poi.ss.usermodel.Cell.CELL_TYPE_FORMULA){
+      val value = formulaEvaluator.evaluate(cell)
 
+      if(columnType == ColumnType.Date) {
+
+        (value.getNumberValue * 1000).toLong.toString
+      }else{
+        value.formatAsString()
       }
-      case ColumnType.Any => {
-        cell match{
-          case EmptyCell(_) => null
-          case StringCell(v) => v
+
+    }else{
+      columnType match{
+        case ColumnType.Integer => {
+          cell match{
+            case EmptyCell(_) => null
+            case LongCell(v) => v.toString
+            case _ => null
+          }
+        }
+        case ColumnType.Double => {
+          cell match{
+            case EmptyCell(_) => null
+            case DoubleCell(v) => v.toString
+            case _ => null
+          }
+
+        }
+        case ColumnType.String => {
+          cell match{
+            case EmptyCell(_) => null
+            case StringCell(v) => v
+          }
+        }
+        case ColumnType.Date => {
+          cell match{
+            case EmptyCell(_) => null
+            case DateCell(v) => v.getTime.toString
+          }
+
+        }
+        case ColumnType.Any => {
+          cell match{
+            case EmptyCell(_) => null
+            case StringCell(v) => v
+          }
         }
       }
     }

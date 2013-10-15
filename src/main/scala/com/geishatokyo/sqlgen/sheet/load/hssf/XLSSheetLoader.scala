@@ -78,6 +78,7 @@ class XLSSheetLoader(nameMapper : NameMapper = null,
   def loadCellValue( _cell : HSSFCell , columnType : ColumnType.Value)(implicit formulaEvaluator : FormulaEvaluator) : String = {
     if(_cell == null) return null
 
+    println(_cell.getCellFormula + " : " + _cell.getCellType)
     val cell = if(_cell.getCellType == org.apache.poi.ss.usermodel.Cell.CELL_TYPE_FORMULA){
       formulaEvaluator.evaluate(_cell)
     }else _cell
