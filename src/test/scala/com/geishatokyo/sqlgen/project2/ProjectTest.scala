@@ -62,18 +62,18 @@ class ProjectTest  extends Specification{
       renameTo("Renamed")
     }
 
+    newSheet("EmptySheet").createEmpty("col1","col2")
   }
 
 
 
   "Project" should{
-    "modiry column values" in {
+    "modify column values" in {
 
       val p = new SampleProject()
 
       val w = p(workbook)
 
-      println(w.toString)
 
       w("Sheet1").row(0)("name").value === "TomTom"
 

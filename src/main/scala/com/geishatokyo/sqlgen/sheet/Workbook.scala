@@ -28,7 +28,9 @@ class Workbook extends scala.collection.mutable.Map[String,Sheet]{
     this
   }
 
-  def get(key: String) = sheets.find(_.name =~= name)
+  def get(key: String) = sheets.find(s => {
+    s.name =~= key
+  })
 
   def iterator = _sheets.map(s => s.name.value -> s).iterator
 

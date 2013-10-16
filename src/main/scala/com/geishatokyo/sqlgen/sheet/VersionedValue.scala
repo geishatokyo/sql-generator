@@ -33,6 +33,7 @@ class VersionedValue(val initialValue : String) {
    * @param v
    */
   def =~=(v : String) = {
+    println(value + " ? " + v)
     val thisV = value
     if (v == null && thisV == null) true
     else if( v == null || thisV == null) false
