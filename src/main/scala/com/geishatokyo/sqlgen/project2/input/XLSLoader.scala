@@ -103,14 +103,14 @@ object XLSLoader {
       columnType match{
         case ColumnType.Integer => {
           cell match{
-            case EmptyCell(_) => null
+            case EmptyCell(_) => "0"
             case LongCell(v) => v.toString
             case _ => null
           }
         }
         case ColumnType.Double => {
           cell match{
-            case EmptyCell(_) => null
+            case EmptyCell(_) => "0"
             case DoubleCell(v) => v.toString
             case _ => null
           }
@@ -131,7 +131,7 @@ object XLSLoader {
         }
         case ColumnType.Any => {
           cell match{
-            case EmptyCell(_) => null
+            case EmptyCell(_) => ""
             case StringCell(v) => v
           }
         }

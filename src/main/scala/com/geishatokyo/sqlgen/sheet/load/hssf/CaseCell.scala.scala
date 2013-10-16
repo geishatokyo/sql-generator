@@ -1,11 +1,12 @@
 package com.geishatokyo.sqlgen.sheet.load.hssf
 
-import java.util.Date
+import java.util.{Calendar, Date}
 import org.apache.poi.hssf.usermodel.HSSFCell
 import org.apache.poi.ss.usermodel.DateUtil
 import org.apache.poi.ss.usermodel.Cell
 import java.text.SimpleDateFormat
 import java.lang.String
+import java.util.concurrent.TimeUnit
 
 /**
  *
@@ -164,7 +165,14 @@ object DateCell {
       try {
         cell.getCellType match {
           case Cell.CELL_TYPE_NUMERIC => {
-            Some((cell.getDateCellValue))
+            val v = cell.getDateCellValue
+            if(v!= null) Some(v)
+            else{
+              val n = cell.getNumericCellValue
+              val c = Calendar.getInstance()
+              c.set(1900,0,1) // エクセルの基準日 1900/01/01
+              Some(new Date(c.getTime.getTime + (TimeUnit.DAYS.toMillis(1) * n).toLong))
+            }
           }
           case Cell.CELL_TYPE_STRING => {
             Some((new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(cell.getStringCellValue)))
