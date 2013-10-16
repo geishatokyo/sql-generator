@@ -314,16 +314,16 @@ trait Project extends Function1[Workbook,Workbook] {
      *  Append new row
      * @param row
      */
-    def +=( row : List[String]) = {
-      get.addRow(row)
+    def +=( row : List[Any]) = {
+      get.addRow(row.map(_.toString))
     }
 
     /**
      * Append new column
      * @param column
      */
-    def +|=( column : (String,List[String])) = {
-      get.addColumn(column._1,column._2)
+    def +|=( column : (String,List[Any])) = {
+      get.addColumn(column._1,column._2.map(_.toString))
     }
 
 
@@ -539,53 +539,72 @@ trait Project extends Function1[Workbook,Workbook] {
 
     def extractFrom(sheetName : String)(columns : String*) = {
       switchExec((w : Workbook) => {
-        val s = w(sheetName)
+        w.get(sheetName) match{
+          case Some(s) => {
+            if (!w.hasSheet(newSheetName)){
+              w.addSheet(new Sheet(newSheetName))
+            }
+            val newSheet = w(newSheetName)
 
-        if (!w.hasSheet(newSheetName)){
-          w.addSheet(new Sheet(newSheetName))
+            columns.foreach(c => {
+              val c2 = s.column(c)
+              newSheet.addColumn(c2)
+            })
+          }
+          case None =>
         }
-        val newSheet = w(newSheetName)
 
-        columns.foreach(c => {
-          val c2 = s.column(c)
-          newSheet.addColumn(c2)
-        })
       })
     }
     def extractThenFilter(sheetName : String)(columns : String*)(filterFunc : Row => Boolean) = {
       switchExec( (w : Workbook) => {
-        val s = w(sheetName)
+        w.get(sheetName) match{
+          case Some(s) => {
+            val newSheet = new Sheet(newSheetName)
 
-        val newSheet = new Sheet(newSheetName)
-
-        columns.foreach(c => {
-          val c2 = s.column(c)
-          newSheet.addColumn(c2)
-        })
-        val resultSheet = newSheet.copyEmpty()
-        newSheet.rows.foreach(r => {
-          if(filterFunc(r)){
-            resultSheet.addRow(r)
+            columns.foreach(c => {
+              val c2 = s.column(c)
+              newSheet.addColumn(c2)
+            })
+            val resultSheet = newSheet.copyEmpty()
+            newSheet.rows.foreach(r => {
+              if(filterFunc(r)){
+                resultSheet.addRow(r)
+              }
+            })
+            w.addSheet(resultSheet)
           }
-        })
-        w.addSheet(resultSheet)
+          case None =>
+        }
 
       })
     }
     def copy(sheetName : String) : Unit = {
       switchExec( (w : Workbook) => {
-        val s = w(sheetName)
-        val s2 = s.copy()
-        s2.name := newSheetName
-        w.addSheet(s2)
+        w.get(sheetName) match{
+          case Some(s) => {
+            val s = w(sheetName)
+            val s2 = s.copy()
+            s2.name := newSheetName
+            w.addSheet(s2)
+          }
+          case None => {
+          }
+        }
       })
     }
     def copyThenModify(sheetName : String )( modify : Sheet => Sheet) : Unit = {
       switchExec( (w : Workbook) => {
-        val s = w(sheetName)
-        val s2 = s.copy()
-        s2.name := newSheetName
-        w.addSheet(modify(s2))
+        w.get(sheetName) match{
+          case Some(s) => {
+            val s = w(sheetName)
+            val s2 = s.copy()
+            s2.name := newSheetName
+            w.addSheet(modify(s2))
+          }
+          case None => {
+          }
+        }
       })
     }
   }
