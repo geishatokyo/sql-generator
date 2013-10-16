@@ -203,7 +203,18 @@ trait Project extends Function1[Workbook,Workbook] {
     def l = toLong
     def d = toDouble
 
-    def +( ca : ColumnAddress) : String = this.toString + ca.toString
+    def tryCastToLong = try{
+      Some(toLong)
+    }catch{
+      case e : NumberFormatException => None
+    }
+
+    def +( ca : ColumnAddress) : String = {
+      (this.tryCastToLong,ca.tryCastToLong) match{
+        case (Some(v1),Some(v2)) => (v1 + v2).toString
+        case _ => this.toString + ca.toString
+      }
+    }
     def -(ca : ColumnAddress) : Long = this.l + ca.l
     def *(ca : ColumnAddress) : Long = this.toLong + ca.toLong
     def /(ca : ColumnAddress) : Double = this.d + ca.d
@@ -226,6 +237,9 @@ trait Project extends Function1[Workbook,Workbook] {
     def -(v : Double): Double = this.d - v
     def *( v : Double) : Double= this.d * v
     def /( v : Double): Double = this.d / v
+
+    def ^( v : Int) : Long = Math.pow(this.d,v).toLong
+    def ^( v : Double) : Double = Math.pow(this.d,v)
 
     def at (sheetAddress : SheetAddress) = {
       ColumnAddress(Some(sheetAddress.sheetName),columnName)
@@ -416,15 +430,15 @@ trait Project extends Function1[Workbook,Workbook] {
       }
     }
 
-    def map( func : String => String) : ColumnMapping = {
+    def map( func : String => Any) : ColumnMapping = {
       mapOrSet(func,_always)
     }
 
-    def set( v : => String) : ColumnMapping = {
+    def set( v : => Any) : ColumnMapping = {
       mapOrSet(s => v,_ifEmpty)
     }
 
-    private def mapOrSet(func : String => String, defaultCond : Row => Boolean) = {
+    private def mapOrSet(func : String => Any, defaultCond : Row => Boolean) = {
       processes :+=( (w : Workbook) => {
         val condition = this.condition.getOrElse(defaultCond)
         w.sheetsMatchingTo(sheetNameRegex).foreach(sheet => {
@@ -436,7 +450,9 @@ trait Project extends Function1[Workbook,Workbook] {
               currentRow.withValue(r){
                 if (condition(r)){
                   val c = r(columnName)
-                  c := func(c.value)
+                  c := {
+                    func(c.value).toString
+                  }
                 }
               }
             })

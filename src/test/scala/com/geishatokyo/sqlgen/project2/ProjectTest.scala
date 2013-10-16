@@ -56,6 +56,8 @@ class ProjectTest  extends Specification{
 
       filterRow(r => r("nickname") != "Apple")
 
+
+
     }
 
     onSheet("Sheet2"){
