@@ -1,6 +1,5 @@
 package com.geishatokyo.sqlgen.project2
 
-import com.geishatokyo.sqlgen.sheet.ColumnType
 import com.geishatokyo.sqlgen.project.TimeHelper
 
 /**

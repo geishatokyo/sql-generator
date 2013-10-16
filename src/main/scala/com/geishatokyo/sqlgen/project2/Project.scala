@@ -196,6 +196,36 @@ trait Project extends Function1[Workbook,Workbook] {
     override def toString = currentRow.value.apply(columnName).value
 
     def toLong = toString().toLong
+    def toInt = toString().toInt
+    def toDouble = toString.toDouble
+    def s = toString
+    def i = toInt
+    def l = toLong
+    def d = toDouble
+
+    def +( ca : ColumnAddress) : String = this.toString + ca.toString
+    def -(ca : ColumnAddress) : Long = this.l + ca.l
+    def *(ca : ColumnAddress) : Long = this.toLong + ca.toLong
+    def /(ca : ColumnAddress) : Double = this.d + ca.d
+
+    def +( s: String): String = this.toString + s
+
+    def +(v : Int) : Int = this.i + v
+    def -(v : Int) : Int = this.i - v
+    def *( v : Int) : Int = this.i * v
+    def /( v : Int) : Int = this.i / v
+
+
+    def +(v : Long) : Long = this.l + v
+    def -(v : Long): Long = this.l - v
+    def *( v : Long) : Long= this.l * v
+    def /( v : Long): Long = this.l / v
+
+
+    def +(v : Double) : Double = this.d + v
+    def -(v : Double): Double = this.d - v
+    def *( v : Double) : Double= this.d * v
+    def /( v : Double): Double = this.d / v
 
     def at (sheetAddress : SheetAddress) = {
       ColumnAddress(Some(sheetAddress.sheetName),columnName)

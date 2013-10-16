@@ -11,7 +11,7 @@ import sheet.Workbook
  */
 package object project2 {
 
-  type ColumnType = com.geishatokyo.sqlgen.sheet.ColumnType.type
+  val ColumnType = com.geishatokyo.sqlgen.sheet.ColumnType
 
   def withWorkbook(wb : Workbook) = {
     new WorkbookInput(wb)
