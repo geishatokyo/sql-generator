@@ -33,18 +33,18 @@ case class Cell(parent : Sheet,override val initialValue : String) extends Versi
   def asInt = try{
     value.toInt
   }catch{
-    case e : Throwable => 0
+    case e : Throwable => asDouble.toInt
   }
   def asLong = try{
     value.toLong
   }catch{
-    case e : Throwable => 0
+    case e : Throwable => asDouble.toLong
   }
 
   def asDouble = try{
     value.toDouble
   }catch{
-    case e : Throwable => 0
+    case e : Throwable => throw new NumberFormatException("Wrong number format " + value)
   }
 
   def asDate = try{
