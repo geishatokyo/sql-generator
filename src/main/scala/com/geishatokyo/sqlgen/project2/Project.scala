@@ -264,7 +264,7 @@ trait Project extends Function1[Workbook,Workbook] {
      * @return
      */
     def substance = currentWorkbook.value.get(sheetName)
-    def get = substance.get
+    def get = currentWorkbook.value(sheetName)
 
     def find ( cond : Row => Boolean) : Option[Row] = {
       substance.map(s => {
@@ -508,8 +508,19 @@ trait Project extends Function1[Workbook,Workbook] {
 
   class NewSheet(newSheetName : String) {
 
+    private def switchExec( processFunc : Workbook => Any) = {
+
+      if(currentWorkbook.value != null){
+        //すでに実行プロセスの場合
+        val w = currentWorkbook.value
+        processFunc(w)
+      }else{
+        processes :+= processFunc
+      }
+    }
+
     def createEmpty(columnNames : String*) = {
-      processes :+= ( (w : Workbook) => {
+      switchExec( (w : Workbook) => {
         if(!w.hasSheet(newSheetName)){
           val sheet = new Sheet(newSheetName)
           sheet.addColumns(columnNames :_*)
@@ -527,7 +538,7 @@ trait Project extends Function1[Workbook,Workbook] {
     }
 
     def extractFrom(sheetName : String)(columns : String*) = {
-      processes :+=( (w : Workbook) => {
+      switchExec((w : Workbook) => {
         val s = w(sheetName)
 
         if (!w.hasSheet(newSheetName)){
@@ -542,7 +553,7 @@ trait Project extends Function1[Workbook,Workbook] {
       })
     }
     def extractThenFilter(sheetName : String)(columns : String*)(filterFunc : Row => Boolean) = {
-      processes :+=( (w : Workbook) => {
+      switchExec( (w : Workbook) => {
         val s = w(sheetName)
 
         val newSheet = new Sheet(newSheetName)
@@ -562,7 +573,7 @@ trait Project extends Function1[Workbook,Workbook] {
       })
     }
     def copy(sheetName : String) : Unit = {
-      processes :+=( (w : Workbook) => {
+      switchExec( (w : Workbook) => {
         val s = w(sheetName)
         val s2 = s.copy()
         s2.name := newSheetName
@@ -570,7 +581,7 @@ trait Project extends Function1[Workbook,Workbook] {
       })
     }
     def copyThenModify(sheetName : String )( modify : Sheet => Sheet) : Unit = {
-      processes :+=( (w : Workbook) => {
+      switchExec( (w : Workbook) => {
         val s = w(sheetName)
         val s2 = s.copy()
         s2.name := newSheetName
