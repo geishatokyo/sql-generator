@@ -508,7 +508,7 @@ trait Project extends Function1[Workbook,Workbook] {
 
   class NewSheet(newSheetName : String) {
 
-    def createEmpty(columnNames : List[String]) = {
+    def createEmpty(columnNames : String*) = {
       processes :+= ( (w : Workbook) => {
         if(!w.hasSheet(newSheetName)){
           val sheet = new Sheet(newSheetName)
