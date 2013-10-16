@@ -20,6 +20,13 @@ class VersionedValue(val initialValue : String) {
 
   def :=(v : String) = this.value = v
 
+
+  /**
+   * この値がEmptyの場合にのみ代入
+   * @param v
+   */
+  def ?=(v : String) = if(empty_?) this.value = v
+
   def value = values.head
 
   def value_=(v : String) {
@@ -33,7 +40,6 @@ class VersionedValue(val initialValue : String) {
    * @param v
    */
   def =~=(v : String) = {
-    println(value + " ? " + v)
     val thisV = value
     if (v == null && thisV == null) true
     else if( v == null || thisV == null) false

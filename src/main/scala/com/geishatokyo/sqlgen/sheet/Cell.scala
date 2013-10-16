@@ -24,6 +24,7 @@ case class Cell(parent : Sheet,override val initialValue : String) extends Versi
   }
 
 
+
   def asString = value
   def asBool = value match{
     case "true" | "t" | "yes" | "1" => true
