@@ -114,12 +114,12 @@ object StringCell {
     if (cell == null) Some((""))
     else {
       if(cell.getCellType == Cell.CELL_TYPE_STRING){
-        Some((cell.getStringCellValue))
+        Some(cell.getStringCellValue)
       }else if(cell.getCellType == Cell.CELL_TYPE_NUMERIC){
         if (cell.getNumericCellValue % 1.0 == 0){
           Some(cell.getNumericCellValue.toLong.toString)
         }else{
-          Some(cell.toString)
+          Some(cell.getNumericCellValue.toString)
         }
       }else{
         Some(cell.toString)
@@ -165,17 +165,15 @@ object DateCell {
       try {
         cell.getCellType match {
           case Cell.CELL_TYPE_NUMERIC => {
-            val v = cell.getDateCellValue
-            if(v!= null) Some(v)
-            else{
-              val n = cell.getNumericCellValue
-              val c = Calendar.getInstance()
-              c.set(1900,0,1) // エクセルの基準日 1900/01/01
-              Some(new Date(c.getTime.getTime + (TimeUnit.DAYS.toMillis(1) * n).toLong))
-            }
+            Some(cell.getNumericCellValue)
           }
           case Cell.CELL_TYPE_STRING => {
-            Some((new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(cell.getStringCellValue)))
+            val value = cell.getStringCellValue
+            val d = try { new SimpleDateFormat("yyyy-MM-dd HH:mm").parse(value)}
+            catch{
+              case e : Throwable => new SimpleDateFormat("yyyy/MM/dd HH:mm").parse(value)
+            }
+            Some(d)
           }
           case _ => None
         }

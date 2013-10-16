@@ -2,6 +2,8 @@ package com.geishatokyo.sqlgen.sheet
 
 import java.util.Date
 import java.text.SimpleDateFormat
+import com.geishatokyo.sqlgen.util.TimeUtil
+import org.apache.poi.ss.usermodel.DateUtil
 
 /**
  *
@@ -20,7 +22,7 @@ case class Cell(parent : Sheet,override val initialValue : String) extends Versi
   }
 
   def :=(d : Date) = {
-    this.value_=(d.getTime.toString)
+    this.value_=( TimeUtil.javaDateToExcelTime(d).toString)
   }
 
 
@@ -48,10 +50,10 @@ case class Cell(parent : Sheet,override val initialValue : String) extends Versi
   }
 
   def asDate = try{
-    new Date(value.toLong)
+    TimeUtil.excelTimeToJavaDate(asDouble)
   }catch{
     case e : Throwable => try{
-      new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").parse(value)
+      new SimpleDateFormat("yyyy/MM/dd HH:mm").parse(value)
     }catch{
       case e : Throwable => null
     }

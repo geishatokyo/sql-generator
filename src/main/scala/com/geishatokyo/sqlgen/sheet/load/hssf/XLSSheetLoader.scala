@@ -108,7 +108,7 @@ class XLSSheetLoader(nameMapper : NameMapper = null,
       case ColumnType.Date => {
         cell match{
           case EmptyCell(_) => null
-          case DateCell(v) => v.getTime.toString
+          case DateCell(v) => v.toString
         }
 
       }
