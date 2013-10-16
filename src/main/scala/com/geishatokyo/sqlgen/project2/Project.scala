@@ -32,6 +32,53 @@ trait Project extends Function1[Workbook,Workbook] {
 
   def newSheet(newSheetName : String) = new NewSheet(newSheetName)
 
+  def renameTo(newSheetName : String) {
+    val sheetName = onSheetName.value
+    processes :+=( (w : Workbook) => {
+      w.sheetsMatchingTo(sheetName).foreach(s => {
+        s.name := newSheetName
+      })
+    })
+  }
+
+  def guessColumnType( guess : PartialFunction[String,ColumnType.Value]) = {
+
+    if (onSheetName.value != null){
+      val sheetName = onSheetName.value
+      processes :+= ((w : Workbook) => {
+        w.sheetsMatchingTo(sheetName).foreach(s => {
+          s.headers.foreach(h => {
+            if (guess.isDefinedAt(h.name)){
+              h.columnType = guess(h.name)
+            }
+          })
+        })
+      })
+    }else{
+      processes :+= ((w : Workbook) => {
+        w.sheets.foreach(s => {
+          s.headers.foreach(h => {
+            if (guess.isDefinedAt(h.name)){
+              h.columnType = guess(h.name)
+            }
+          })
+        })
+      })
+    }
+
+  }
+  def guessId( guess : String => Boolean) = {
+    processes :+= ((w : Workbook) => {
+      w.sheets.foreach(s => {
+        val ids = s.headers.filter(h => {
+          guess(h.name)
+        })
+
+        s.replaceIds(ids.map(_.name.value) :_*)
+      })
+    })
+  }
+
 
   def onSheet(sheetName : String)( func : => Unit) = {
     onSheetName.withValue( ("^" + Pattern.quote(sheetName) + "$").r){
@@ -44,6 +91,8 @@ trait Project extends Function1[Workbook,Workbook] {
       func
     }
   }
+
+  // ##########  Use inside of onSheet function. ##################
 
   def forColumn(columnName : String) : ColumnMapping = {
     return new ColumnMapping(onSheetName.value, columnName)
@@ -70,7 +119,49 @@ trait Project extends Function1[Workbook,Workbook] {
       })
     })
   }
-  // Reference
+
+  def foreachRow( func : Row => Unit) = {
+    val sheetName = onSheetName.value
+    processes :+=( (w : Workbook) => {
+      w.sheets.foreach(s => s.name.value match {
+        case sheetName() => {
+          currentSheet.withValue(s){
+            for (i <- ((s.rowSize -1 ) to 0 by -1)){
+              val row = s.row(i)
+              currentRow.withValue(row){
+                func(s.row(i))
+              }
+            }
+          }
+        }
+        case _ =>
+      })
+    })
+  }
+
+
+
+  def validate(func : Row => Boolean) = {
+    val sheetName = onSheetName.value
+    processes :+=( (w : Workbook) => {
+      w.sheets.foreach(s => s.name.value match {
+        case sheetName() => {
+          currentSheet.withValue(s){
+            s.rows.foreach(row => {
+              if(!func(row)){
+                throw new Exception("Validation error at %s:%s".format(sheetName,row.index))
+              }
+            })
+          }
+        }
+        case _ =>
+      })
+    })
+  }
+
+
+
+  // ############## Use inside of processing function. #####################
 
 
   /**
@@ -139,12 +230,21 @@ trait Project extends Function1[Workbook,Workbook] {
     }
     def searchFirstBelow(cond : String => Boolean) = findFirstBelow(cond).get
 
+    def validate( func : String => Boolean) = {
+      currentSheet.value.rows.foreach( row => {
+        if(!func(row(columnName))){
+          throw new Exception("Validation error at %s@%s:%s".format(sheetName.get,columnName,row.index))
+        }
+      })
+
+    }
+
   }
 
 
   case class SheetAddress(sheetName : String){
     def search( cond : Row => Boolean) : Row = {
-      currentWorkbook.value.getSheet(sheetName).map(s => {
+      substance.map(s => {
         s.rows.find(cond).getOrElse({
           throw new Exception("Match row is not found in Sheet:" + sheetName + ".")
         })
@@ -159,8 +259,15 @@ trait Project extends Function1[Workbook,Workbook] {
       })
     }
 
+    /**
+     * 現在の対象シートを取得
+     * @return
+     */
+    def substance = currentWorkbook.value.get(sheetName)
+    def get = substance.get
+
     def find ( cond : Row => Boolean) : Option[Row] = {
-      currentWorkbook.value.getSheet(sheetName).map(s => {
+      substance.map(s => {
         s.rows.find(cond)
       }).getOrElse(None)
     }
@@ -173,16 +280,56 @@ trait Project extends Function1[Workbook,Workbook] {
       })
     }
 
-    def row(rowIndex : Int) = {
-      currentWorkbook.value(sheetName).row(rowIndex)
-    }
-    def column(columnName : String) = {
-      currentWorkbook.value(sheetName).column(columnName)
+    def indexOf( cond : Row => Boolean) : Int = {
+      substance.map( _.rows.indexOf(cond)).getOrElse(-1)
     }
 
+    def row(rowIndex : Int) = {
+      get.row(rowIndex)
+    }
+    def column(columnName : String) = {
+      get.column(columnName)
+    }
+
+    def rowSize = {
+      substance.map(_.rowSize).getOrElse(0)
+    }
+    def columnSize = {
+      substance.map(_.columnSize).getOrElse(0)
+    }
+
+    def foreachRow[T]( func : Row => T) : List[T] = {
+      substance.map(_.rows.map(func)).getOrElse(Nil)
+    }
+
+    def validate( func : Row => Boolean) = {
+      substance.foreach(_.rows.foreach( row => {
+        if(!func(row)){
+          throw new Exception("Validation error at %s:%s".format(sheetName,row.index))
+        }
+      }))
+    }
+
+    /**
+     *  Append new row
+     * @param row
+     */
+    def +=( row : List[String]) = {
+      get.addRow(row)
+    }
+
+    /**
+     * Append new column
+     * @param column
+     */
+    def +|=( column : (String,List[String])) = {
+      get.addColumn(column._1,column._2)
+    }
 
 
   }
+
+  // ############### Can use outside of functions. ##############
 
   def useOnly(sheets : SheetAddress*) : Unit = {
     processes :+= ( (w : Workbook) => {
@@ -221,53 +368,6 @@ trait Project extends Function1[Workbook,Workbook] {
       }
     })
 
-  }
-
-  def renameTo(newSheetName : String) {
-    val sheetName = onSheetName.value
-    processes :+=( (w : Workbook) => {
-      w.sheetsMatchingTo(sheetName).foreach(s => {
-        s.name := newSheetName
-      })
-    })
-  }
-
-  def guessColumnType( guess : PartialFunction[String,ColumnType.Value]) = {
-
-    if (onSheetName.value != null){
-      val sheetName = onSheetName.value
-      processes :+= ((w : Workbook) => {
-        w.sheetsMatchingTo(sheetName).foreach(s => {
-          s.headers.foreach(h => {
-            if (guess.isDefinedAt(h.name)){
-              h.columnType = guess(h.name)
-            }
-          })
-        })
-      })
-    }else{
-      processes :+= ((w : Workbook) => {
-        w.sheets.foreach(s => {
-          s.headers.foreach(h => {
-            if (guess.isDefinedAt(h.name)){
-              h.columnType = guess(h.name)
-            }
-          })
-        })
-      })
-    }
-
-  }
-  def guessId( guess : String => Boolean) = {
-    processes :+= ((w : Workbook) => {
-      w.sheets.foreach(s => {
-        val ids = s.headers.filter(h => {
-          guess(h.name)
-        })
-
-        s.replaceIds(ids.map(_.name.value) :_*)
-      })
-    })
   }
 
 
@@ -407,6 +507,25 @@ trait Project extends Function1[Workbook,Workbook] {
   }
 
   class NewSheet(newSheetName : String) {
+
+    def createEmpty(columnNames : List[String]) = {
+      processes :+= ( (w : Workbook) => {
+        if(!w.hasSheet(newSheetName)){
+          val sheet = new Sheet(newSheetName)
+          sheet.addColumns(columnNames :_*)
+          w.addSheet(sheet)
+        } else {
+          val sheet = w(newSheetName)
+
+          val columns = sheet.columns.map(_.columnName).sorted
+
+          if(columns != columnNames.sorted){
+            throw new Exception("Can't create same name sheet!")
+          }
+        }
+      })
+    }
+
     def extractFrom(sheetName : String)(columns : String*) = {
       processes :+=( (w : Workbook) => {
         val s = w(sheetName)
