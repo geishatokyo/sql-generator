@@ -118,7 +118,7 @@ object XLSLoader {
         }
         case ColumnType.String => {
           cell match{
-            case EmptyCell(_) => null
+            case EmptyCell(_) => ""
             case StringCell(v) => v
           }
         }
