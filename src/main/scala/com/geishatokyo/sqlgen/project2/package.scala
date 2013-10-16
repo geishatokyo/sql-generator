@@ -11,6 +11,8 @@ import sheet.Workbook
  */
 package object project2 {
 
+  type ColumnType = com.geishatokyo.sqlgen.sheet.ColumnType.type
+
   def withWorkbook(wb : Workbook) = {
     new WorkbookInput(wb)
   }
@@ -28,8 +30,12 @@ package object project2 {
     new ConsoleOutput()
   }
 
-  def asXls = {
-    new XlsOutput()
+  def asXls : Output = {
+    new XlsOutput( s => s)
+  }
+
+  def asXls( conversion : String => String) : Output = {
+    new XlsOutput(conversion)
   }
 
   def asSql = {
