@@ -38,12 +38,19 @@ package object project2 {
     new XlsOutput(conversion)
   }
 
-  def asSql = {
-    new MySQLOutput()
+  def asSql : Output = {
+    new MySQLOutput(s => s)
   }
 
-  def asSqlite = {
-    new SQLiteOutput()
+  def asSql(filenameConversion : String => String) : Output = {
+    new MySQLOutput(filenameConversion)
+  }
+
+  def asSqlite : Output = {
+    new SQLiteOutput(s => s)
+  }
+  def asSqlite(filenameConversion : String => String) : Output = {
+    new SQLiteOutput(filenameConversion)
   }
 
 }

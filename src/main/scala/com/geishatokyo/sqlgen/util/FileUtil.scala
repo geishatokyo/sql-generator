@@ -132,6 +132,10 @@ object FileUtil extends FileFinder {
   }
   
   private def _saveTo(filename : String , func : OutputStream => Any) = {
+    val dir = new File(filename).getParentFile
+    if(!dir.exists()){
+      dir.mkdirs()
+    }
     val output = new FileOutputStream(filename)
     func(output)
     output.flush()

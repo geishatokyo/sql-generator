@@ -12,7 +12,7 @@ import com.geishatokyo.sqlgen.util.FileUtil
  * User: takeshita
  * DateTime: 13/07/12 2:59
  */
-class MySQLOutput extends Output {
+class MySQLOutput( conversion : String => String) extends Output {
 
   val logger = Logger.logger
   val mysqlConverter = new MySQLConverter
@@ -33,7 +33,8 @@ class MySQLOutput extends Output {
   private def writeSql(context: Context, w: Workbook,action : String, convert : Sheet => String) {
     val sqls = w.sheets.filter( !_.ignore).map(convert)
     if (sqls.size > 0){
-      val path = FileUtil.joinPath(context.workingDir,action + "_" + w.name + ".sql")
+      val filename = conversion( action + "_" + w.name)
+      val path = FileUtil.joinPath(context.workingDir, filename + ".sql")
       logger.log("Save " + action + " sql to %s".format(path))
       FileUtil.saveTo(path,sqls)
     }
