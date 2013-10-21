@@ -11,6 +11,8 @@ import com.geishatokyo.sqlgen.logger.Logger
 
 class SQLiteConverter extends SQLConverter {
 
+  var makeTableNameToLowerCase = true
+
   def toInsertSQL(sheet: Sheet): String = {
 
     val headers = sheet.headers.withFilter(_.output_?).map(_.name.toString)
@@ -22,11 +24,16 @@ class SQLiteConverter extends SQLConverter {
       }).mkString("(",",",")")
     })
 
+    val tableName = if(makeTableNameToLowerCase){
+      sheet.name.toString.toLowerCase
+    }else{
+      sheet.name.toString
+    }
 
     values.map( v => {
 
       "INSERT INTO %s (%s) VALUES %s;".format(
-        sheet.name.toString,
+        tableName,
         headers.mkString(","),
         v
       )
@@ -41,12 +48,19 @@ class SQLiteConverter extends SQLConverter {
       return ""
     }
 
+
+    val tableName = if(makeTableNameToLowerCase){
+      sheet.name.toString.toLowerCase
+    }else{
+      sheet.name.toString
+    }
+
     if (primaryKeys.size == 1){
       val pkH = sheet.header(primaryKeys(0))
       val pk = pkH.name()
       val ids = sheet.foreachRow(row => asSQLString(pkH.columnType, row(pk)))
       """DELETE FROM %s WHERE %s in %s;""".format(
-        sheet.name.toString,
+        tableName,
         pk,ids.mkString("(",",",")")
       )
     }else{
@@ -61,7 +75,7 @@ class SQLiteConverter extends SQLConverter {
         })
       })
       """DELETE FROM %s WHERE %s;""".format(
-        sheet.name.toString,
+        tableName,
         values.map( row => headers.zip(row).map(p => {
           "(" + p._1 + " = " + p._2 + ")"
         }).mkString("("," and ",")")).mkString(" or\n")
@@ -80,6 +94,13 @@ class SQLiteConverter extends SQLConverter {
     val idHeaders = sheet.headers.withFilter( h => {
       primaryKeys.exists(pk => h.name =~= pk)
     }).map(_.name.toString)
+
+
+    val tableName = if(makeTableNameToLowerCase){
+      sheet.name.toString.toLowerCase
+    }else{
+      sheet.name.toString
+    }
 
     sheet.foreachRow(row => {
 
@@ -104,7 +125,7 @@ class SQLiteConverter extends SQLConverter {
         }
       }).mkString(" and ")
 
-      """UPDATE %s SET %s WHERE %s;""".format(sheet.name,setClause,whereClause)
+      """UPDATE %s SET %s WHERE %s;""".format(tableName,setClause,whereClause)
     }).mkString("\n")
 
   }
@@ -121,10 +142,17 @@ class SQLiteConverter extends SQLConverter {
     })
 
 
+    val tableName = if(makeTableNameToLowerCase){
+      sheet.name.toString.toLowerCase
+    }else{
+      sheet.name.toString
+    }
+
+
     values.map( v => {
 
       "INSERT OR REPLACE INTO %s (%s) VALUES %s;".format(
-        sheet.name.toString,
+        tableName,
         headers.mkString(","),
         v
       )
