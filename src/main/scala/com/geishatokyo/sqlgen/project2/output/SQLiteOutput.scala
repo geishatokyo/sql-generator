@@ -26,6 +26,9 @@ class SQLiteOutput(filenameConversion : String => String) extends Output {
     writeSql(context,w,"delete",s => {
       sqliteConverter.toDeleteSQL(s,s.ids.map(_.name.value))
     })
+    writeSql(context,w,"replace",s => {
+      sqliteConverter.toReplaceSQL(s,s.ids.map(_.name.value))
+    })
 
   }
   def writeInserts(context: Context, w: Workbook) {

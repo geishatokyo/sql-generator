@@ -1,6 +1,7 @@
 package com.geishatokyo.sqlgen.sheet.convert
 
 import com.geishatokyo.sqlgen.sheet.{CellUnit, Sheet}
+import com.geishatokyo.sqlgen.logger.Logger
 
 /**
  *
@@ -11,9 +12,8 @@ import com.geishatokyo.sqlgen.sheet.{CellUnit, Sheet}
 class MySQLConverter extends SQLConverter {
 
   def toInsertSQL(sheet: Sheet): String = {
-
-    val headers = sheet.headers.withFilter(_.output_?).map(_.name.toString)
     if (sheet.rowSize == 0) return ""
+    val headers = sheet.headers.withFilter(_.output_?).map(_.name.toString)
 
     val values = sheet.foreachRow(row => {
       row.units.withFilter( cu => cu.header.output_?).map(cu => {
@@ -30,8 +30,11 @@ class MySQLConverter extends SQLConverter {
   }
 
   def toDeleteSQL(sheet: Sheet,primaryKeys: List[String]): String = {
-    if(primaryKeys.size == 0) return ""
     if (sheet.rowSize == 0) return ""
+    if(primaryKeys.size == 0) {
+      Logger.log("Can't generate delete sql for " + sheet.name)
+      return ""
+    }
 
     if (primaryKeys.size == 1){
       val pkH = sheet.header(primaryKeys(0))
@@ -63,8 +66,11 @@ class MySQLConverter extends SQLConverter {
   }
 
   def toUpdateSQL(sheet : Sheet, primaryKeys : List[String]) : String = {
-    if(primaryKeys.size == 0) return ""
     if (sheet.rowSize == 0) return ""
+    if(primaryKeys.size == 0) {
+      Logger.log("Can't generate update sql for " + sheet.name)
+      return ""
+    }
 
     val primaryKeySet = primaryKeys.map(_.toLowerCase).toSet
     val idHeaders = sheet.headers.withFilter( h => {
@@ -99,4 +105,41 @@ class MySQLConverter extends SQLConverter {
 
   }
 
+  def toReplaceSQL(sheet: Sheet, primaryKeys: List[String]) : String = {
+    if (sheet.rowSize == 0) return ""
+    if(primaryKeys.size == 0) {
+      Logger.log("Can't generate replace sql for " + sheet.name)
+      return ""
+    }
+
+    val primaryKeySet = primaryKeys.map(_.toLowerCase).toSet
+
+    sheet.foreachRow(row => {
+
+      val fieldClause = row.units.map({
+        case CellUnit(h,c) => {
+          h.name.toString
+        }
+      }).mkString("(",",",")")
+      val insertValueClause = row.units.map({
+        case CellUnit(h,c) => {
+          asSQLString(h.columnType,c)
+        }
+      }).mkString("(",",",")")
+      val setClause = row.units.filter({
+        case CellUnit(h,c) => {
+          h.output_? &&
+            !primaryKeySet.contains(h.name.value.toLowerCase)
+        }
+      }).map({
+        case CellUnit(h,c) => {
+          h.name.toString + "=" + asSQLString(h.columnType,c)
+        }
+      }).mkString(",")
+
+
+      """INSERT INTO %s %s VALUES %s ON DUPLICATE KEY UPDATE %s;""".format(
+        sheet.name,fieldClause,insertValueClause,setClause)
+    }).mkString("\n")
+  }
 }

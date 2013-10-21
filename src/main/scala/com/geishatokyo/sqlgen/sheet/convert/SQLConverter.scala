@@ -17,6 +17,8 @@ trait SQLConverter {
 
   def toUpdateSQL(sheet : Sheet, primaryKeys : List[String]) : String
 
+  def toReplaceSQL(sheet : Sheet, primaryKeys : List[String]) : String
+
   def asSQLString(cellType : ColumnType.Value, cell : Cell) = {
     cellType match{
       case ColumnType.Integer => cell.asLong.toString

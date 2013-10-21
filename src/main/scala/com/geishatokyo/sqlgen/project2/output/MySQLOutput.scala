@@ -26,6 +26,10 @@ class MySQLOutput( conversion : String => String) extends Output {
     writeSql(context,w,"delete",s => {
       mysqlConverter.toDeleteSQL(s,s.ids.map(_.name.value))
     })
+    writeSql(context,w,"replace",s => {
+      mysqlConverter.toReplaceSQL(s,s.ids.map(_.name.value))
+    })
+
 
   }
   def writeInserts(context: Context, w: Workbook) {

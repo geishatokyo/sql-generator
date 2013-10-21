@@ -1,6 +1,7 @@
 package com.geishatokyo.sqlgen.sheet.convert
 
 import com.geishatokyo.sqlgen.sheet.{CellUnit, Sheet}
+import com.geishatokyo.sqlgen.logger.Logger
 
 /**
  *
@@ -34,8 +35,11 @@ class SQLiteConverter extends SQLConverter {
   }
 
   def toDeleteSQL(sheet: Sheet,primaryKeys: List[String]): String = {
-    if(primaryKeys.size == 0) return ""
     if (sheet.rowSize == 0) return ""
+    if(primaryKeys.size == 0) {
+      Logger.log("Can't generate delete sql for " + sheet.name)
+      return ""
+    }
 
     if (primaryKeys.size == 1){
       val pkH = sheet.header(primaryKeys(0))
@@ -67,9 +71,11 @@ class SQLiteConverter extends SQLConverter {
   }
 
   def toUpdateSQL(sheet : Sheet, primaryKeys : List[String]) : String = {
-    if(primaryKeys.size == 0) return ""
     if (sheet.rowSize == 0) return ""
-
+    if(primaryKeys.size == 0) {
+      Logger.log("Can't generate update sql for " + sheet.name)
+      return ""
+    }
     val primaryKeySet = primaryKeys.map(_.toLowerCase).toSet
     val idHeaders = sheet.headers.withFilter( h => {
       primaryKeys.exists(pk => h.name =~= pk)
@@ -101,6 +107,28 @@ class SQLiteConverter extends SQLConverter {
       """UPDATE %s SET %s WHERE %s;""".format(sheet.name,setClause,whereClause)
     }).mkString("\n")
 
+  }
+
+  def toReplaceSQL(sheet: Sheet, primaryKeys: List[String]) : String = {
+
+    val headers = sheet.headers.withFilter(_.output_?).map(_.name.toString)
+    if (sheet.rowSize == 0) return ""
+
+    val values = sheet.foreachRow(row => {
+      row.units.withFilter( cu => cu.header.output_?).map(cu => {
+        asSQLString(cu.header.columnType,cu.value)
+      }).mkString("(",",",")")
+    })
+
+
+    values.map( v => {
+
+      "INSERT OR REPLACE INTO %s (%s) VALUES %s;".format(
+        sheet.name.toString,
+        headers.mkString(","),
+        v
+      )
+    }).mkString("\n")
   }
 
 }
