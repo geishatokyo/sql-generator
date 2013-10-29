@@ -159,4 +159,10 @@ class SQLiteConverter extends SQLConverter {
     }).mkString("\n")
   }
 
+  override def escapeSQLString(v: String) = {
+    if (v == null) "NULL"
+    else{
+      "'" + v.replace("'","''") + "'"
+    }
+  }
 }
