@@ -38,7 +38,7 @@ class MySQLConverter extends SQLConverter {
 
     if (primaryKeys.size == 1){
       val pkH = sheet.header(primaryKeys(0))
-      val pk = pkH.name()
+      val pk = pkH.name
       val ids = sheet.foreachRow(row => asSQLString(pkH.columnType, row(pk)))
       """DELETE FROM %s WHERE %s in %s;""".format(
         sheet.name.toString,
@@ -46,7 +46,7 @@ class MySQLConverter extends SQLConverter {
       )
     }else{
       val headers = sheet.headers.withFilter( h => {
-        primaryKeys.exists(pk => h.name =~= pk)
+        primaryKeys.exists(pk => h.name == pk)
       }).map(_.name.toString)
       val values =  sheet.foreachRow(row => {
         row.units.withFilter( cu => {
@@ -74,7 +74,7 @@ class MySQLConverter extends SQLConverter {
 
     val primaryKeySet = primaryKeys.map(_.toLowerCase).toSet
     val idHeaders = sheet.headers.withFilter( h => {
-      primaryKeys.exists(pk => h.name =~= pk)
+      primaryKeys.exists(pk => h.name == pk)
     }).map(_.name.toString)
 
     sheet.foreachRow(row => {
@@ -82,7 +82,7 @@ class MySQLConverter extends SQLConverter {
       val setClause = row.units.filter({
         case CellUnit(h,c) => {
           h.output_? &&
-          !primaryKeySet.contains(h.name.value.toLowerCase)
+          !primaryKeySet.contains(h.name.toLowerCase)
         }
       }).map({
         case CellUnit(h,c) => {
@@ -92,7 +92,7 @@ class MySQLConverter extends SQLConverter {
       val whereClause = row.units.filter({
         case CellUnit(h,c) => {
           h.output_? &&
-          primaryKeySet.contains(h.name.value.toLowerCase)
+          primaryKeySet.contains(h.name.toLowerCase)
         }
       }).map({
         case CellUnit(h,c) => {
@@ -129,7 +129,7 @@ class MySQLConverter extends SQLConverter {
       val setClause = row.units.filter({
         case CellUnit(h,c) => {
           h.output_? &&
-            !primaryKeySet.contains(h.name.value.toLowerCase)
+            !primaryKeySet.contains(h.name.toLowerCase)
         }
       }).map({
         case CellUnit(h,c) => {

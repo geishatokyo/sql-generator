@@ -21,13 +21,13 @@ class SQLiteOutput(filenameConversion : String => String) extends Output {
 
     writeSql(context,w,"insert",sqliteConverter.toInsertSQL _)
     writeSql(context,w,"update",s => {
-      sqliteConverter.toUpdateSQL(s,s.ids.map(_.name.value))
+      sqliteConverter.toUpdateSQL(s,s.ids.map(_.name))
     })
     writeSql(context,w,"delete",s => {
-      sqliteConverter.toDeleteSQL(s,s.ids.map(_.name.value))
+      sqliteConverter.toDeleteSQL(s,s.ids.map(_.name))
     })
     writeSql(context,w,"replace",s => {
-      sqliteConverter.toReplaceSQL(s,s.ids.map(_.name.value))
+      sqliteConverter.toReplaceSQL(s,s.ids.map(_.name))
     })
 
   }

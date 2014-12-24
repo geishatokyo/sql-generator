@@ -1,11 +1,9 @@
 package com.geishatokyo.sqlgen.project
 
 import com.geishatokyo.sqlgen.sheet.{Column, CellUnit, Row, Cell}
-import xml.XML
 import com.geishatokyo.sqlgen.Project
 import com.geishatokyo.sqlgen.logger.Logger
 import com.geishatokyo.sqlgen.project.ValidateProject.ValidationTask
-import util.parsing.json.{JSON, JSONObject}
 
 /**
  *
@@ -64,13 +62,13 @@ trait ValidateProject extends Project with SheetScope {
       is(new CompositeFuncImpl(func,""))
     }
 
-    def isValidXml = {
+    /*def isValidXml = {
       is(validXml)
     }
 
     def isValidJson = {
       is(validJson)
-    }
+    }*/
 
     def isSingleLine = {
       is(singleLine)
@@ -82,29 +80,29 @@ trait ValidateProject extends Project with SheetScope {
 object ValidateProject{
 
   val notEmpty = new CompositeFuncImpl(v => {v != null && v.length > 0},"HasEmptyColumn")
-  val validXml = new CompositeFuncImpl(v => {
-    try{
-      XML.loadString("<root>%s</root>".format(v))
-      true
-    }catch{
-      case e : Throwable => false
-    }
-  },"NotValidXML")
-
+//  val validXml = new CompositeFuncImpl(v => {
+//    try{
+//      XML.loadString("<root>%s</root>".format(v))
+//      true
+//    }catch{
+//      case e : Throwable => false
+//    }
+//  },"NotValidXML")
+//
+//  val validJson = new CompositeFuncImpl(v => {
+//    try{
+//      JSON.parseRaw(v) match{
+//        case Some(_) => true
+//        case None => false
+//      }
+//    }catch{
+//      case e : Throwable=> false
+//    }
+//  },"NotValidJson")
   val singleLine = new CompositeFuncImpl(v => {
     v != null && ( !v.contains("\r") && !v.contains("\n"))
   },"NotSingleLine")
 
-  val validJson = new CompositeFuncImpl(v => {
-    try{
-      JSON.parseRaw(v) match{
-        case Some(_) => true
-        case None => false
-      }
-    }catch{
-      case e : Throwable=> false
-    }
-  },"NotValidJson")
 
 
   implicit def funcToComposite(f : String => Boolean) = new CompositeFuncImpl(f,"")
@@ -130,7 +128,7 @@ object ValidateProject{
 
   case class CompositeFuncImpl(func : String => Boolean,message : String) extends CompositeFunc{
     def apply(cell : CellUnit): Boolean = {
-      if(func(cell.value.value)) true
+      if(func(cell.value.asString)) true
       else {
         Logger.log("Validation failed at %s@%s(Message:%s Value:'%s')".format(
           cell.header.name,cell.header.parent.name,message,cell.value

@@ -43,7 +43,7 @@ trait EnsureProcessProvider extends ProcessProvider {
     def validateSheet( sheet : Sheet, defs : List[ColumnDef]) = {
       import BaseProject._
 
-      val sheetName = sheet.name.value
+      val sheetName = sheet.name
       defs.foreach({
         case Exists(cn) => {
           getOrAddColumn(sheet,cn)
@@ -56,13 +56,13 @@ trait EnsureProcessProvider extends ProcessProvider {
         case Convert(cn, func) => {
           logger.log("Convert values column:%s@%s".format(cn,sheetName))
           getOrAddColumn(sheet,cn).cells.foreach(c => {
-            c := func(c.value)
+            c := func(c.asString)
           })
         }
         case SetDefaultValue(cn,dv, when) => {
           logger.log("Set defalt values to column:%s@%s".format(cn,sheetName))
           getOrAddColumn(sheet,cn).cells.foreach(c => {
-            val v = c.value
+            val v = c.asString
             if (when(v)){
               c := dv
             }
@@ -74,7 +74,7 @@ trait EnsureProcessProvider extends ProcessProvider {
               logger.log("Check value of column:%s@%s".format(cn,sheetName))
               var index = 0
               c.cells.foreach(c => {
-                val v = c.value
+                val v = c.asString
                 if (when(v)){
                   throw new SQLGenException(
                     "Column:%s@%s row:%s value='%s' is not valid.".format(
@@ -92,9 +92,9 @@ trait EnsureProcessProvider extends ProcessProvider {
               logger.log("Check value of column:%s@%s".format(cn,sheetName))
               var index = 0
               getOrAddColumn(sheet,cn).cells.foreach(c => {
-                val v = c.value
+                val v = c.asString
                 if (when(v)){
-                  c :=  convertFunc(refC(index))
+                  c :=  convertFunc(refC(index).asString)
                 }
                 index += 1
               })
@@ -114,8 +114,8 @@ trait EnsureProcessProvider extends ProcessProvider {
           c
         }
         case None => {
-          logger.log("Add column:%s@%s".format(columnName,sheet.name.value))
-          val setting = project(sheet.name.value)
+          logger.log("Add column:%s@%s".format(columnName,sheet.name))
+          val setting = project(sheet.name)
           sheet.addColumns(columnName)
           sheet.header(columnName).columnType = setting.columnTypeGuesser(columnName)
           sheet.column(columnName)

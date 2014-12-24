@@ -31,7 +31,7 @@ object SaveUtil {
   def saveAsUpdateSQL(filename : String ,wb : Workbook) = {
     val sql = wb.sheets.flatMap(sheet => {
       if (!sheet.ignore){
-        Some(sqlConverter.toUpdateSQL(sheet,sheet.ids.map(_.name.value)))
+        Some(sqlConverter.toUpdateSQL(sheet,sheet.ids.map(_.name)))
       }else{
         None
       }
@@ -41,7 +41,7 @@ object SaveUtil {
   def saveAsDeleteSQL(filename : String ,wb : Workbook) = {
     val sql = wb.sheets.flatMap(sheet => {
       if (!sheet.ignore){
-        Some(sqlConverter.toDeleteSQL(sheet,sheet.ids.map(_.name.value)))
+        Some(sqlConverter.toDeleteSQL(sheet,sheet.ids.map(_.name)))
       }else{
         None
       }

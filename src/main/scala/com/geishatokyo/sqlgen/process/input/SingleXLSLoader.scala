@@ -41,8 +41,7 @@ class SingleXLSLoader(workingDir : String,name : String,getInputStream : () => I
   def load(project: BaseProject, context: Context): Workbook = {
     context.workingDir = workingDir
     val loader = new XLSSheetLoader(
-      new NameMapperWrapper(project),
-      new ColumnTypeGuesserWrapper(project)
+      new NameMapperWrapper(project)
     )
     val stream = getInputStream()
     try{

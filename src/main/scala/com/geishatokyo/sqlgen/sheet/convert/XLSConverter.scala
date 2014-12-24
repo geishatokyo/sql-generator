@@ -25,9 +25,9 @@ class XLSConverter {
         }
       })
 
-      sheet.foreachRow({
-        case row => {
-          val hssfRow = hssfSheet.createRow(row.index + 1)
+      (sheet.rows zipWithIndex).foreach({
+        case (row,index) => {
+          val hssfRow = hssfSheet.createRow(index + 1)
           row.units.zipWithIndex.foreach({
             case ( CellUnit(header,cell),index) => {
               val c = hssfRow.createCell(index)

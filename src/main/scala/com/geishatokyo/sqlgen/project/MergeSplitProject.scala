@@ -73,13 +73,13 @@ trait MergeSplitProject extends Project with SheetScope with SheetAddress {
           new Object{
             def isSame = {
               addTask(MergeSelectTask(sheetName,mergeColumns,fromSheet, (my,your) => {
-                my(columnName) =~= your(columnName).value
+                my(columnName) == your(columnName).value
               }))
             }
 
             def is(compColumnName : String) = {
               addTask(MergeSelectTask(sheetName,mergeColumns,fromSheet, (my,your) => {
-                my(columnName) =~= your(compColumnName).value
+                my(columnName) == your(compColumnName).value
               }))
             }
           }

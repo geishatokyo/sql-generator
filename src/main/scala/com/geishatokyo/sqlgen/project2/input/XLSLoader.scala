@@ -142,7 +142,7 @@ object XLSLoader {
 
   private def loadHeaders(xls: HSSFSheet,sheet : Sheet): List[(Int, ColumnHeader)] = {
     val row = xls.getRow(0)
-    val sheetName = sheet.name.value
+    val sheetName = sheet.name
     if(row == null) return Nil
     val size = row.getPhysicalNumberOfCells
 

@@ -8,13 +8,13 @@ package com.geishatokyo.sqlgen.sheet
 
 class Column(val parent : Sheet,val header : ColumnHeader,val cells : List[Cell]) {
 
-  def apply(index : Int) = cells(index).value
+  def apply(index : Int) = cells(index)
   def update(index : Int,value : String) = cells(index) := value
 
   def unit(index : Int) = CellUnit(header,cells(index))
 
   def size = cells.size
-  def columnName = header.name.value
+  def columnName = header.name
 
   override def equals(obj: Any): Boolean = {
     obj match{

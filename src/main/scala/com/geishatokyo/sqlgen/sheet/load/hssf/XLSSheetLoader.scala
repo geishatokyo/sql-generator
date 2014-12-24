@@ -15,8 +15,7 @@ import org.apache.poi.ss.usermodel.FormulaEvaluator
  * Create: 12/07/12 11:42
  */
 
-class XLSSheetLoader(nameMapper : NameMapper = null,
-                     typeGuesser : ColumnTypeGuesser = null) extends SheetLoader {
+class XLSSheetLoader(nameMapper : NameMapper = null) extends SheetLoader {
 
   val logger = Logger
 
@@ -52,111 +51,83 @@ class XLSSheetLoader(nameMapper : NameMapper = null,
 
     val rows = (1 until rowSize).map(i => {
       val row = xls.getRow(i)
-      loadRow(headers,row)
-    }).filter(values => !values.forall(v => v == null || v.length == 0))
+      loadRow(sheet,headers,row)
+    }).filter(cells => !cells.forall(_.isEmpty))
 
-    sheet.addRows(rows.toList)
+    sheet.addRowCells(rows.toList)
+
 
     Some(sheet)
   }
 
-  def loadRow(headers: List[(Int, ColumnHeader)], row: HSSFRow)(implicit formulaEvaluator : FormulaEvaluator) : List[String] = {
+  def loadRow(sheet : Sheet,headers: List[ColumnHeader], row: HSSFRow)(implicit formulaEvaluator : FormulaEvaluator) : List[Cell] = {
     if(row == null) return Nil
-    headers.map({
-      case (index,h) => {
+    (headers zipWithIndex ).map({
+      case (h,index) => {
         val cell = row.getCell(index)
-        val v = loadCellValue(cell,h.columnType)
-        if(v != null){
-          v.trim()
-        }else{
-          v
-        }
+        loadCell(sheet,cell)
       }
     })
   }
 
-  def loadCellValue( _cell : HSSFCell , columnType : ColumnType.Value)(implicit formulaEvaluator : FormulaEvaluator) : String = {
+  def loadCell(sheet : Sheet, _cell : HSSFCell)(implicit formulaEvaluator : FormulaEvaluator) : Cell = {
     if(_cell == null) return null
 
-    val cell = if(_cell.getCellType == org.apache.poi.ss.usermodel.Cell.CELL_TYPE_FORMULA){
-      formulaEvaluator.evaluate(_cell)
-    }else _cell
+    import org.apache.poi.ss.usermodel.{Cell => PoiCell}
 
-
-    columnType match{
-      case ColumnType.Integer => {
-        cell match{
-          case EmptyCell(_) => null
-          case LongCell(v) => v.toString
-          case _ => null
+    if(_cell.getCellType == org.apache.poi.ss.usermodel.Cell.CELL_TYPE_FORMULA){
+      val cell = formulaEvaluator.evaluate(_cell)
+      cell.getCellType match{
+        case PoiCell.CELL_TYPE_STRING => {
+          Cell(sheet,cell.getStringValue)
+        }
+        case PoiCell.CELL_TYPE_NUMERIC => {
+          Cell(sheet, cell.getNumberValue)
+        }
+        case PoiCell.CELL_TYPE_BOOLEAN => {
+          Cell(sheet, cell.getBooleanValue)
+        }
+        case PoiCell.CELL_TYPE_BLANK => {
+          Cell(sheet,null)
+        }
+        case _ => {
+          Cell(sheet,null)
         }
       }
-      case ColumnType.Double => {
-        cell match{
-          case EmptyCell(_) => null
-          case DoubleCell(v) => v.toString
-          case _ => null
+    }else {
+      val cell = _cell
+      cell.getCellType match{
+        case PoiCell.CELL_TYPE_STRING => {
+          Cell(sheet,cell.getStringCellValue)
         }
-
-      }
-      case ColumnType.String => {
-        cell match{
-          case EmptyCell(_) => null
-          case StringCell(v) => v
+        case PoiCell.CELL_TYPE_NUMERIC => {
+          Cell(sheet, cell.getNumericCellValue)
         }
-      }
-      case ColumnType.Date => {
-        cell match{
-          case EmptyCell(_) => null
-          case DateCell(v) => v.toString
+        case PoiCell.CELL_TYPE_BOOLEAN => {
+          Cell(sheet, cell.getBooleanCellValue)
         }
-
-      }
-      case ColumnType.Any => {
-        cell match{
-          case EmptyCell(_) => null
-          case StringCell(v) => v
+        case PoiCell.CELL_TYPE_BLANK => {
+          Cell(sheet,null)
+        }
+        case _ => {
+          Cell(sheet,null)
         }
       }
     }
   }
 
 
-  def loadHeaders(xls: HSSFSheet,sheet : Sheet): List[(Int, ColumnHeader)] = {
+  def loadHeaders(xls: HSSFSheet,sheet : Sheet): List[ColumnHeader] = {
     val row = xls.getRow(0)
-    val sheetName = sheet.name.value
+    val sheetName = sheet.name
     if(row == null) return Nil
     val size = row.getPhysicalNumberOfCells
 
-    val nameMap = nameMapper.columnNameMapperFor(sheetName)
-    val typeMap = typeGuesser.guesserFor(sheetName)
-    val ignoreCols = typeGuesser.isIgnoreColumn_?(sheetName)
-    val idColumns = typeGuesser.isIdColumn_?(sheetName)
-
-    val headersOnFile = (0 until size).map(i => {
+    (0 until size).map(i => {
       val cell = row.getCell(i)
-      cell match {
-        case StringCell(v) => {
-          i -> v.trim()
-        }
-        //case _ => throw new Exception("There is wrong header column.row:0 column:%s".format(i))
-      }
-    }).filter(p => p._2.length > 0).map(p => p._1 -> nameMap(p._2)).toList
-
-    sheet.addColumns(headersOnFile.map(_._2): _*)
-    sheet.headers.foreach(ch => {
-      ch.columnType = typeMap(ch.name)
-      if(ch.columnType == ColumnType.Any){
-        ch.columnType = typeMap(ch.name.toLowerCase)
-      }
-      ch.output_? = !ignoreCols(ch.name)
-      logger.log("Column:%s@%s is %s".format(ch.name,sheetName,ch.columnType))
-    })
-    //find and set ids
-    val ids = sheet.headers.withFilter(h => idColumns(h.name)).map(_.name.value)
-    logger.log("Sheet:%s's IDs are %s".format(sheetName,ids))
-    sheet.replaceIds(ids:_*)
-    headersOnFile.map(_._1).zip(sheet.headers)
+      val name = cell.getStringCellValue
+      new ColumnHeader(sheet,name)
+    }).toList
   }
 
 }

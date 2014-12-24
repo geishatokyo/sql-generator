@@ -6,12 +6,12 @@ package com.geishatokyo.sqlgen.sheet
  * Create: 12/07/11 21:05
  */
 
-class Row(val parent : Sheet,var index : Int,val headers : List[ColumnHeader],val cells : List[Cell]) {
+class Row(val parent : Sheet,val headers : List[ColumnHeader],val cells : List[Cell]) {
 
-  def apply( index : Int) = cells(index).value
+  def apply( index : Int) = cells(index)
 
   def apply(columnName : String) : Cell = {
-    val index = headers.indexWhere( h => h.name =~= columnName)
+    val index = headers.indexWhere( h => h.name == columnName)
     if(index < 0){
       throw new HeaderNotFoundException(parent.name, columnName)
     }else{
@@ -29,7 +29,7 @@ class Row(val parent : Sheet,var index : Int,val headers : List[ColumnHeader],va
   def units = headers.zip(cells).map(p => CellUnit(p._1,p._2))
 
   def indexOf(columnName : String) = {
-    headers.indexWhere(h => h.name =~= columnName)
+    headers.indexWhere(h => h.name == columnName)
   }
 
   def size = cells.size
@@ -37,12 +37,12 @@ class Row(val parent : Sheet,var index : Int,val headers : List[ColumnHeader],va
   def header(index : Int) : ColumnHeader = headers(index)
 
   def header(columnName : String) : ColumnHeader = {
-    headers.find( h => h.name =~= columnName).getOrElse{
+    headers.find( h => h.name == columnName).getOrElse{
       throw new HeaderNotFoundException(parent.name, columnName)
     }
   }
   def existColumn(columnName : String) = {
-    headers.indexWhere( h => h.name =~= columnName) >= 0
+    headers.indexWhere( h => h.name == columnName) >= 0
   }
 
   override def equals(obj: Any): Boolean = {
@@ -66,6 +66,10 @@ class Row(val parent : Sheet,var index : Int,val headers : List[ColumnHeader],va
   }
 
   def copy() = {
-    new Row(this.parent,this.index,this.headers,this.cells.map(_.copy(this.parent)))
+    new Row(this.parent,this.headers,this.cells.map(_.copy(this.parent)))
+  }
+
+  def rowIndex = {
+    parent.indexOf(this)
   }
 }

@@ -21,13 +21,13 @@ class MySQLOutput( conversion : String => String) extends Output {
 
     writeSql(context,w,"insert",mysqlConverter.toInsertSQL _)
     writeSql(context,w,"update",s => {
-      mysqlConverter.toUpdateSQL(s,s.ids.map(_.name.value))
+      mysqlConverter.toUpdateSQL(s,s.ids.map(_.name))
     })
     writeSql(context,w,"delete",s => {
-      mysqlConverter.toDeleteSQL(s,s.ids.map(_.name.value))
+      mysqlConverter.toDeleteSQL(s,s.ids.map(_.name))
     })
     writeSql(context,w,"replace",s => {
-      mysqlConverter.toReplaceSQL(s,s.ids.map(_.name.value))
+      mysqlConverter.toReplaceSQL(s,s.ids.map(_.name))
     })
 
 

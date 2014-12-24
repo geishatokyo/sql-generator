@@ -101,14 +101,14 @@ trait MergeSplitProcessProvider extends ProcessProvider {
             newSheet
           }
         }
-        targetSheet.addColumn(c.columnName,c.cells.map(_.value))
+        targetSheet.addColumn(c.columnName,c.cells.map(_.asString))
       })
 
     }
 
     def doRenameSheet(sheetName : String, newName : String) {
       logger.log("Rename sheet from %s to %s".format(sheetName,newName))
-      workbook(sheetName).name := newName
+      workbook(sheetName).name = newName
     }
 
     def doDeleteSheet(sheetName : String) {
@@ -117,12 +117,12 @@ trait MergeSplitProcessProvider extends ProcessProvider {
     }
     def doRenameColumn(ca : ColumnAddress,newName : String) {
       logger.log("Rename column@%s from %s to %s".format(ca.sheetName,ca.columnName,newName))
-      workbook(ca.sheetName).header(ca.columnName).name := newName
+      workbook(ca.sheetName).header(ca.columnName).name = newName
     }
     def doConvertColumn(ca : ColumnAddress,func : String => String) {
       logger.log("Convert column:%s".format(ca))
       workbook(ca.sheetName).column(ca.columnName).cells.foreach(c => {
-        c := func(c.value)
+        c := func(c.asString)
       })
     }
 

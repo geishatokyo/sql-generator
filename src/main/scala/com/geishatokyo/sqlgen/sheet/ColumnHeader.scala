@@ -6,15 +6,14 @@ package com.geishatokyo.sqlgen.sheet
  * Create: 12/07/11 21:27
  */
 
-class ColumnHeader(val parent : Sheet,val name : VersionedValue) {
-
-  def this(parent : Sheet,initName : String) = this(parent,new VersionedValue(initName))
+class ColumnHeader(val parent : Sheet,var name : String) {
 
   var columnType : ColumnType.Value = ColumnType.Any
   var output_? : Boolean = true
+  var tag : Any = null
 
   def copy(newParent : Sheet) = {
-    val ch =new ColumnHeader(newParent,name.copy())
+    val ch =new ColumnHeader(newParent,name)
     ch.columnType = columnType
     ch.output_? = output_?
     ch

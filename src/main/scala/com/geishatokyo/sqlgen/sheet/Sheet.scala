@@ -10,7 +10,7 @@ object Sheet{
    * @param sheet
    */
   def apply(sheet : Sheet) = {
-    val newSheet = new Sheet(sheet.name.toString)
+    val newSheet = new Sheet(sheet.name)
     newSheet._headers = sheet._headers.map(_.copy(newSheet))
     newSheet
   }
@@ -22,9 +22,8 @@ object Sheet{
  * Create: 12/07/11 21:05
  */
 
-class Sheet(val name : VersionedValue) {
+class Sheet(var name : String) {
 
-  def this(sheetName:  String) = this(new VersionedValue(sheetName))
   protected var _headers : List[ColumnHeader] = Nil
   def headers = _headers
 
@@ -47,7 +46,7 @@ class Sheet(val name : VersionedValue) {
 
   protected def cellsToRows() = {
     rows = cells.zipWithIndex.map({
-      case (values , index) => new Row(this,index,_headers,values)
+      case (values , index) => new Row(this,_headers,values)
     })
   }
   protected def rowsToCells() = {
@@ -72,8 +71,30 @@ class Sheet(val name : VersionedValue) {
     }
   }
 
+
   def apply( row : Int, col : Int) = {
     cells(row)(col).value
+  }
+
+  def indexOf(cell : Cell) : (Int,Int) = {
+    (rows zipWithIndex).foreach({
+      case (row,rowIndex) => (row.cells zipWithIndex).foreach({
+        case (_cell,columnIndex) => if(cell.eq(_cell)) return (rowIndex,columnIndex)
+      })
+    })
+    (-1,-1)
+  }
+  def indexOf(row : Row) : Int = {
+    (rows zipWithIndex).foreach({
+      case (_row,index) => if(_row.eq(row)) return index
+    })
+    -1
+  }
+  def indexOf(column : Column) : Int = {
+    (columns zipWithIndex).foreach({
+      case (_column,index) => if(_column.eq(column)) return index
+    })
+    -1
   }
 
   def cellAt(row : Int, col : Int) = {
@@ -124,22 +145,22 @@ class Sheet(val name : VersionedValue) {
     headerIndex(columnName) >= 0
   }
   def header(columnName : String) : ColumnHeader = {
-    _headers.find( h => h.name =~= columnName).getOrElse{
+    _headers.find( h => h.name == columnName).getOrElse{
       throw new HeaderNotFoundException(name, columnName)
     }
   }
 
   def headerIndex(columnName : String) = {
-    _headers.indexWhere( h => h.name =~= columnName)
+    _headers.indexWhere( h => h.name == columnName)
   }
   def findFirstRowWhere( columnName : String, value : String, caseInsensitive : Boolean = false) : Option[Row] = {
     val index = headerIndex(columnName)
     if (index < 0) return None
     rows.find( r => {
       if (caseInsensitive){
-        r.cells(index) =~= value
+        r.cells(index).asString == value
       }else{
-        r(index) == value
+        r(index).asString == value
       }
     })
   }
@@ -148,9 +169,9 @@ class Sheet(val name : VersionedValue) {
     if (index < 0) return Nil
     rows.filter( r => {
       if (caseInsensitive){
-        r.cells(index) =~= value
+        r.cells(index).asString == value
       }else{
-        r(index) == value
+        r(index).asString == value
       }
     })
   }
@@ -179,12 +200,12 @@ class Sheet(val name : VersionedValue) {
    */
   def addRow( values : Map[String,String], throwErrorOnColumnMissMatch : Boolean = false): Unit = {
     val row = headers.map(h => {
-      values.get(h.name()) match{
+      values.get(h.name) match{
         case Some(v) => v
         case None => {
           if (throwErrorOnColumnMissMatch){
             throw new SQLGenException(
-              "Column:%s is not passed".format(h.name()))
+              "Column:%s is not passed".format(h.name))
           }else{
             ""
           }
@@ -203,6 +224,15 @@ class Sheet(val name : VersionedValue) {
     cellsToRows()
     cellsToColumns()
 
+  }
+  def addRowCells( rows : List[List[Cell]]) = {
+    if (!rows.forall(row => row.size == _headers.size)){
+      throw new SQLGenException(
+        "Column size missmatch.SheetRowSize:%s".format(_headers.size))
+    }
+    cells = cells ::: rows
+    cellsToRows()
+    cellsToColumns()
   }
 
   def replaceIds( idColumnNames : String*) = {
@@ -225,7 +255,7 @@ class Sheet(val name : VersionedValue) {
     addColumn(columnName,values)
   }
 
-  def addColumn(columnName : String,values : List[String]) = {
+  def addColumn(columnName : String,values : List[Any]) = {
     if (columnSize > 0 && values.size != cells.size) {
       throw new SQLGenException(
         "Row size missmatch.Sheet:%s Passed:%s".format(cells.size,values.size))
@@ -233,7 +263,7 @@ class Sheet(val name : VersionedValue) {
     checkColumnExist(columnName)
     columns = columns :+ new Column(
       this,
-      new ColumnHeader(this,new VersionedValue(columnName)),
+      new ColumnHeader(this,columnName),
       values.map(v => new Cell(this,v)))
 
     columnsToCells
@@ -264,7 +294,7 @@ class Sheet(val name : VersionedValue) {
     def genColumn(columnName : String) = {
       new Column(
         this,
-        new ColumnHeader(this,new VersionedValue(columnName)),
+        new ColumnHeader(this,columnName),
         List.fill(rowSize)(new Cell(this,""))
       )
     }
@@ -288,9 +318,6 @@ class Sheet(val name : VersionedValue) {
 
   def deleteRow(index : Int) : Unit = {
     rows = rows.take(index) ::: rows.drop(index + 1)
-    for (newIndex <- index until _rows.size){
-      rows(newIndex).index = newIndex
-    }
     rowsToCells
     cellsToColumns
   }
@@ -313,7 +340,7 @@ class Sheet(val name : VersionedValue) {
   }
 
   def copy() = {
-    val newSheet = new Sheet(name.copy())
+    val newSheet = new Sheet(name)
     newSheet._headers = this.headers.map(_.copy(newSheet))
     newSheet._ids = this._ids
     newSheet.cells = this.cells.map(row => row.map(_.copy(newSheet)))
@@ -323,8 +350,8 @@ class Sheet(val name : VersionedValue) {
   }
 
   def copyWithoutHistory() = {
-    val newSheet = new Sheet(new VersionedValue(name.value))
-    newSheet._headers = this.headers.map(h => new ColumnHeader(newSheet,h.name.value))
+    val newSheet = new Sheet(name)
+    newSheet._headers = this.headers.map(h => new ColumnHeader(newSheet,h.name))
     newSheet._ids = this._ids
     newSheet.cells = this.cells.map(row => row.map(r => new Cell(newSheet,r.value)))
     newSheet.cellsToRows
@@ -333,7 +360,7 @@ class Sheet(val name : VersionedValue) {
   }
 
   def copyEmpty() = {
-    val newSheet = new Sheet(name.copy())
+    val newSheet = new Sheet(name)
     newSheet._headers = this.headers.map(_.copy(newSheet))
     newSheet._ids = this._ids
     newSheet.cellsToRows

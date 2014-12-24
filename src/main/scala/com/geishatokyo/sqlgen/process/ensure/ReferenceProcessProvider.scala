@@ -29,7 +29,7 @@ trait ReferenceProcessProvider extends ProcessProvider {
           }
           sheet.foreachRow(row => {
             val v = row(ref.columnName)
-            if (ref.whenFunc(v.value)){
+            if (ref.whenFunc(v.asString)){
               val sheet = workbook(ref.sheetName)
               sheet.findFirstRowWhere( refRow => {ref.whereFunc(row,refRow)}) match{
                 case Some(refRow) => {

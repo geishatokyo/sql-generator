@@ -2,7 +2,8 @@ package com.geishatokyo.sqlgen.sheet
 
 import java.util.Date
 import java.text.SimpleDateFormat
-import com.geishatokyo.sqlgen.util.TimeUtil
+import com.geishatokyo.sqlgen.SQLGenException
+import com.geishatokyo.sqlgen.util.{DateFormat, TimeUtil}
 import org.apache.poi.ss.usermodel.DateUtil
 
 /**
@@ -11,51 +12,126 @@ import org.apache.poi.ss.usermodel.DateUtil
  * Create: 12/07/11 21:05
  */
 
-case class Cell(parent : Sheet,override val initialValue : String) extends VersionedValue(initialValue) {
+case class Cell(parent : Sheet,var value : Any) {
 
-
+  var tag : Any = null
 
   def copy(newParent : Sheet) = {
-    val c = new Cell(newParent,values.last)
-    c.values = this.values
-    c
+    new Cell(newParent,value)
   }
 
-  def :=(d : Date) = {
-    this.value_=( TimeUtil.javaDateToExcelTime(d).toString)
+  def :=( v : Any) = {
+    this.value = v
   }
 
-
-
-  def asString = value
-  def asBool = value match{
-    case "true" | "t" | "yes" | "1" => true
+  def isEmpty = value match {
+    case null => true
+    case "" => true
     case _ => false
   }
-  def asInt = try{
-    value.toInt
-  }catch{
-    case e : Throwable => asDouble.toInt
+
+
+  def asString = if(value != null) {
+    value.toString
+  }else{
+    null
   }
-  def asLong = try{
-    value.toLong
-  }catch{
-    case e : Throwable => asDouble.toLong
+  def asBool = value match{
+    case true => true
+    case false => false
+    case "true" | "t" | "yes" | "1" => true
+    case "false" | "f" | "no" | "0" => false
+    case _ => false
   }
 
-  def asDouble = try{
-    value.toDouble
+
+  def asIntOp = try{
+    value match {
+      case i : Int => Some(i)
+      case l : Long => Some(l.toInt)
+      case s : String => Some(s.toInt)
+      case d : Double => Some(d.toInt)
+      case f : Float => Some(f.toInt)
+      case _ => {
+        None
+      }
+    }
   }catch{
-    case e : Throwable => throw new NumberFormatException("Wrong number format " + value)
+    case e : Throwable => None
+  }
+  def asInt = {
+    niceGet(asIntOp)("Int")
   }
 
-  def asDate = try{
-    TimeUtil.excelTimeToJavaDate(asDouble)
+
+  def asLongOp = try{
+    value match {
+      case i : Int => Some(i.toLong)
+      case l : Long => Some(l)
+      case s : String => Some(s.toLong)
+      case d : Double => Some(d.toLong)
+      case f : Float => Some(f.toLong)
+      case _ => {
+        None
+      }
+    }
   }catch{
-    case e : Throwable => try{
-      new SimpleDateFormat("yyyy/MM/dd HH:mm").parse(value)
-    }catch{
-      case e : Throwable => null
+    case e : Throwable => None
+  }
+  def asLong = {
+    niceGet(asLongOp)("Long")
+  }
+
+
+  def asDoubleOp: Option[Double] = try{
+    value match {
+      case i : Int => Some(i.toDouble)
+      case l : Long => Some(l.toDouble)
+      case s : String => Some(s.toDouble)
+      case d : Double => Some(d)
+      case f : Float => Some(f.toDouble)
+      case _ => {
+        None
+      }
+    }
+  }catch{
+    case e : Throwable => None
+  }
+  def asDouble = {
+    niceGet(asDoubleOp)("Double")
+  }
+
+  def asDateOp: Option[Date] = asDateOpOfExcelTime
+  def asDate = niceGet(asDateOp)("Date")
+
+  def asDateOpOfUnixTime = try{
+    value match {
+      case i : Int => Some(new Date(i))
+      case l : Long => Some(new Date(l))
+      case s : String => DateFormat.parse(s)
+      case d : Double => Some(new Date((d * 1000).toLong))
+      case f : Float => Some(new Date( (f * 1000).toLong))
+      case _ => {
+        None
+      }
+    }
+  }catch{
+    case e : Throwable => None
+  }
+  def asDateOpOfExcelTime = try{
+    value match {
+      case s : String => DateFormat.parse(s)
+      case _ => {
+        asDoubleOp.map(d => TimeUtil.excelTimeToJavaDate(d))
+      }
+    }
+  }catch{
+    case e : Throwable => None
+  }
+
+  def niceGet[T]( op : Option[T])(typeName : String) = {
+    op.getOrElse{
+      throw new SQLGenException(s"Cell at ${parent.indexOf(this)} in sheet '${parent.name}' is not ${typeName}.")
     }
   }
 

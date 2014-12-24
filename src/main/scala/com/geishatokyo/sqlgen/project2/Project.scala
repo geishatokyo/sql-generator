@@ -36,7 +36,7 @@ trait Project extends Function1[Workbook,Workbook] {
     val sheetName = onSheetName.value
     processes :+=( (w : Workbook) => {
       w.sheetsMatchingTo(sheetName).foreach(s => {
-        s.name := newSheetName
+        s.name = newSheetName
       })
     })
   }
@@ -74,7 +74,7 @@ trait Project extends Function1[Workbook,Workbook] {
           guess(h.name)
         })
 
-        s.replaceIds(ids.map(_.name.value) :_*)
+        s.replaceIds(ids.map(_.name) :_*)
       })
     })
   }
@@ -102,7 +102,7 @@ trait Project extends Function1[Workbook,Workbook] {
   def filterRow( func : Row => Boolean) = {
     val sheetName = onSheetName.value
     processes :+=( (w : Workbook) => {
-      w.sheets.foreach(s => s.name.value match {
+      w.sheets.foreach(s => s.name match {
         case sheetName() => {
           currentSheet.withValue(s){
             for (i <- ((s.rowSize -1 ) to 0 by -1)){
@@ -123,7 +123,7 @@ trait Project extends Function1[Workbook,Workbook] {
   def foreachRow( func : Row => Unit) = {
     val sheetName = onSheetName.value
     processes :+=( (w : Workbook) => {
-      w.sheets.foreach(s => s.name.value match {
+      w.sheets.foreach(s => s.name match {
         case sheetName() => {
           currentSheet.withValue(s){
             for (i <- ((s.rowSize -1 ) to 0 by -1)){
@@ -144,12 +144,12 @@ trait Project extends Function1[Workbook,Workbook] {
   def validate(func : Row => Boolean) = {
     val sheetName = onSheetName.value
     processes :+=( (w : Workbook) => {
-      w.sheets.foreach(s => s.name.value match {
+      w.sheets.foreach(s => s.name match {
         case sheetName() => {
           currentSheet.withValue(s){
             s.rows.foreach(row => {
               if(!func(row)){
-                throw new Exception("Validation error at %s:%s".format(sheetName,row.index))
+                throw new Exception("Validation error at %s:%s".format(sheetName,row.rowIndex))
               }
             })
           }
@@ -189,28 +189,28 @@ trait Project extends Function1[Workbook,Workbook] {
     v.value
   }
   implicit def cellToStringOps( v : Cell) = {
-    new StringOps( v.value)
+    new StringOps( v.asString)
   }
 
   case class ColumnAddress(sheetName : Option[String],columnName : String){
-    override def toString = currentRow.value.apply(columnName).value
+    override def toString = cell.asString
 
-    def toLong = toString().toLong
-    def toInt = toString().toInt
-    def toDouble = toString.toDouble
+    def cell = currentRow.value(columnName)
+
+    def toLong = cell.asLong
+    def asLong = cell.asLong
+    def toInt = cell.asInt
+    def asInt = cell.asInt
+    def toDouble = cell.asDouble
+    def asDouble = cell.asDouble
     def s = toString
     def i = toInt
     def l = toLong
     def d = toDouble
 
-    def tryCastToLong = try{
-      Some(toLong)
-    }catch{
-      case e : NumberFormatException => None
-    }
 
     def +( ca : ColumnAddress) : String = {
-      (this.tryCastToLong,ca.tryCastToLong) match{
+      (this.cell.asLongOp,ca.cell.asLongOp) match{
         case (Some(v1),Some(v2)) => (v1 + v2).toString
         case _ => this.toString + ca.toString
       }
@@ -256,8 +256,8 @@ trait Project extends Function1[Workbook,Workbook] {
      */
     def findFirstAbove(cond : String => Boolean) : Option[String] = {
       val sheet = currentSheet.value
-      (currentRow.value.index - 1 to 0 by -1).view.map(index => {
-        sheet.row(index)(columnName).value
+      (currentRow.value.rowIndex - 1 to 0 by -1).view.map(index => {
+        sheet.row(index)(columnName).asString
       }).find( cond(_))
     }
     def searchFirstAbove(cond : String => Boolean) = findFirstAbove(cond).get
@@ -268,16 +268,16 @@ trait Project extends Function1[Workbook,Workbook] {
      */
     def findFirstBelow(cond : String => Boolean): Option[String] = {
       val sheet = currentSheet.value
-      (currentRow.value.index + 1 until sheet.rowSize).view.map(index => {
-        sheet.row(index)(columnName).value
+      (currentRow.value.rowIndex + 1 until sheet.rowSize).view.map(index => {
+        sheet.row(index)(columnName).asString
       }).find( cond(_))
     }
     def searchFirstBelow(cond : String => Boolean) = findFirstBelow(cond).get
 
     def validate( func : String => Boolean) = {
       currentSheet.value.rows.foreach( row => {
-        if(!func(row(columnName))){
-          throw new Exception("Validation error at %s@%s:%s".format(sheetName.get,columnName,row.index))
+        if(!func(row(columnName).asString)){
+          throw new Exception("Validation error at %s@%s:%s".format(sheetName.get,columnName,row.rowIndex))
         }
       })
 
@@ -299,7 +299,7 @@ trait Project extends Function1[Workbook,Workbook] {
     def searchIdIs( v: => String) : Row = {
       search( r => {
         val id = r.parent.ids(0)
-        r(id.name) == v
+        r(id.name).asString == v
       })
     }
 
@@ -320,7 +320,7 @@ trait Project extends Function1[Workbook,Workbook] {
     def findIdIs( v : => String) : Option[Row] = {
       find( r => {
         val id = r.parent.ids(0)
-        r(id.name) == v
+        r(id.name).asString == v
       })
     }
 
@@ -349,7 +349,7 @@ trait Project extends Function1[Workbook,Workbook] {
     def validate( func : Row => Boolean) = {
       substance.foreach(_.rows.foreach( row => {
         if(!func(row)){
-          throw new Exception("Validation error at %s:%s".format(sheetName,row.index))
+          throw new Exception("Validation error at %s:%s".format(sheetName,row.rowIndex))
         }
       }))
     }
@@ -379,7 +379,7 @@ trait Project extends Function1[Workbook,Workbook] {
     processes :+= ( (w : Workbook) => {
       val names = sheets.map(_.sheetName).toSet
       w.sheets.foreach(s => {
-        s.ignore = !names.contains(s.name.value)
+        s.ignore = !names.contains(s.name)
       })
     })
   }
@@ -451,7 +451,7 @@ trait Project extends Function1[Workbook,Workbook] {
                 if (condition(r)){
                   val c = r(columnName)
                   c := {
-                    func(c.value).toString
+                    func(c.asString)
                   }
                 }
               }
@@ -467,7 +467,7 @@ trait Project extends Function1[Workbook,Workbook] {
     }
 
     def when( func : String => Boolean) = {
-      condition = Some(r => func( r(columnName)))
+      condition = Some(r => func( r(columnName).asString))
       this
     }
 
@@ -480,7 +480,7 @@ trait Project extends Function1[Workbook,Workbook] {
 
       processes :+=( (w : Workbook) => {
         w.sheetsMatchingTo(sheetNameRegex).foreach(sheet => {
-          sheet.header(columnName).name := newName
+          sheet.header(columnName).name = newName
         })
       })
       this
@@ -631,7 +631,7 @@ trait Project extends Function1[Workbook,Workbook] {
           case Some(s) => {
             val s = w(sheetName)
             val s2 = s.copy()
-            s2.name := newSheetName
+            s2.name = newSheetName
             w.addSheet(s2)
           }
           case None => {
@@ -645,7 +645,7 @@ trait Project extends Function1[Workbook,Workbook] {
           case Some(s) => {
             val s = w(sheetName)
             val s2 = s.copy()
-            s2.name := newSheetName
+            s2.name = newSheetName
             w.addSheet(modify(s2))
           }
           case None => {

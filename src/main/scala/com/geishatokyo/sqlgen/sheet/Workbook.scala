@@ -29,10 +29,10 @@ class Workbook extends scala.collection.mutable.Map[String,Sheet]{
   }
 
   def get(key: String) = sheets.find(s => {
-    s.name =~= key
+    s.name == key
   })
 
-  def iterator = _sheets.map(s => s.name.value -> s).iterator
+  def iterator = _sheets.map(s => s.name -> s).iterator
 
 
 
@@ -40,12 +40,12 @@ class Workbook extends scala.collection.mutable.Map[String,Sheet]{
   override def apply(name : String) : Sheet = getSheet(name).getOrElse(
     throw new SheetNotFoundException(name)
   )
-  def getSheet(name : String) = sheets.find(_.name =~= name)
+  def getSheet(name : String) = sheets.find(_.name == name)
 
-  def hasSheet(name : String) = sheets.exists(_.name =~= name)
+  def hasSheet(name : String) = sheets.exists(_.name == name)
 
   def sheetsMatchingTo(sheetNameRegex : Regex) = {
-    sheets.filter( s => sheetNameRegex.findFirstIn(s.name.value).isDefined)
+    sheets.filter( s => sheetNameRegex.findFirstIn(s.name).isDefined)
   }
 
   def foreachSheet[T]( func : Sheet => T) : List[T] = {
@@ -66,14 +66,14 @@ class Workbook extends scala.collection.mutable.Map[String,Sheet]{
    * @param sheet
    */
   def replaceSheet(sheet : Sheet) = {
-    deleteSheet(sheet.name.value)
+    deleteSheet(sheet.name)
     addSheet(sheet)
   }
 
   def deleteSheet(sheetName : String) = {
     getSheet(sheetName) match{
       case Some(_) => {
-        sheets = sheets.filterNot(s => s.name =~= sheetName)
+        sheets = sheets.filterNot(s => s.name == sheetName)
         true
       }
       case _ => false
