@@ -1,6 +1,6 @@
 package com.geishatokyo.sqlgen.sheet
 
-import org.specs2.mutable.Specification
+import org.scalatest.{Matchers, FlatSpec}
 import com.geishatokyo.sqlgen.project2.input.XLSLoader
 import java.util.Date
 
@@ -9,10 +9,10 @@ import java.util.Date
  * User: takeshita
  * DateTime: 13/10/15 12:44
  */
-class LoadTest extends Specification{
+class LoadTest extends FlatSpec with Matchers{
 
 
-  "XLSLoader" should{
+  "XLSLoader" should
     "load expression" in {
 
       val s = XLSLoader.load(getClass.getClassLoader.getResourceAsStream("LoadTest.xls"))
@@ -21,16 +21,16 @@ class LoadTest extends Specification{
 
       val row = s.sheets(0).row(0)
 
-
+      println(row("time").value + "  : " + row("time").value.getClass)
       val d = row("time").asString
       println(d + " --- " + row("time").asDate + " -- " + row.header("time"))
 
-      row("sum").value.toDouble === (row("price").value.toLong * row("count").value.toInt)
+      assert(row("sum").asInt == (row("price").asInt * row("count").asInt))
 
 
 
 
     }
-  }
+
 
 }

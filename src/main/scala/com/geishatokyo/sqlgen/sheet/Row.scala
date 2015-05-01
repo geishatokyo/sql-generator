@@ -26,7 +26,9 @@ class Row(val parent : Sheet,val headers : List[ColumnHeader],val cells : List[C
 
   def unit(index : Int) = CellUnit(headers(index),cells(index))
 
-  def units = headers.zip(cells).map(p => CellUnit(p._1,p._2))
+  def units = {
+    headers.zip(cells).map(p => CellUnit(p._1,p._2))
+  }
 
   def indexOf(columnName : String) = {
     headers.indexWhere(h => h.name == columnName)

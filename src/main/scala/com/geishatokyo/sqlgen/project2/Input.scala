@@ -6,7 +6,6 @@ import java.io.File
 import com.geishatokyo.sqlgen.util.FileUtil
 import com.geishatokyo.sqlgen.process.input.SingleXLSLoader
 import com.geishatokyo.sqlgen.Context
-import com.geishatokyo.sqlgen.sheet.load.hssf.XLSSheetLoader
 
 /**
  * 

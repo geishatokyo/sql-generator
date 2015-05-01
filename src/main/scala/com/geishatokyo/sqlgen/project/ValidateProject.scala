@@ -4,6 +4,7 @@ import com.geishatokyo.sqlgen.sheet.{Column, CellUnit, Row, Cell}
 import com.geishatokyo.sqlgen.Project
 import com.geishatokyo.sqlgen.logger.Logger
 import com.geishatokyo.sqlgen.project.ValidateProject.ValidationTask
+import scala.xml._
 
 /**
  *
@@ -80,15 +81,15 @@ trait ValidateProject extends Project with SheetScope {
 object ValidateProject{
 
   val notEmpty = new CompositeFuncImpl(v => {v != null && v.length > 0},"HasEmptyColumn")
-//  val validXml = new CompositeFuncImpl(v => {
-//    try{
-//      XML.loadString("<root>%s</root>".format(v))
-//      true
-//    }catch{
-//      case e : Throwable => false
-//    }
-//  },"NotValidXML")
-//
+  val validXml = new CompositeFuncImpl(v => {
+    try{
+      XML.loadString("<root>%s</root>".format(v))
+      true
+    }catch{
+      case e : Throwable => false
+    }
+  },"NotValidXML")
+
 //  val validJson = new CompositeFuncImpl(v => {
 //    try{
 //      JSON.parseRaw(v) match{

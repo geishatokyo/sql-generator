@@ -1,6 +1,6 @@
 package com.geishatokyo.sqlgen.project2
 
-import org.specs2.mutable.Specification
+import org.scalatest.{Matchers, FlatSpec}
 import com.geishatokyo.sqlgen.sheet.{Sheet, Workbook}
 
 /**
@@ -8,7 +8,7 @@ import com.geishatokyo.sqlgen.sheet.{Sheet, Workbook}
  * User: takeshita
  * DateTime: 13/07/11 23:34
  */
-class ProjectTest  extends Specification{
+class ProjectTest  extends FlatSpec with Matchers{
 
   var workbook = new Workbook()
 
@@ -49,7 +49,7 @@ class ProjectTest  extends Specification{
       forColumn("name") map(v => v + v) when(_ == "Tom");
       forColumn("displayName") map(v => column("name") + column("age")) ifEmpty;
       forColumn("nickname") set({
-        sheet("Sheet2").search(_("id") == column("id"))("nickname")
+        sheet("Sheet2").search(_("id").asString == column("id").toString)("nickname").asString
       })
 
       forColumn("age") renameTo("ageeee")
@@ -69,7 +69,7 @@ class ProjectTest  extends Specification{
 
 
 
-  "Project" should{
+  "Project" should
     "modify column values" in {
 
       val p = new SampleProject()
@@ -77,21 +77,20 @@ class ProjectTest  extends Specification{
       val w = p(workbook)
 
 
-      w("Sheet1").row(0)("name").value === "TomTom"
+      assert(w("Sheet1").row(0)("name").value == "TomTom")
 
 
-      w("Sheet1").row(0)("displayName").value === "TomTom21"
-      w("Sheet1").row(0)("nickname").value === "Tommy"
+      assert(w("Sheet1").row(0)("displayName").value == "TomTom21")
+      assert(w("Sheet1").row(0)("nickname").value == "Tommy")
 
 
     }
 
+  "Project" should
     "input then output" in {
       withWorkbook(this.workbook) >> new SampleProject >> console
 
-      ok
     }
-  }
 
 
 }

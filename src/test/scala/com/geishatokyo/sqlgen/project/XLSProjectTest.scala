@@ -7,7 +7,7 @@ import com.geishatokyo.sqlgen.process.input.SingleXLSLoader
 import com.geishatokyo.sqlgen.process.output.SQLOutputProvider
 import com.geishatokyo.sqlgen.process.ensure.EnsureProcessProvider
 import com.geishatokyo.sqlgen.process.MapContext
-import org.specs2.mutable.Specification
+import org.scalatest.{Matchers, FlatSpec}
 import com.geishatokyo.sqlgen.process.input.InputHelpers._
 
 /**
@@ -16,25 +16,24 @@ import com.geishatokyo.sqlgen.process.input.InputHelpers._
  * Create: 12/07/12 16:48
  */
 
-class XLSProjectTest extends Specification {
+class XLSProjectTest extends FlatSpec with Matchers {
 
-  "BaseProject executor" should {
-
+  "BaseProject executor" should
     "apply project specification" in{
 
       val executor = new ExecutorUsage()
 
       val workbook = executor.execute(file("sample2.xls"))
 
-      workbook.getSheet("IgnoredSheet") must beNone
+      assert(workbook.getSheet("IgnoredSheet") == None)
 
       val sheet = workbook("Converted")
-      sheet.existColumn("id") must_== true
-      sheet.existColumn("time") must_== true
-      sheet.existColumn("language") must_== true
-      sheet.existColumn("autoAdded") must_== true
+      assert(sheet.existColumn("id") == true)
+      assert(sheet.existColumn("time") == true)
+      assert(sheet.existColumn("language") == true)
+      assert(sheet.existColumn("autoAdded") == true)
     }
-  }
+
 
 
 }

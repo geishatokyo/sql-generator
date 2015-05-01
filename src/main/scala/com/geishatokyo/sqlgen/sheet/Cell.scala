@@ -12,7 +12,7 @@ import org.apache.poi.ss.usermodel.DateUtil
  * Create: 12/07/11 21:05
  */
 
-case class Cell(parent : Sheet,var value : Any) {
+class Cell(parent : Sheet,var value : Any) {
 
   var tag : Any = null
 
@@ -135,4 +135,15 @@ case class Cell(parent : Sheet,var value : Any) {
     }
   }
 
+  override def equals(obj: scala.Any): Boolean = {
+    obj match{
+      case c : Cell => c.value == value
+      case v => v == value
+    }
+  }
+
+  override def toString(): String = {
+    if(value != null) value.toString
+    else "''"
+  }
 }

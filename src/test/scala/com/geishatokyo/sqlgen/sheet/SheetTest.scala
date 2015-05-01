@@ -1,6 +1,7 @@
 package com.geishatokyo.sqlgen.sheet
 
-import org.specs2.mutable.Specification
+import org.scalatest.{FlatSpec, Matchers}
+
 
 /**
  *
@@ -8,9 +9,9 @@ import org.specs2.mutable.Specification
  * Create: 12/07/12 17:39
  */
 
-class SheetTest extends Specification {
+class SheetTest extends FlatSpec with Matchers  {
 
-  "Sheet " should{
+  "Sheet " should
     "add column" in {
       val sheet = new Sheet("TestSheet")
 
@@ -27,11 +28,10 @@ class SheetTest extends Specification {
 
       println(sheet)
 
-      sheet(1,0) must_== "a"
+      assert(sheet(1,0) == "a")
 
-      sheet(1,2) must_== "Override"
-      sheet.cellAt(1,2).initialValue must_== "c"
+      assert(sheet(1,2) == "Override")
     }
-  }
+
 
 }

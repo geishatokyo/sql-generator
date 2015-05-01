@@ -6,7 +6,7 @@ import com.geishatokyo.sqlgen.process.output.SQLOutputProvider
 import com.geishatokyo.sqlgen.process.{Proc, MapContext}
 import com.geishatokyo.sqlgen.process.input.{InputHelpers, SingleXLSLoader}
 import com.geishatokyo.sqlgen.process.ensure.EnsureProcessProvider
-import org.specs2.mutable.Specification
+import org.scalatest.{Matchers, FlatSpec}
 import InputHelpers._
 
 /**
@@ -15,18 +15,16 @@ import InputHelpers._
  * Create: 12/07/14 2:31
  */
 
-class I18NExecutorTest extends Specification {
+class I18NExecutorTest extends FlatSpec with Matchers {
 
-  "i18nExecutor" should{
-
+  "i18nExecutor" should
     "merge i18n files" in{
       val executor = new I18NExecutorSample()
       val wb = executor.execute( file("i18n/i18n.xls"))
 
       println(wb)
-      ok
     }
-  }
+
 
 }
 

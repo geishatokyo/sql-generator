@@ -1,6 +1,6 @@
 package com.geishatokyo.sqlgen.sample
 
-import org.specs2.mutable.Specification
+import org.scalatest.{Matchers, FlatSpec}
 import com.geishatokyo.sqlgen.{Context, Executor}
 import com.geishatokyo.sqlgen.importall._
 import com.geishatokyo.sqlgen.process.input.InputHelpers._
@@ -13,16 +13,14 @@ import com.geishatokyo.sqlgen.setting.GTEDefaultProject
  * Create: 12/07/12 18:32
  */
 
-class PlainProjectTest extends Specification {
+class PlainProjectTest extends FlatSpec with Matchers {
 
-  "Executor" should{
+  "Executor" should
     "load xls and save sql" in {
       val exe = new SimpleExecutor
       exe.execute(file("sample.xls"))
-
-      ok
     }
-  }
+
 
 }
 

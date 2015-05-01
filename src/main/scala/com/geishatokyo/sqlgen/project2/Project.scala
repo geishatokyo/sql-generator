@@ -1,5 +1,7 @@
 package com.geishatokyo.sqlgen.project2
 
+import com.geishatokyo.sqlgen.SQLGenException
+
 import util.DynamicVariable
 import com.geishatokyo.sqlgen.sheet._
 import sun.rmi.server.InactiveGroupException
@@ -15,16 +17,128 @@ import java.util.regex.Pattern
  */
 trait Project extends Function1[Workbook,Workbook] {
 
-  protected val onSheetName = new DynamicVariable[Regex](null)
+  object ScopeLevel extends Enumeration{
+    val None = Value
+    val Workbook = Value
+    val Sheet = Value
+    val Row = Value
+    val Cell = Value
+  }
+
+  protected var scopeLevel = ScopeLevel.None
   protected val currentWorkbook = new DynamicVariable[Workbook](null)
   protected val currentSheet = new DynamicVariable[Sheet](null)
   protected val currentRow = new DynamicVariable[Row](null)
+  protected val currentCell = new DynamicVariable[Cell](null)
+
+  def sheet = currentSheet.value
+  def workbook = currentWorkbook.value
+  def row = currentRow.value
+  def cell = currentCell.value
+
 
   protected var processes : List[Workbook => Any] = Nil
 
+  def workbookLevelFunc( func : Workbook => Any) = {
+    processes :+= func
+    func
+  }
+  def sheetLevelFunc(selector : Workbook => List[Sheet],func : Sheet => Any) = {
+    val f : Workbook => Any = w => {
+      selector(w).foreach(s => {
+        currentSheet.withValue(s){
+          scopeLevel = ScopeLevel.Sheet
+          func(s)
+        }
+      })
+    }
+    workbookLevelFunc(f)
+    f
+  }
+
+
+  def rowLevelFunc(selector : Workbook => List[Sheet],func : Row => Any) = {
+    sheetLevelFunc(selector , s => {
+      s.rows.foreach(r => {
+        currentRow.withValue(r) {
+          scopeLevel = ScopeLevel.Row
+          func(r)
+        }
+      })
+    })
+  }
+
+  def onSheetOrWorkbookLevel(func : Sheet => Any) = {
+    scopeLevel match{
+      case ScopeLevel.None => {
+        throwScopeException("workbook or sheet")
+      }
+      case ScopeLevel.Workbook => {
+        workbook.sheets.foreach(func)
+      }
+      case _ => {
+        func(sheet)
+      }
+    }
+  }
+
+  def onSheetLevel(func : Sheet => Any) = {
+    scopeLevel match{
+      case ScopeLevel.None => {
+        throwScopeException("sheet")
+      }
+      case ScopeLevel.Workbook => {
+        throwScopeException("Sheet")
+      }
+      case _ => {
+        func(sheet)
+      }
+    }
+  }
+
+  def withSheet(sheet : Sheet)(func : => Unit) = {
+    scopeLevel match{
+      case ScopeLevel.Workbook => {
+        currentSheet.withValue(sheet){
+          scopeLevel = ScopeLevel.Sheet
+          func
+        }
+      }
+      case _ => {
+        throwScopeException("Workbook")
+      }
+    }
+  }
+  def withRow(row : Row)( func : => Unit) = {
+    scopeLevel match{
+      case ScopeLevel.Sheet => {
+        currentRow.withValue(row){
+          scopeLevel = ScopeLevel.Row
+          func
+        }
+      }
+      case _ => {
+        throwScopeException("Sheet")
+      }
+    }
+  }
+  def withCell(cell : Cell)( func : => Unit) = {
+    scopeLevel match{
+      case ScopeLevel.Row => {
+        currentCell.withValue(cell){
+          scopeLevel = ScopeLevel.Cell
+          func
+        }
+      }
+      case _ => {
+        throwScopeException("Row")
+      }
+    }
+  }
+
   def addSheet(sheetName : String) = {
-    processes :+=( (w: Workbook) => {
-      if (!w.hasSheet(sheetName)){
+    workbookLevelFunc(w => {
+      if(!w.hasSheet(sheetName)){
         w.addSheet(new Sheet(sheetName))
       }
     })
@@ -32,67 +146,68 @@ trait Project extends Function1[Workbook,Workbook] {
 
   def newSheet(newSheetName : String) = new NewSheet(newSheetName)
 
-  def renameTo(newSheetName : String) {
-    val sheetName = onSheetName.value
-    processes :+=( (w : Workbook) => {
-      w.sheetsMatchingTo(sheetName).foreach(s => {
-        s.name = newSheetName
-      })
-    })
+  @inline
+  def throwScopeException(scope : String) = {
+    throw new SQLGenException(s"Must use in ${scope} scope")
+  }
+
+  def renameTo(newSheetName : String) = {
+    onSheetLevel(sheet => sheet.name = newSheetName)
   }
 
   def guessColumnType( guess : PartialFunction[String,ColumnType.Value]) = {
-
-    if (onSheetName.value != null){
-      val sheetName = onSheetName.value
-      processes :+= ((w : Workbook) => {
-        w.sheetsMatchingTo(sheetName).foreach(s => {
-          s.headers.foreach(h => {
-            if (guess.isDefinedAt(h.name)){
-              h.columnType = guess(h.name)
-            }
-          })
-        })
+    onSheetOrWorkbookLevel(s => {
+      s.headers.foreach(h => {
+        if (guess.isDefinedAt(h.name)){
+          h.columnType = guess(h.name)
+        }
       })
-    }else{
-      processes :+= ((w : Workbook) => {
-        w.sheets.foreach(s => {
-          s.headers.foreach(h => {
-            if (guess.isDefinedAt(h.name)){
-              h.columnType = guess(h.name)
-            }
-          })
-        })
-      })
-    }
-
+    })
   }
   def guessId( guess : String => Boolean) = {
-    processes :+= ((w : Workbook) => {
-      w.sheets.foreach(s => {
-        val ids = s.headers.filter(h => {
-          guess(h.name)
-        })
-
-        s.replaceIds(ids.map(_.name) :_*)
+    onSheetOrWorkbookLevel(s => {
+      val ids = s.headers.filter(h => {
+        guess(h.name)
       })
+      if(ids.size > 0){
+        s.replaceIds(ids.map(_.name) :_*)
+      }
     })
   }
 
 
-  def onSheet(sheetName : String)( func : => Unit) = {
-    onSheetName.withValue( ("^" + Pattern.quote(sheetName) + "$").r){
-      func
-    }
+  def onSheet(sheetName : String)( func : => Unit) : Unit = {
+    onSheet(("^" + Pattern.quote(sheetName) + "$").r)(func)
   }
 
-  def onSheet( sheetNameRegex : Regex)(func : => Unit) = {
-    onSheetName.withValue( sheetNameRegex){
+  def onSheet( sheetNameRegex : Regex)(func : => Unit) : Unit = {
+    sheetLevelFunc(workbook => {
+      workbook.sheets.filter(sheet => {
+        sheetNameRegex.findFirstMatchIn(sheet.name).isDefined
+      })
+    },sheet => {
       func
-    }
+    })
   }
 
   // ##########  Use inside of onSheet function. ##################
+
+  def onColumn(columnName : String)(func : => Any) = {
+    onSheetLevel(sheet => {
+      val column = sheet.column(columnName)
+      sheet.rows.foreach(row => {
+        withRow(row){
+          val cell = row(columnName)
+          withCell(cell){
+            func
+          }
+        }
+      })
+    })
+  }
+  def column(columnName : String) : ColumnMapping = {
+    new ColumnMapping(columnName.r)
+  }
 
   def forColumn(columnName : String) : ColumnMapping = {
     return new ColumnMapping(onSheetName.value, columnName)
@@ -203,6 +318,7 @@ trait Project extends Function1[Workbook,Workbook] {
     def asInt = cell.asInt
     def toDouble = cell.asDouble
     def asDouble = cell.asDouble
+    def asString = toString
     def s = toString
     def i = toInt
     def l = toLong
@@ -272,6 +388,7 @@ trait Project extends Function1[Workbook,Workbook] {
         sheet.row(index)(columnName).asString
       }).find( cond(_))
     }
+
     def searchFirstBelow(cond : String => Boolean) = findFirstBelow(cond).get
 
     def validate( func : String => Boolean) = {
@@ -416,9 +533,43 @@ trait Project extends Function1[Workbook,Workbook] {
 
 
 
+  class ColumnRef(columnName : String){
+    def :=( value : => Any) = {
+      set(value)
+    }
+    def map(func : String => Any) = {
+
+    }
+    def set( value : => Any) = {
+
+    }
+
+    def renameTo(newColumnName : String) = {
+      onColumn(columnName){
+
+      }
+    }
+  }
+
+  class ConditionController(proc : Workbook => Any){
+
+    def ifEmpty = {
+
+    }
+
+    def when( condition : => Boolean) = {
+
+    }
+
+    def always = {
+
+    }
+
+  }
 
 
-  class ColumnMapping(sheetNameRegex : Regex,columnName : String) {
+
+  class ColumnMapping(columnName : String) {
 
     var condition : Option[Row => Boolean] = None
 

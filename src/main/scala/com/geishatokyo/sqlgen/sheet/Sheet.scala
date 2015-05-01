@@ -72,8 +72,8 @@ class Sheet(var name : String) {
   }
 
 
-  def apply( row : Int, col : Int) = {
-    cells(row)(col).value
+  def apply( row : Int, col : Int) : Cell = {
+    cells(row)(col)
   }
 
   def indexOf(cell : Cell) : (Int,Int) = {
