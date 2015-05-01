@@ -4,10 +4,6 @@ import Keys._
 object AvatarXlsConverterBuild extends Build {
 
   
-  def ideaPluginSettings = {
-    import org.sbtidea.SbtIdeaPlugin
-    SbtIdeaPlugin.settings
-  }
   
   lazy val dependencies = Seq(
     "org.apache.poi" % "poi" % "3.7",
@@ -20,7 +16,7 @@ object AvatarXlsConverterBuild extends Build {
 
   lazy val root = Project(id = "sql-generator",
     base =  file("."),
-    settings = Project.defaultSettings ++ ideaPluginSettings ++ Seq(
+    settings = Project.defaultSettings ++ Seq(
       version := "0.2.0-SNAPSHOT",
       organization := "com.geishatokyo",
       description := "Converter from xls to sql",
