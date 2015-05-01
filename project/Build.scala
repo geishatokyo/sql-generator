@@ -24,7 +24,7 @@ object AvatarXlsConverterBuild extends Build {
       version := "0.2.0-SNAPSHOT",
       organization := "com.geishatokyo",
       description := "Converter from xls to sql",
-      scalaVersion := "2.11.4",
+      scalaVersion := "2.11.6",
       libraryDependencies ++= dependencies
     )
   )
