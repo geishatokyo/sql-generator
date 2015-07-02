@@ -5,6 +5,7 @@ import java.text.SimpleDateFormat
 import com.geishatokyo.sqlgen.SQLGenException
 import com.geishatokyo.sqlgen.util.{DateFormat, TimeUtil}
 import org.apache.poi.ss.usermodel.DateUtil
+import com.geishatokyo.sqlgen.logger.Logger
 
 /**
  *
@@ -118,15 +119,15 @@ case class Cell(parent : Sheet,var value : Any) {
   }catch{
     case e : Throwable => None
   }
-  def asDateOpOfExcelTime = try{
-    value match {
-      case s : String => DateFormat.parse(s)
-      case _ => {
-        asDoubleOp.map(d => TimeUtil.excelTimeToJavaDate(d))
-      }
+  def asDateOpOfExcelTime : Option[Date] = try{
+    asDoubleOp.map(d => TimeUtil.excelTimeToJavaDate(d)) orElse{
+      DateFormat.parse(value.toString)
     }
   }catch{
-    case e : Throwable => None
+    case e : Throwable => {
+      Logger.log("Wring date format:" + value)
+      None
+    }
   }
 
   def niceGet[T]( op : Option[T])(typeName : String) = {
