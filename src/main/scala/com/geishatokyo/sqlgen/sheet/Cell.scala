@@ -14,6 +14,12 @@ import org.apache.poi.ss.usermodel.DateUtil
 
 class Cell(parent : Sheet,var value : Any) {
 
+  var rowIndex = 0
+  var columnIndex = 0
+
+  def row = parent.row(rowIndex)
+  def column = parent.column(columnIndex)
+
   var tag : Any = null
 
   def copy(newParent : Sheet) = {
@@ -21,7 +27,10 @@ class Cell(parent : Sheet,var value : Any) {
   }
 
   def :=( v : Any) = {
-    this.value = v
+    v match{
+      case c : Cell => this.value = c.value
+      case a => this.value = a
+    }
   }
 
   def isEmpty = value match {
@@ -111,6 +120,7 @@ class Cell(parent : Sheet,var value : Any) {
       case s : String => DateFormat.parse(s)
       case d : Double => Some(new Date((d * 1000).toLong))
       case f : Float => Some(new Date( (f * 1000).toLong))
+      case d : Date => Some(d)
       case _ => {
         None
       }
@@ -121,6 +131,7 @@ class Cell(parent : Sheet,var value : Any) {
   def asDateOpOfExcelTime = try{
     value match {
       case s : String => DateFormat.parse(s)
+      case d : Date => Some(d)
       case _ => {
         asDoubleOp.map(d => TimeUtil.excelTimeToJavaDate(d))
       }
@@ -141,6 +152,27 @@ class Cell(parent : Sheet,var value : Any) {
       case v => v == value
     }
   }
+
+  /**
+   * アバウトなEqual
+   * Valueの型によらず判定できる
+   * @param obj
+   * @return
+   */
+  def ~==(obj : scala.Any): Boolean = {
+    if(obj == null || value == null){
+      obj == value
+    }else {
+      obj match {
+        case c: Cell => this ~== c.value
+        case v => {
+          v == value ||
+          v.toString == value.toString
+        }
+      }
+    }
+  }
+  def !~==(obj : scala.Any): Boolean = !(this ~== obj)
 
   override def toString(): String = {
     if(value != null) value.toString

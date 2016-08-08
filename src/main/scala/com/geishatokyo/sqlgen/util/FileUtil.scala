@@ -80,9 +80,12 @@ object FileUtil extends FileFinder {
     }
   }
 
-  def loadFile(filePath : String) = {
+  def loadFile(filePath : String) : Array[Byte] = {
     val f = new File(findFile(filePath))
-    val input = new FileInputStream(f)
+    loadFile(f)
+  }
+  def loadFile(file: File) : Array[Byte] = {
+    val input = new FileInputStream(file)
     val fileData = new Array[Byte](input.available())
     input.read(fileData,0,fileData.length)
     input.close()
@@ -90,8 +93,16 @@ object FileUtil extends FileFinder {
 
   }
   
-  def loadFileAsString(filePath : String, encoding : String = "utf8") = {
+  def loadFileAsString(filePath : String, encoding : String) : String = {
     val f = new File(findFile(filePath))
+    loadFileAsString(f, encoding)
+  }
+
+
+  def loadFileAsString(f : File) : String = {
+    loadFileAsString(f,"utf-8")
+  }
+  def loadFileAsString(f : File, encoding : String) : String = {
     val input = new FileInputStream(f)
     val fileData = new Array[Byte](input.available())
     input.read(fileData,0,fileData.length)

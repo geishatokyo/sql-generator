@@ -35,17 +35,27 @@ class Sheet(var name : String) {
   protected var _columns : List[Column] = Nil
 
   def rows = _rows
-  protected def rows_=(v : List[Row]) = _rows = v
+  def rows_=(v : List[Row]) = {
+    _rows = v
+    rowsToCells()
+    cellsToColumns()
+    updateIndexes()
+  }
 
   def columns = _columns
-  protected def columns_=(v : List[Column]) = _columns = v
+  protected def columns_=(v : List[Column]) = {
+    _columns = v
+    columnsToCells()
+    cellsToRows()
+    updateIndexes()
+  }
 
   var ignore = false
 
 
 
   protected def cellsToRows() = {
-    rows = cells.zipWithIndex.map({
+    _rows = cells.zipWithIndex.map({
       case (values , index) => new Row(this,_headers,values)
     })
   }
@@ -53,7 +63,7 @@ class Sheet(var name : String) {
     cells = rows.map(_.cells)
   }
   protected def cellsToColumns() = {
-    columns = _headers.zipWithIndex.map({
+    _columns = _headers.zipWithIndex.map({
       case (header,index) => new Column(this,header, cells.map(_.apply(index)))
     })
   }
@@ -68,6 +78,17 @@ class Sheet(var name : String) {
         columns.map(c => c.cells(i))
       }).toList
       _headers = columns.map(_.header)
+    }
+  }
+  protected def updateIndexes() = {
+    for(c <- 0 until _columns.size;
+      r <- 0 until _rows.size
+    ) {
+      val cell = cellAt(r,c)
+
+      cell.rowIndex = r
+      cell.columnIndex = c
+
     }
   }
 
@@ -184,7 +205,7 @@ class Sheet(var name : String) {
     addRow(values,true)
   }
 
-  def addRow( values : List[String]) : Unit = {
+  def addRow( values : List[Any]) : Unit = {
     if(values.size != _headers.size) {
       throw new SQLGenException(
         "Column size missmatch.Sheet:%s Passed:%s".format(_headers.size,values.size))
@@ -192,6 +213,7 @@ class Sheet(var name : String) {
     cells = cells :+ values.map(v => new Cell(this,v))
     cellsToRows()
     cellsToColumns()
+    updateIndexes()
   }
 
   /**
@@ -215,7 +237,7 @@ class Sheet(var name : String) {
     addRow(row)
   }
 
-  def addRows( rows : List[List[String]]) = {
+  def addRows( rows : List[List[Any]]) = {
     if (!rows.forall(row => row.size == _headers.size)){
       throw new SQLGenException(
       "Column size missmatch.SheetRowSize:%s".format(_headers.size))
@@ -223,6 +245,7 @@ class Sheet(var name : String) {
     cells = cells ::: rows.map( row => row.map(v => new Cell(this,v)))
     cellsToRows()
     cellsToColumns()
+    updateIndexes()
 
   }
   def addRowCells( rows : List[List[Cell]]) = {
@@ -233,6 +256,7 @@ class Sheet(var name : String) {
     cells = cells ::: rows
     cellsToRows()
     cellsToColumns()
+    updateIndexes()
   }
 
   def replaceIds( idColumnNames : String*) = {
@@ -242,6 +266,7 @@ class Sheet(var name : String) {
     cells = cells :+ List.fill(_headers.size)(new Cell(this,""))
     cellsToRows()
     cellsToColumns()
+    updateIndexes()
   }
 
   protected def checkColumnExist(columnName : String){
@@ -268,6 +293,7 @@ class Sheet(var name : String) {
 
     columnsToCells
     cellsToRows
+    updateIndexes()
   }
 
   def addColumn(column : Column) = {
@@ -280,6 +306,7 @@ class Sheet(var name : String) {
 
     columnsToCells()
     cellsToRows()
+    updateIndexes()
   }
 
   /**
@@ -298,9 +325,13 @@ class Sheet(var name : String) {
         List.fill(rowSize)(new Cell(this,""))
       )
     }
-    columns = columns ::: columnNames.map(genColumn(_)).toList
-    columnsToCells
-    cellsToRows
+    val addedColumns = columnNames.map(genColumn(_)).toList
+    columns = columns ::: addedColumns
+    columnsToCells()
+    cellsToRows()
+    updateIndexes()
+
+    addedColumns
   }
 
   def overwriteColumn(columnName : String, values : List[String]) = {
@@ -316,16 +347,19 @@ class Sheet(var name : String) {
   }
 
 
-  def deleteRow(index : Int) : Unit = {
+  def deleteRow(index : Int) : Boolean = {
     rows = rows.take(index) ::: rows.drop(index + 1)
-    rowsToCells
-    cellsToColumns
+    rowsToCells()
+    cellsToColumns()
+    updateIndexes()
+    true
   }
 
   def deleteColumn(index : Int) : Boolean = {
     columns = columns.take(index) ::: columns.drop(index + 1)
-    columnsToCells
-    cellsToRows
+    columnsToCells()
+    cellsToRows()
+    updateIndexes()
     true
   }
 
@@ -346,6 +380,7 @@ class Sheet(var name : String) {
     newSheet.cells = this.cells.map(row => row.map(_.copy(newSheet)))
     newSheet.cellsToRows
     newSheet.cellsToColumns
+    newSheet.updateIndexes()
     newSheet
   }
 
@@ -356,6 +391,7 @@ class Sheet(var name : String) {
     newSheet.cells = this.cells.map(row => row.map(r => new Cell(newSheet,r.value)))
     newSheet.cellsToRows
     newSheet.cellsToColumns
+    newSheet.updateIndexes()
     newSheet
   }
 
@@ -365,6 +401,7 @@ class Sheet(var name : String) {
     newSheet._ids = this._ids
     newSheet.cellsToRows
     newSheet.cellsToColumns
+    newSheet.updateIndexes()
     newSheet
   }
 

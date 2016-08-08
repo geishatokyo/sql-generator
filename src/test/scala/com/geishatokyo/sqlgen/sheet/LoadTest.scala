@@ -1,7 +1,7 @@
 package com.geishatokyo.sqlgen.sheet
 
 import org.scalatest.{Matchers, FlatSpec}
-import com.geishatokyo.sqlgen.project2.input.XLSLoader
+import com.geishatokyo.sqlgen.project3.input.XLSLoader
 import java.util.Date
 
 /**
