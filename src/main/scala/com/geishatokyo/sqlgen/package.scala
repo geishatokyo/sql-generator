@@ -1,15 +1,17 @@
-package com.geishatokyo.sqlgen
+package com.geishatokyo
 
 import java.io.File
+import java.text.SimpleDateFormat
+import java.util.Date
 
-import com.geishatokyo.sqlgen.project3.flow.Output
-import com.geishatokyo.sqlgen.project3.input.{FileSource}
-import com.geishatokyo.sqlgen.project3.output.{XlsOutput, ConsoleOutput, SQLOutput}
+import com.geishatokyo.sqlgen.project.flow.Output
+import com.geishatokyo.sqlgen.project.input.FileSource
+import com.geishatokyo.sqlgen.project.output.{ConsoleOutput, SQLOutput, XlsOutput}
 
 /**
  * Created by takezoux2 on 15/05/05.
  */
-package object project3 {
+package object sqlgen {
 
 
   def file(file: String) = {
@@ -47,6 +49,14 @@ package object project3 {
   }
   def console : Output = {
     new ConsoleOutput
+  }
+
+  def now = {
+    new SimpleDateFormat("YYYY/MM/DD HH:mm:ss").format(new Date)
+  }
+
+  def today = {
+    new SimpleDateFormat("YYYY/MM/DD").format(new Date)
   }
 
 }

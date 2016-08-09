@@ -1,6 +1,6 @@
 package com.geishatokyo.sqlgen.setting
 
-import com.geishatokyo.sqlgen.project3.Project
+import com.geishatokyo.sqlgen.Project
 import com.geishatokyo.sqlgen.sheet.ColumnType
 
 /**

@@ -1,7 +1,7 @@
-package com.geishatokyo.sqlgen.project3.output
+package com.geishatokyo.sqlgen.project.output
 
 import com.geishatokyo.sqlgen.Context
-import com.geishatokyo.sqlgen.project3.flow.Output
+import com.geishatokyo.sqlgen.project.flow.Output
 import com.geishatokyo.sqlgen.sheet.Workbook
 
 /**

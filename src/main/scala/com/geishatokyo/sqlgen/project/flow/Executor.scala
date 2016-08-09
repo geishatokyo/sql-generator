@@ -1,6 +1,6 @@
-package com.geishatokyo.sqlgen.project3.flow
+package com.geishatokyo.sqlgen.project.flow
 
-import com.geishatokyo.sqlgen.project3.Project
+import com.geishatokyo.sqlgen.Project
 
 /**
   * Created by takezoux2 on 2016/08/05.
@@ -10,7 +10,8 @@ case class Executor(input: Input, project: Project) {
 
   def >>(output: Output) = {
     val t = input.read()
-    output.output(t._1,t._2)
+    val wb = project(t._2)
+    output.output(t._1,wb)
     this
   }
 

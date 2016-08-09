@@ -1,8 +1,8 @@
-package com.geishatokyo.sqlgen.project3.input
+package com.geishatokyo.sqlgen.project.input
 
 import java.io.File
 
-import com.geishatokyo.sqlgen.project3.flow.Input
+import com.geishatokyo.sqlgen.project.flow.Input
 import com.geishatokyo.sqlgen.util.FileUtil
 
 /**

@@ -1,4 +1,4 @@
-package com.geishatokyo.sqlgen.project3.input
+package com.geishatokyo.sqlgen.project.input
 
 import java.io.{File, FileInputStream, InputStream}
 

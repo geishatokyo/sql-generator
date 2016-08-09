@@ -12,7 +12,19 @@ import org.apache.poi.ss.usermodel.DateUtil
  * Create: 12/07/11 21:05
  */
 
-class Cell(parent : Sheet,var value : Any) {
+class Cell(parent : Sheet,private var _value : Any) {
+
+  def value = _value
+  def value_=(a: Any) = {
+    a match{
+      case c: Cell => {
+        _value = c.value
+      }
+      case _ => {
+        _value = a
+      }
+    }
+  }
 
   var rowIndex = 0
   var columnIndex = 0

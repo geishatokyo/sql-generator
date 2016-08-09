@@ -1,6 +1,6 @@
-package com.geishatokyo.sqlgen.project3.input
+package com.geishatokyo.sqlgen.project.input
 
-import com.geishatokyo.sqlgen.project3.flow.Input
+import com.geishatokyo.sqlgen.project.flow.Input
 
 /**
   * Created by takezoux2 on 2016/08/08.

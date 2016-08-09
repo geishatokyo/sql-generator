@@ -1,8 +1,8 @@
-package com.geishatokyo.sqlgen.project3.output
+package com.geishatokyo.sqlgen.project.output
 
 import com.geishatokyo.sqlgen.Context
 import com.geishatokyo.sqlgen.logger.Logger
-import com.geishatokyo.sqlgen.project3.flow.{Output}
+import com.geishatokyo.sqlgen.project.flow.{Output}
 import com.geishatokyo.sqlgen.sheet.{Sheet, Workbook}
 import com.geishatokyo.sqlgen.sheet.convert.{SQLiteConverter, MySQLConverter, SQLConverter}
 import com.geishatokyo.sqlgen.util.FileUtil
