@@ -15,15 +15,15 @@ package object sqlgen {
 
 
   def file(file: String) = {
-    new FileSource(new File(file))
+    new FileSource(new File(file)).asInput
   }
   def files(fs: List[String]) = {
-    new FileSource(fs.map(new File(_)):_*)
+    new FileSource(fs.map(new File(_)):_*).asInput
   }
   def lastDirIn(d: String) = {
     val file = new File(d)
     val dir = file.listFiles().filter(f => !f.isHidden && f.isDirectory).sortBy(_.getName).last
-    new FileSource(dir)
+    new FileSource(dir).asInput
   }
 
   def asMySQL : Output = {

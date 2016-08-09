@@ -29,6 +29,15 @@ class FileSource(files: File*) {
     new XLSInput(files.toList)
   }
 
+  def asInput() : Input = {
+    val xlss = listUpFiles(ext.getOrElse(List("xls","xlsx")))
+    if(xlss.size == 0){
+      new XLSInput(xlss.toList)
+    }else{
+      asCsv()
+    }
+  }
+
   def flatten(file: File,ext: List[String]) : Array[File] = {
     if(file.isFile) Array(file)
     else{

@@ -6,6 +6,8 @@ import com.geishatokyo.sqlgen.SQLGenException
 import com.geishatokyo.sqlgen.util.{DateFormat, TimeUtil}
 import org.apache.poi.ss.usermodel.DateUtil
 
+import scala.concurrent.duration.FiniteDuration
+
 /**
  *
  * User: takeshita
@@ -168,7 +170,8 @@ class Cell(parent : Sheet,private var _value : Any) {
   /**
    * アバウトなEqual
    * Valueの型によらず判定できる
-   * @param obj
+    *
+    * @param obj
    * @return
    */
   def ~==(obj : scala.Any): Boolean = {
@@ -185,6 +188,24 @@ class Cell(parent : Sheet,private var _value : Any) {
     }
   }
   def !~==(obj : scala.Any): Boolean = !(this ~== obj)
+
+  def +=( duration: FiniteDuration) = {
+    asDateOp match{
+      case Some(d) => {
+        _value = new Date(d.getTime + duration.toMillis)
+      }
+      case _ => throw new Exception(s"Can't add duration to non date cell.(${rowIndex}:${columnIndex})@${parent.name}")
+    }
+  }
+  def -=( duration: FiniteDuration) = {
+    asDateOp match{
+      case Some(d) => {
+        _value = new Date(d.getTime - duration.toMillis)
+      }
+      case _ => throw new Exception(s"Can't add duration to non date cell.(${rowIndex}:${columnIndex})@${parent.name}")
+    }
+  }
+
 
   override def toString(): String = {
     if(value != null) value.toString

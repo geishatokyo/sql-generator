@@ -49,6 +49,7 @@ trait Project {
   }
 
 
+  protected var preActions : List[(Workbook => Workbook)] = Nil
   protected var actions : List[(Workbook => Workbook)] = Nil
   protected var postActions : List[Workbook => Workbook] = Nil
 
@@ -95,6 +96,19 @@ trait Project {
   def addAction(action: Workbook => Workbook) = {
     actions = action :: actions
   }
+
+  /**
+    * 通常アクションの前に実行されるアクションを追加する
+    * @param action
+    */
+  def addPreActions(action: Workbook => Workbook) = {
+    preActions = action :: preActions
+  }
+
+  /**
+    * 通常アクションの後に実行されるアクションを実行する
+    * @param action
+    */
   def addPostActions(action: Workbook => Workbook) = {
     postActions = action :: postActions
   }

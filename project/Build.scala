@@ -12,7 +12,8 @@ object XlsConverterBuild extends Build {
 
   
   lazy val dependencies = Seq(
-    "org.apache.poi" % "poi" % "3.11",
+    "org.apache.poi" % "poi" % "3.14",
+    "org.apache.poi" % "poi-ooxml" % "3.14",
     "org.scala-lang.modules" %% "scala-xml" % "1.0.2" % "provided",
     "mysql" % "mysql-connector-java" % "5.1.18" % "provided",
     "com.amazonaws" % "aws-java-sdk" % "1.2.6" % "provided",
