@@ -8,6 +8,7 @@ object XlsConverterBuild extends Build {
     version := "0.3.0-SNAPSHOT",
     organization := "com.geishatokyo",
     description := "Converter from xls to sql",
+    name := "sql-generator",
     scalaVersion := ScalaVersion)
 
   

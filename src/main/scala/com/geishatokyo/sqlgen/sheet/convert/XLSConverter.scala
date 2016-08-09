@@ -4,6 +4,10 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook
 import com.geishatokyo.sqlgen.sheet.{CellUnit, Workbook}
 import com.geishatokyo.sqlgen.sheet.ColumnType
 
+
+import org.apache.poi.ss.usermodel
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+
 /**
  *
  * User: takeshita
@@ -12,8 +16,12 @@ import com.geishatokyo.sqlgen.sheet.ColumnType
 
 class XLSConverter {
 
-  def toHSSFSheet( workbook : Workbook) : HSSFWorkbook = {
-    val hssfWB = new HSSFWorkbook()
+  def toHSSFSheet( workbook : Workbook, isXlsx: Boolean) : usermodel.Workbook = {
+    val hssfWB = if(isXlsx){
+      new XSSFWorkbook()
+    }else {
+      new HSSFWorkbook()
+    }
 
     workbook.foreachSheet( sheet => {
       val hssfSheet = hssfWB.createSheet(sheet.name.toString)

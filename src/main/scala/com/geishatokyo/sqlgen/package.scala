@@ -45,7 +45,11 @@ package object sqlgen {
   }
 
   def asXLS(filename : String) : Output = {
-    new XlsOutput(filename)
+    new XlsOutput(filename,false)
+  }
+
+  def asXLSX(filename : String) : Output = {
+    new XlsOutput(filename,true)
   }
   def console : Output = {
     new ConsoleOutput

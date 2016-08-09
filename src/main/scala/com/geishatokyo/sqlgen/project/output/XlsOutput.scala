@@ -13,7 +13,7 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook
  * User: takeshita
  * DateTime: 13/07/12 2:54
  */
-class XlsOutput(path: String) extends Output{
+class XlsOutput(path: String, isXlsx: Boolean) extends Output{
 
   val logger = Logger.logger
 
@@ -27,7 +27,7 @@ class XlsOutput(path: String) extends Output{
     }
     val filename = FileUtil.joinPath(context.workingDir,name)
 
-    val xls = new XLSConverter().toHSSFSheet(workbook)
+    val xls = new XLSConverter().toHSSFSheet(workbook,isXlsx)
     logger.log("Save " + filename)
     FileUtil.saveTo(filename,xls)
   }

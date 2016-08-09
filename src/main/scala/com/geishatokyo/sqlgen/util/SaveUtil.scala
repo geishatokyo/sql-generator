@@ -14,7 +14,12 @@ object SaveUtil {
   val sqlConverter = new MySQLConverter
 
   def saveAsXls(filename : String,wb : Workbook) = {
-    val xls = xlsConverter.toHSSFSheet(wb)
+    val xls = xlsConverter.toHSSFSheet(wb,false)
+    FileUtil.saveTo(filename,xls)
+  }
+
+  def saveAsXlsx(filename : String,wb : Workbook) = {
+    val xls = xlsConverter.toHSSFSheet(wb,true)
     FileUtil.saveTo(filename,xls)
   }
 

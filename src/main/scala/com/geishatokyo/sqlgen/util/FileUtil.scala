@@ -2,7 +2,7 @@ package com.geishatokyo.sqlgen.util
 
 import com.geishatokyo.sqlgen.logger.Logger
 import java.io._
-import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import org.apache.poi.ss.usermodel
 import java.security.MessageDigest
 import io.Source
 import util.matching.Regex
@@ -161,7 +161,7 @@ object FileUtil extends FileFinder {
     })
   }
   
-  def saveTo(filename : String,  workbook : HSSFWorkbook) = {
+  def saveTo(filename : String,  workbook : usermodel.Workbook) = {
     _saveTo(filename,output => {
       workbook.write(output)
     })
