@@ -80,20 +80,36 @@ class Workbook extends scala.collection.mutable.Map[String,Sheet]{
     }
   }
 
+  /**
+    * シートをマージする。
+    * 同名のシートが存在する場合は結合される
+    * @param workbook
+    */
+  def merge(workbook: Workbook) = {
+    workbook.sheets.foreach(sheet => {
+      if(!this.contains(sheet.name)){
+        this.addSheet(sheet.copy())
+      }else{
+        val thisSheet = apply(sheet.name)
+        if(thisSheet.headers == sheet.headers){
+          thisSheet.addRows(sheet.rows)
+        }else{
+          val renamed = sheet.copy()
+          renamed.name = s"${workbook.name}_${sheet.name}"
+          this.addSheet(renamed)
+        }
+
+      }
+    })
+    this
+  }
+
   def copy() = {
     val wb = new Workbook()
     wb.name = name
     wb.sheets = sheets.map(_.copy())
     wb
   }
-
-  def copyWithoutHistory() = {
-    val wb = new Workbook()
-    wb.name = name
-    wb.sheets = sheets.map(_.copyWithoutHistory())
-    wb
-  }
-
   override def toString: String = {
     """WorkbookName:%s
 %s

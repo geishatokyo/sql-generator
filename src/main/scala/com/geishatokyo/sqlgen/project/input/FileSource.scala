@@ -2,40 +2,58 @@ package com.geishatokyo.sqlgen.project.input
 
 import java.io.File
 
-import com.geishatokyo.sqlgen.project.flow.Input
+import com.geishatokyo.sqlgen.Context
+import com.geishatokyo.sqlgen.project.flow.{InputData, Input}
+import com.geishatokyo.sqlgen.sheet.Workbook
 import com.geishatokyo.sqlgen.util.FileUtil
 
 /**
   * Created by takezoux2 on 2016/08/05.
   */
-class FileSource(files: File*) {
+class FileInput(files: File*) extends Input{
 
   var ext: Option[List[String]] = None
 
-  def listUpFiles(ext: List[String]) = {
+  val extensions = List("csv","xls","xlss")
+
+
+  override def read(): List[InputData] = {
+    val files = listUpFiles()
+
+    val (csvs,xlss) = files.partition(f => f.getName.endsWith(".csv"))
+
+    val wbs = xlss.map(f => {
+      val wb = XLSLoader.load(f)
+      val c = context.copy()
+      c.setWorkingDirIfNotSet(f.getParent)
+      InputData(c,wb)
+    }).toList
+
+    val csvWbs = csvs.groupBy(f => {
+      f.getParent
+    }).map({
+      case (dir,files) => {
+        val wb = new Workbook()
+        wb.name = new File(dir).getName
+        files.foreach(f => {
+          val sheet = CSVLoader.load(f)
+          wb.addSheet(sheet)
+        })
+        val c = context.copy()
+        c.setWorkingDirIfNotSet(dir)
+        InputData(c,wb)
+      }
+    }).toList
+
+
+    csvWbs ::: wbs
+
+  }
+
+  def listUpFiles() = {
     files.flatMap(f => {
-      flatten(f,ext)
+      flatten(f,extensions)
     })
-  }
-
-  def asCsv() : Input = {
-    val csvs = listUpFiles(ext.getOrElse(List("csv"))).map(file => {
-      FileUtil.loadFileAsString(file)
-    })
-    new CSVInput(csvs.toList)
-  }
-  def asXls() : Input = {
-    val files = listUpFiles(ext.getOrElse(List("xls","xlsx")))
-    new XLSInput(files.toList)
-  }
-
-  def asInput() : Input = {
-    val xlss = listUpFiles(ext.getOrElse(List("xls","xlsx")))
-    if(xlss.size > 0){
-      new XLSInput(xlss.toList)
-    }else{
-      asCsv()
-    }
   }
 
   def flatten(file: File,ext: List[String]) : Array[File] = {

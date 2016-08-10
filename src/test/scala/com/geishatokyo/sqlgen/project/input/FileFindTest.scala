@@ -11,13 +11,18 @@ class FileFindTest extends FlatSpec with Matchers {
 
 
   it should "load specific file extensions" in {
-    val fs = new FileSource(new File("src/test/resources"))
+    val fs = new FileInput(new File("src/test/resources"))
 
-    val files = fs.listUpFiles(List("xls"))
+    val files = fs.listUpFiles()
 
     files.foreach(f => println(f.getAbsolutePath))
 
-    assert(files.forall(_.getName.endsWith(".xls")))
+    assert(files.forall(f => {
+      val name = f.getName
+      name.endsWith(".xls") ||
+      name.endsWith(".csv") ||
+      name.endsWith(".xlsx")
+    }))
   }
 
   it should "" in {

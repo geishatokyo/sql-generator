@@ -14,28 +14,6 @@ import scala.util.DynamicVariable
  * Created by takezoux2 on 15/05/04.
  */
 
-object ColumnRef{
-
-
-  def replaceToForeach(c: Context)(e : c.Expr[Any]) : c.Expr[Unit] = {
-    import c.universe._
-
-    println(e)
-    val tree = q"""${c.prefix}.foreach{ implicit cell : com.geishatokyo.sqlgen.sheet.Cell =>
-         cell.value = ${e.tree}
-       }
-     """
-
-    println(tree)
-    c.Expr(tree)
-
-  }
-
-
-
-
-}
-
 class SheetScope{
 
   private val currentRow = new DynamicVariable[Row](null)
@@ -90,7 +68,20 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
       cell.value = v
     })
   }
-
+  def mapIfEmpty(func : Cell => Any) : Unit = {
+    foreach(cell => {
+      if(cell.isEmpty){
+        cell.value = func(cell)
+      }
+    })
+  }
+  def setIfEmpty(func : => Any) : Unit = {
+    foreach(cell => {
+      if(cell.isEmpty){
+        cell.value = func
+      }
+    })
+  }
 
   def asString = {
     row(columnName).asString

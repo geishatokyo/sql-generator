@@ -237,13 +237,24 @@ class Sheet(var name : String) {
     addRow(row)
   }
 
-  def addRows( rows : List[List[Any]]) = {
+  def addRowValues( rows : List[List[Any]]) : Unit = {
     if (!rows.forall(row => row.size == _headers.size)){
       throw new SQLGenException(
       "Column size missmatch.SheetRowSize:%s".format(_headers.size))
     }
     cells = cells ::: rows.map( row => row.map(v => new Cell(this,v)))
     cellsToRows()
+    cellsToColumns()
+    updateIndexes()
+
+  }
+  def addRows( rows : List[Row]) : Unit = {
+    if (!rows.forall(row => row.size == _headers.size)){
+      throw new SQLGenException(
+        "Column size missmatch.SheetRowSize:%s".format(_headers.size))
+    }
+    this._rows = _rows ++ rows
+    rowsToCells()
     cellsToColumns()
     updateIndexes()
 

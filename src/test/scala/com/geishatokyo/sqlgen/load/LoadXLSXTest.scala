@@ -3,7 +3,7 @@ package com.geishatokyo.sqlgen.load
 
 import java.io.File
 
-import com.geishatokyo.sqlgen.project.input.{InputStreamSource, FileSource}
+import com.geishatokyo.sqlgen.project.input.{InputStreamSource}
 import org.scalatest.{Matchers, FlatSpec}
 
 /**

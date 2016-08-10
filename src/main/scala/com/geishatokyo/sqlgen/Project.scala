@@ -1,8 +1,11 @@
 package com.geishatokyo.sqlgen
 
+import java.text.SimpleDateFormat
+import java.util.Date
+
 import com.geishatokyo.sqlgen.project.flow.{DataProcessor, InputData}
 import com.geishatokyo.sqlgen.project.refs.{ColumnRef, SheetScope}
-import com.geishatokyo.sqlgen.sheet.{Sheet, Workbook}
+import com.geishatokyo.sqlgen.sheet.{Row, Sheet, Workbook}
 
 import scala.util.DynamicVariable
 import scala.util.matching.Regex
@@ -23,14 +26,42 @@ trait Project extends DataProcessor{
 
   def sheet = {
     val s = currentSheet.value
-    if(s == null) throw new Exception("Not sheet scope")
+    if(s == null) {
+      throw new Exception("Not sheet scope")
+    }
     s
+  }
+  def workbook = {
+    val w = currentWorkbook.value
+    if(w == null){
+      throw new Exception("Not workbook scope")
+    }
+    w
   }
 
   def sheet(name : String) = {
     val wb = currentWorkbook.value
     if(wb == null) throw new Exception("Not workbook scope")
-    wb.get(name)
+
+    if(wb.contains(name)){
+      wb(name)
+    }else{
+      //参照するワークブックにも含まれているかチェック
+      context.references.find(w => {
+        w.contains(name)
+      }).map(_(name)).getOrElse({
+        throw new Exception(s"Sheet:${name} not found")
+      })
+    }
+  }
+
+  def addSheet(sheetName: String) = {
+    addAction(wb => {
+      if(!wb.contains(sheetName)){
+        wb.addSheet(new Sheet(sheetName))
+      }
+      wb
+    })
   }
 
 
@@ -45,7 +76,13 @@ trait Project extends DataProcessor{
     sheet.columns
   }
 
-  def findById(id: Any) = {
+  /**
+    * 現在のシートから、指定したIDの行を取得する
+    *
+    * @param id
+    * @return
+    */
+  def findById(id: Any) : Option[Row] = {
     val idColumn = sheet.ids.headOption.getOrElse(throw new Exception(s"Sheet:${sheet.name} has no ids"))
     rows.find(r => {
       r(idColumn.name) ~== id
@@ -131,9 +168,26 @@ trait Project extends DataProcessor{
 
   def ++(next: Project) = {
     val p = new EmptyProject()
+    p.preActions = this.preActions ++ next.preActions
     p.actions = this.actions ++ next.actions
     p.postActions = this.postActions ++ next.postActions
     p
+  }
+
+  /**
+    * 現時刻のString表現を取得
+    * @return
+    */
+  def now = {
+    new SimpleDateFormat("YYYY/MM/DD HH:mm:ss").format(new Date)
+  }
+
+  /**
+    * 今日の日付のString表現を取得
+    * @return
+    */
+  def today = {
+    new SimpleDateFormat("YYYY/MM/DD").format(new Date)
   }
 
 
