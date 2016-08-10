@@ -1,5 +1,6 @@
 package com.geishatokyo.sqlgen
 
+import com.geishatokyo.sqlgen.project.flow.{DataProcessor, InputData}
 import com.geishatokyo.sqlgen.project.refs.{ColumnRef, SheetScope}
 import com.geishatokyo.sqlgen.sheet.{Sheet, Workbook}
 
@@ -9,13 +10,16 @@ import scala.util.matching.Regex
 /**
  * Created by takezoux2 on 15/05/04.
  */
-trait Project {
+trait Project extends DataProcessor{
 
   protected val currentWorkbook = new DynamicVariable[Workbook](null)
+  protected val currentContext = new DynamicVariable[Context](null)
 
   protected val currentSheet = new DynamicVariable[Sheet](null)
 
   val sheetScope = new SheetScope
+
+  def context = currentContext.value
 
   def sheet = {
     val s = currentSheet.value
@@ -85,11 +89,20 @@ trait Project {
     sheet.ignore
   }
 
+  def process(inputDatas: List[InputData]) = {
+    inputDatas.map(data => {
+      val c = data.context
+      InputData(c,apply(c,data.workbook))
+    })
+  }
 
-  def apply(workbook : Workbook) = {
-    currentWorkbook.withValue(workbook){
-      val applyed = actions.reverse.foldLeft(workbook)((wb,ac) => ac(wb))
-      postActions.reverse.foldLeft(applyed)((wb,ac) => ac(wb))
+
+  def apply(context: Context,workbook : Workbook) = {
+    currentWorkbook.withValue(workbook) {
+      currentContext.withValue(context) {
+        val applyed = actions.reverse.foldLeft(workbook)((wb, ac) => ac(wb))
+        postActions.reverse.foldLeft(applyed)((wb, ac) => ac(wb))
+      }
     }
   }
 
@@ -99,6 +112,7 @@ trait Project {
 
   /**
     * 通常アクションの前に実行されるアクションを追加する
+    *
     * @param action
     */
   def addPreActions(action: Workbook => Workbook) = {
@@ -107,6 +121,7 @@ trait Project {
 
   /**
     * 通常アクションの後に実行されるアクションを実行する
+    *
     * @param action
     */
   def addPostActions(action: Workbook => Workbook) = {
@@ -120,8 +135,6 @@ trait Project {
     p.postActions = this.postActions ++ next.postActions
     p
   }
-
-
 
 
 

@@ -8,10 +8,25 @@ import com.geishatokyo.sqlgen.sheet.Workbook
   */
 trait Input {
 
-  def >>(project: Project) = {
-    Executor(this,project)
+  protected var context = new Context()
+
+  def modifyContext(func: Context => Context) = {
+    context = func(context)
+    this
   }
 
-  def read() : (Context,Workbook)
+  def withContext(c: Context) = {
+    this.context = c
+    this
+  }
+
+
+  def >>(proc: DataProcessor) = {
+    Executor(this,List(proc))
+  }
+
+  def read() : List[InputData]
 
 }
+
+case class InputData(context: Context, workbook: Workbook)

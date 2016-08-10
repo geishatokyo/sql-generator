@@ -1,14 +1,14 @@
 package com.geishatokyo.sqlgen.project.input
 
 import com.geishatokyo.sqlgen.Context
-import com.geishatokyo.sqlgen.project.flow.Input
+import com.geishatokyo.sqlgen.project.flow.{InputData, Input}
 import com.geishatokyo.sqlgen.sheet.{Sheet, Workbook}
 
 /**
   * Created by takezoux2 on 2016/08/08.
   */
 class CSVInput(csvs: List[String],seps: Array[Char] = ",".toCharArray) extends Input {
-  override def read(): (Context,Workbook) = {
+  override def read(): List[InputData] = {
     val workbook = new Workbook()
     csvs.zipWithIndex.foreach({
       case (s,index) => {
@@ -16,7 +16,7 @@ class CSVInput(csvs: List[String],seps: Array[Char] = ",".toCharArray) extends I
         workbook.addSheet(sheet)
       }
     })
-    (new Context,workbook)
+    List(InputData(context.copy(),workbook))
   }
 
 

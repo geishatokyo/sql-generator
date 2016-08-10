@@ -5,19 +5,22 @@ import com.geishatokyo.sqlgen.Project
 /**
   * Created by takezoux2 on 2016/08/05.
   */
-case class Executor(input: Input, project: Project) {
+case class Executor(input: Input, processors: List[DataProcessor]) {
 
 
   def >>(output: Output) = {
-    val t = input.read()
-    val wb = project(t._2)
-    output.output(t._1,wb)
+    val data = input.read()
+
+    val results = processors.reverse.
+      foldLeft(data)((d,proc) => proc.process(d))
+
+    output.output(results)
     this
   }
 
 
-  def >>(project: Project) = {
-    new Executor(input,this.project ++ project)
+  def >>(proc: DataProcessor) = {
+    new Executor(input,proc :: processors)
   }
 
 }

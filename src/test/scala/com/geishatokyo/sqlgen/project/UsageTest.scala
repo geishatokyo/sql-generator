@@ -1,6 +1,6 @@
 package com.geishatokyo.sqlgen.project
 
-import com.geishatokyo.sqlgen.{StandardGuess, Project}
+import com.geishatokyo.sqlgen.{Context, StandardGuess, Project}
 import com.geishatokyo.sqlgen.project.input.WorkbookInput
 import com.geishatokyo.sqlgen.project.output.{ConsoleOutput}
 import com.geishatokyo.sqlgen.sheet.{Sheet, Workbook}
@@ -19,7 +19,7 @@ class UsageTest extends FlatSpec with Matchers{
     sheet.addRow(List("2","Bob",""))
     wb.addSheet(sheet)
 
-    val r = SampleProject(wb)
+    val r = SampleProject(new Context(),wb)
 
 
     println("##" + r.toString)

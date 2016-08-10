@@ -9,7 +9,7 @@ import com.geishatokyo.sqlgen.sheet.Workbook
 trait Output{
 
 
-  def output(context: Context,workbook: Workbook) : Unit
+  def output(inputDatas: List[InputData]) : Unit
 
 
 

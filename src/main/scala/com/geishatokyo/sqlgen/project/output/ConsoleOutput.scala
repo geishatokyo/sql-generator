@@ -1,7 +1,7 @@
 package com.geishatokyo.sqlgen.project.output
 
 import com.geishatokyo.sqlgen.Context
-import com.geishatokyo.sqlgen.project.flow.Output
+import com.geishatokyo.sqlgen.project.flow.{InputData, Output}
 import com.geishatokyo.sqlgen.sheet.Workbook
 
 /**
@@ -11,7 +11,10 @@ import com.geishatokyo.sqlgen.sheet.Workbook
  */
 class ConsoleOutput extends Output{
 
-  def output(context: Context, w: Workbook) = {
-    println(w)
+
+  override def output(inputDatas: List[InputData]): Unit = {
+    inputDatas.foreach(id => {
+      println(id.workbook)
+    })
   }
 }

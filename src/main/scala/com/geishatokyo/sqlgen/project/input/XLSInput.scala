@@ -3,34 +3,22 @@ package com.geishatokyo.sqlgen.project.input
 import java.io.File
 
 import com.geishatokyo.sqlgen.Context
-import com.geishatokyo.sqlgen.project.flow.Input
+import com.geishatokyo.sqlgen.project.flow.{InputData, Input}
 import com.geishatokyo.sqlgen.sheet.Workbook
 
 /**
   * Created by takezoux2 on 2016/08/08.
   */
 class XLSInput(files: List[File]) extends Input {
-  override def read(): (Context,Workbook) = {
-    val workbooks = files.map(f => {
-      XLSLoader.load(f)
+
+
+  override def read(): List[InputData] = {
+
+    files.map(f => {
+      val wb = XLSLoader.load(f)
+      val context = new Context()
+      context.setWorkingDirIfNotSet(f.getParent)
+      InputData(context,wb)
     })
-
-    val wb = if(workbooks.size == 0) new Workbook()
-    else if(workbooks.size == 1) workbooks.head
-    else {
-      workbooks.reduce[Workbook]((w1,w2) => {
-        w2.sheets.foreach(s => {
-          w1.addSheet(s)
-        })
-        w1
-      })
-    }
-
-    val context = new Context()
-    files.headOption.foreach(f => {
-      context.workingDir = f.getParentFile.getAbsolutePath
-    })
-
-    (context,wb)
   }
 }
