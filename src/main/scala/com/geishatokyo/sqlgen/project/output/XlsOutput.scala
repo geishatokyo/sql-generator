@@ -19,11 +19,17 @@ class XlsOutput(path: String, isXlsx: Boolean) extends Output{
 
 
   override def output(context: Context,workbook: Workbook): Unit = {
-
-    val name = if(path.contains('.')){
+    // 相対パスチェック
+    val path2 = if(path.startsWith(".")){
       path
     }else{
-      FileUtil.joinPath(path,"%s.%s".format(workbook.name,"xls"))
+      FileUtil.joinPath("./" ,path)
+    }
+    //ファイル名チェック
+    val name = if(path.takeRight(7).contains('.')){
+      path2
+    }else{
+      FileUtil.joinPath(path2,"%s.%s".format(workbook.name,"xls"))
     }
     val filename = FileUtil.joinPath(context.workingDir,name)
 

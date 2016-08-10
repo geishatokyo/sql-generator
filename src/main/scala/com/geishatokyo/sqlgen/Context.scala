@@ -10,7 +10,7 @@ import scala.collection.mutable
 
 class Context{
 
-  protected var _workingDir : String = ""
+  protected var _workingDir : String = "."
   def workingDir : String = _workingDir
   def workingDir_=(v : String) = this._workingDir = v
 

@@ -31,7 +31,7 @@ class FileSource(files: File*) {
 
   def asInput() : Input = {
     val xlss = listUpFiles(ext.getOrElse(List("xls","xlsx")))
-    if(xlss.size == 0){
+    if(xlss.size > 0){
       new XLSInput(xlss.toList)
     }else{
       asCsv()
@@ -39,19 +39,12 @@ class FileSource(files: File*) {
   }
 
   def flatten(file: File,ext: List[String]) : Array[File] = {
-    if(file.isFile) Array(file)
-    else{
+    if(file.isHidden) Array()
+    else if(file.isFile && ext.exists(e => file.getName.endsWith(e)))Array(file)
+    else if(file.listFiles() == null) Array()
+     else{
       file.listFiles().flatMap(f => {
-        if(!f.isHidden){
-          if(f.isDirectory) flatten(f,ext)
-          else if(ext.exists(e => f.getName.endsWith(e))){
-            Array(f)
-          }else{
-            Array[File]()
-          }
-        }else{
-          Array[File]()
-        }
+        flatten(f,ext)
       })
     }
   }

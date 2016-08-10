@@ -28,7 +28,7 @@ class XLSInput(files: List[File]) extends Input {
 
     val context = new Context()
     files.headOption.foreach(f => {
-      context.workingDir = f.getParent
+      context.workingDir = f.getParentFile.getAbsolutePath
     })
 
     (context,wb)

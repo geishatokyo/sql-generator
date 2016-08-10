@@ -146,7 +146,12 @@ object XLSLoader {
           if(DateUtil.isCellDateFormatted(cell)){
             cell.getDateCellValue()
           }else {
-            cell.getNumericCellValue
+            var v = cell.getNumericCellValue
+            if(v % 1.0 == 0){
+              v.toLong
+            }else{
+              v
+            }
           }
         }
         case PoiCell.CELL_TYPE_BOOLEAN => {

@@ -61,7 +61,8 @@ object FileUtil extends FileFinder {
   }
   
   def joinPath( dir : String, filename : String) : String = {
-    new File(dir,filename).getPath
+    if(dir == null || dir.length == 0) filename
+    else new File(dir,filename).getPath
   }
 
   def toAbsolutePathFromWorkingDir(relativePath : String) = {
