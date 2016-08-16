@@ -49,21 +49,24 @@ class Cell(parent : Sheet,private var _value : Any) {
 
   def isEmpty = value match {
     case null => true
+    case NullValue => true
     case "" => true
     case _ => false
   }
 
 
-  def asString = if(value != null) {
+  def asString = if(value == NullValue) {
+    null
+  }else if(value != null) {
     value.toString
   }else{
-    null
+    ""
   }
   def asBool = value match{
     case true => true
     case false => false
     case "true" | "t" | "yes" | "1" => true
-    case "false" | "f" | "no" | "0" => false
+    case "false" | "f" | "no" | "0" | "" => false
     case _ => false
   }
 
@@ -72,9 +75,13 @@ class Cell(parent : Sheet,private var _value : Any) {
     value match {
       case i : Int => Some(i)
       case l : Long => Some(l.toInt)
-      case s : String => Some(s.toInt)
+      case s : String => {
+        if(s.length == 0) Some(0)
+        else Some(s.toInt)
+      }
       case d : Double => Some(d.toInt)
       case f : Float => Some(f.toInt)
+      case null => Some(0)
       case _ => {
         None
       }
@@ -91,9 +98,13 @@ class Cell(parent : Sheet,private var _value : Any) {
     value match {
       case i : Int => Some(i.toLong)
       case l : Long => Some(l)
-      case s : String => Some(s.toLong)
+      case s : String => {
+        if(s.length == 0) Some(0L)
+        else Some(s.toLong)
+      }
       case d : Double => Some(d.toLong)
       case f : Float => Some(f.toLong)
+      case null => Some(0L)
       case _ => {
         None
       }
@@ -110,9 +121,13 @@ class Cell(parent : Sheet,private var _value : Any) {
     value match {
       case i : Int => Some(i.toDouble)
       case l : Long => Some(l.toDouble)
-      case s : String => Some(s.toDouble)
+      case s : String => {
+        if(s.length == 0) Some(0.0)
+        else Some(s.toDouble)
+      }
       case d : Double => Some(d)
       case f : Float => Some(f.toDouble)
+      case null => Some(0.0)
       case _ => {
         None
       }
@@ -156,7 +171,7 @@ class Cell(parent : Sheet,private var _value : Any) {
 
   def niceGet[T]( op : Option[T])(typeName : String) = {
     op.getOrElse{
-      throw new SQLGenException(s"Cell at ${parent.indexOf(this)} in sheet '${parent.name}' is not ${typeName}.")
+      throw new SQLGenException(s"Cell at ${parent.indexOf(this)} in sheet '${parent.name}' is not ${typeName}.value = ${value}")
     }
   }
 

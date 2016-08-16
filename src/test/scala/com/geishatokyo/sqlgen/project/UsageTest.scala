@@ -39,7 +39,7 @@ class UsageTest extends FlatSpec with Matchers{
 
   object SampleProject extends Project with StandardGuess{
 
-    onSheet("User"){implicit sheet =>
+    onSheet("User"){
 
       rows.foreach(row => {
         row("id") := row("id").asInt * 2

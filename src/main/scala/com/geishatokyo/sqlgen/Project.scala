@@ -40,9 +40,7 @@ trait Project extends DataProcessor{
   }
 
   def sheet(name : String) = {
-    val wb = currentWorkbook.value
-    if(wb == null) throw new Exception("Not workbook scope")
-
+    val wb = workbook
     if(wb.contains(name)){
       wb(name)
     }else{
@@ -52,6 +50,55 @@ trait Project extends DataProcessor{
       }).map(_(name)).getOrElse({
         throw new Exception(s"Sheet:${name} not found")
       })
+    }
+  }
+  object all{
+
+    private var refSheetCache = Map[String,Option[Sheet]]()
+
+    /**
+      * 参照するワークブックも含めて、全てのシートをマージする
+      *
+      * @param name
+      */
+    def sheet(name: String) = {
+
+      val refSheet = refSheetCache.getOrElse(name,{
+        val sheets = context.references.filter(w => {
+          w.contains(name)
+        }).map(_(name))
+
+        val s = sheets match{
+          case h :: tail => {
+            Some(tail.foldLeft(h.copy())((s1,s2) => s1.merge(s2)))
+          }
+          case Nil => None
+        }
+        refSheetCache = refSheetCache + (name -> s)
+        s
+      })
+
+      val wb = workbook
+      if(wb.contains(name)){
+        val baseSheet = wb(name)
+        refSheet match{
+          case Some(refS) => {
+            baseSheet.copy.merge(refS)
+          }
+          case None => {
+            baseSheet
+          }
+        }
+      }else{
+        refSheet match{
+          case Some(refS) => {
+            refS
+          }
+          case None => {
+            throw new Exception(s"Sheet:${name} not found")
+          }
+        }
+      }
     }
   }
 
@@ -95,36 +142,42 @@ trait Project extends DataProcessor{
   protected var postActions : List[Workbook => Workbook] = Nil
 
 
-  def onAllSheet(action: Sheet => Any) : Unit = {
+  def onAllSheet(action: => Any) : Unit = {
     val func = (wb: Workbook) => {
-      wb.sheets.foreach(sheet => action(sheet))
+      wb.sheets.foreach(sheet => {
+        currentSheet.withValue(sheet) {
+          action
+        }
+      })
       wb
     }
     this.actions = func :: this.actions
   }
 
-  def onSheet(sheetName: String)(action : Sheet => Any) : Unit = {
+  def onSheet(sheetName: String)(action : => Any) : Unit = {
     val func = (wb: Workbook) => {
       wb.getSheet(sheetName).foreach(sheet => {
-        currentSheet.withValue(sheet){action(sheet)}
+        currentSheet.withValue(sheet){action}
       })
       wb
     }
     this.actions =  func :: actions
   }
-  def onSheet(sheetMatch: Regex)(action: Sheet => Any) : Unit = {
+
+  def onSheet(sheetMatch: Regex)(action: => Any) : Unit = {
     val func = (wb: Workbook) => {
       wb.sheetsMatchingTo(sheetMatch).foreach(sheet => {
-        currentSheet.withValue(sheet){action(sheet)}
+        currentSheet.withValue(sheet){action}
       })
       wb
     }
     this.actions = func :: this.actions
   }
 
-  def ignore()(implicit sheet: Sheet) = {
+  def ignore() = {
     sheet.ignore
   }
+
 
   def process(inputDatas: List[InputData]) = {
     inputDatas.map(data => {
@@ -176,6 +229,7 @@ trait Project extends DataProcessor{
 
   /**
     * 現時刻のString表現を取得
+    *
     * @return
     */
   def now = {
@@ -184,6 +238,7 @@ trait Project extends DataProcessor{
 
   /**
     * 今日の日付のString表現を取得
+    *
     * @return
     */
   def today = {
@@ -191,8 +246,19 @@ trait Project extends DataProcessor{
   }
 
 
+  implicit class SheetOps(sheet: Sheet) {
+    def renameColumns(maps: (String,String) *) = {
+      maps.foreach(conv => {
+        sheet.headers.find(_.name == conv._1).foreach(h => {
+          h.name = conv._2
+        })
+      })
+    }
+  }
 
 }
+
+
 
 class EmptyProject extends Project{
 

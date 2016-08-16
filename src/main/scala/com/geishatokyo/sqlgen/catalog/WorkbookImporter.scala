@@ -15,13 +15,15 @@ class WorkbookImporter(files: File*) extends DataProcessor{
   override def process(inputDatas: List[InputData]): List[InputData] = {
     val workbooks = new FileInput(files:_*).read().map(_.workbook)
 
-    val passed = inputDatas.map(_.workbook)
-
-    inputDatas.foreach(id => {
-      id.context.references = (id.context.references ++ workbooks ++ passed).filter(w => {
-        w != id.workbook
+    if(workbooks.size > 0) {
+      //依存しているワークブックは一つにまとめてしまう
+      val refs =  List(workbooks.reduce((w1,w2) => {
+        w1.merge(w2)
+      }))
+      inputDatas.foreach(id => {
+        id.context.references = refs
       })
-    })
+    }
 
     inputDatas
 

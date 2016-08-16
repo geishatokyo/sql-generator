@@ -91,14 +91,7 @@ class Workbook extends scala.collection.mutable.Map[String,Sheet]{
         this.addSheet(sheet.copy())
       }else{
         val thisSheet = apply(sheet.name)
-        if(thisSheet.headers == sheet.headers){
-          thisSheet.addRows(sheet.rows)
-        }else{
-          val renamed = sheet.copy()
-          renamed.name = s"${workbook.name}_${sheet.name}"
-          this.addSheet(renamed)
-        }
-
+        thisSheet.merge(sheet)
       }
     })
     this

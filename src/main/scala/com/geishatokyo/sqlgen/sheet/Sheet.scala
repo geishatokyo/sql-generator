@@ -220,7 +220,7 @@ class Sheet(var name : String) {
    * Add row by map
    * @param values
    */
-  def addRow( values : Map[String,String], throwErrorOnColumnMissMatch : Boolean = false): Unit = {
+  def addRow( values : Map[String,Any], throwErrorOnColumnMissMatch : Boolean = false): Unit = {
     val row = headers.map(h => {
       values.get(h.name) match{
         case Some(v) => v
@@ -229,7 +229,7 @@ class Sheet(var name : String) {
             throw new SQLGenException(
               "Column:%s is not passed".format(h.name))
           }else{
-            ""
+            null
           }
         }
       }
@@ -374,6 +374,27 @@ class Sheet(var name : String) {
     true
   }
 
+  /**
+    * シートをマージする
+    * カラムにミスマッチがあった場合も強制的にマージされるので注意
+    * @param that
+    */
+  def merge(that: Sheet) : Sheet = {
+    if(that.rowSize == 0){
+      return this
+    }
+
+    that.columns.foreach(c => {
+      if(!this.existColumn(c.columnName)){
+        this.addEmptyColumn(c.columnName)
+      }
+    })
+    that.rows.foreach(row => {
+      this.addRow(that.columns.map(c => c.columnName -> row(c.columnName).value).toMap)
+    })
+    this
+  }
+
   def deleteColumn(columnName : String) : Boolean = {
     val index = headerIndex(columnName)
     if(index < 0){
@@ -415,6 +436,8 @@ class Sheet(var name : String) {
     newSheet.updateIndexes()
     newSheet
   }
+
+
 
   override def toString: String = {
     """SheetName: %s

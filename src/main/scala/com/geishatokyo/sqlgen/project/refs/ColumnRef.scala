@@ -35,11 +35,13 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
   }
 
   def foreach(func: Cell => Unit) : Unit = {
-    sheet.column(columnName).cells.foreach(func)
+    if(sheet.existColumn(columnName)) {
+      sheet.column(columnName).cells.foreach(func)
+    }
   }
 
   def name : String = columnName
-  def name_=(newName: String)(implicit sheet : Sheet) = {
+  def name_=(newName: String) = {
     sheet.column(columnName).header.name = newName
     columnName = newName
   }
@@ -82,6 +84,21 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
       }
     })
   }
+
+  def mapTo(convs: (String,Any)*) = {
+    val mapping = convs.toMap
+    foreach(cell => {
+      val v = cell.asString
+      val mapped = mapping.getOrElse(v,cell.value)
+      cell.value = mapped
+    })
+  }
+  def mapTo(pf: PartialFunction[Any,Any]) = {
+    foreach(cell => {
+      cell.value = pf(cell.value)
+    })
+  }
+
 
   def asString = {
     row(columnName).asString

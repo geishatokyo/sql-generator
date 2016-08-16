@@ -11,16 +11,16 @@ import com.geishatokyo.sqlgen.sheet.ColumnType
 
 trait GTEDefaultProject extends Project {
 
-  onSheet("""sheet\d*""".r){implicit sheet => {
+  onSheet("""sheet\d*""".r){{
     ignore()
   }}
 
-  onAllSheet{ implicit sheet =>
+  onAllSheet{
     column("名前").name = "name"
     column("内部名").name = "innerName"
   }
 
-  onAllSheet{ implicit sheet =>
+  onAllSheet{
     columns.foreach(c => {
       val t = c.columnName match{
         case v if v.endsWith("id") => ColumnType.Integer

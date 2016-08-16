@@ -15,6 +15,7 @@ class FileInput(files: File*) extends Input{
   var ext: Option[List[String]] = None
 
   val extensions = List("csv","xls","xlss")
+  val excludeDirs = List("output","target","out",".git",".svn")
 
 
   override def read(): List[InputData] = {
@@ -60,10 +61,14 @@ class FileInput(files: File*) extends Input{
     if(file.isHidden) Array()
     else if(file.isFile && ext.exists(e => file.getName.endsWith(e)))Array(file)
     else if(file.listFiles() == null) Array()
-     else{
-      file.listFiles().flatMap(f => {
-        flatten(f,ext)
-      })
+    else{
+      if(excludeDirs.contains(file.getName)){
+        Array()
+      }else {
+        file.listFiles().flatMap(f => {
+          flatten(f, ext)
+        })
+      }
     }
   }
 
