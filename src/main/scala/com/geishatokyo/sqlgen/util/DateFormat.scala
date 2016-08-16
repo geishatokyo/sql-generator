@@ -23,13 +23,12 @@ object DateFormat {
 
   def parse(v : String) : Option[Date] = {
     if(v == null || v.length == 0) return None
-    formats.foreach(f => {
+    formats.view.map(f => {
       try{
-        return Some(f.parse(v))
+        Some(f.parse(v))
       }catch{
-        case e : Throwable =>
+        case e : Throwable => None
       }
-    })
-    None
+    }).find(_.isDefined).flatten
   }
 }

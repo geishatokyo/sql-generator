@@ -32,94 +32,39 @@ Later rows are interpreted as records.
 You write your conversion rules in your project class.
 Sample code is below.
 
-    import com.geishatokyo.sqlgen.project2._
+    import com.geishatokyo.sqlgen._
     object YourProject extends DefaultProject{
 
       def main(args : Array[String]) {
-        inDir("hoge") >> YourProject >> asXls
+      
+        files("hoge.xls","fuga.csv","aaa.xlsx") >>
+          merge >> imports("dir_path/for/reference_files") >> 
+          YourProject >>
+          asXls.toDir("output/xls") >> asMySQL.toDir("output/sql")
+         
       }
 
       addSheet("NewSheet");
+      
+      onSheet("SheetToIgnore"){
+        ignore
+      }
 
       onSheet("Sheet1"){
-        forColumn("column1") map(v => "Map to " + v) always;
-        forColumn("column2") set("0") ifEmpty;
-        forColumn("column3") renameTo("NewColumnName");
+        column("column1").map( c => "Map " + c.asString)
+        column("column2") := "set to all rows"
+        column("column3").setIfEmpty(0)
+        column("column4").name = "NewColumnName"
       }
 
       onSheet("Sheet2"){
-        forColumn("ref other column") set( {
-          column("name") + "_" + sheet("Sheet3").searchIdIs( column("foreignKey") )("name")
+        column("aaa").map(c => {
+          c.row("id").asString + c.row("name").asString
         })
-
+        
+        sheet.addRow(List("2","tom","value for aaa"))
       }
 
     }
-
-
-
-## Grammer
-
-
-### Outside sheet
-
-    onSheet( _sheetName){
-      ...Inside sheet rules
-    }
-    onSheet( _sheetNameRegex.r){ // example onSheet("""(S|s)heet\n+""".r){...}
-      ...Inside sheet rules
-    }
-
-    addSheet( _sheetName)
-
-    ignore( sheet(_sheetName) )
-    ignore( coluimn(_column) )
-    guessColumnType( {
-      case _patten => _ColumnType
-    })
-    guessId( _columnName => _isId)
-
-
-
-### Inside sheet
-
-only use in onSheet scope.
-
-    forColumn( _columnName) map( _columnValue => _newColumnValue) always // (default)
-                                                                  ifEmpty
-                                                                  when( _columnValue => _bool)
-                            set( _newColumnValue)                 ifEmpty // (default)
-                                                                  when( _columnValue => _bool)
-                                                                  always
-                            ignore
-                            isId
-                            type_=( _ColumnType)
-                            renameTo(_newColumnName)
-
-    renameTo(_newSheetName)
-
-    filterRow( _row => Boolean) // remain rows which return true.
-
-
-### Refer other sheet or column
-
-These are use inside functions.
-
-    sheet( _sheetName) search( _row => _bool) : Row
-                       searchIdIs( _idValue) : Row
-                       find( _row => _bool) : Option[Row]
-                       findIdIs( _idValue) : Option[Row]
-
-    column( _columnName) : String
-
-
-
-
-### Processing
-
-       Input                 Project         Output
-    inDir( _dir)                            console
-    file(_file)         >>  _Project     >> asXls
-    workbook(_workbook)                     asSql
 
 

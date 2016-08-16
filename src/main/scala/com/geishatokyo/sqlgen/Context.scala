@@ -1,5 +1,7 @@
 package com.geishatokyo.sqlgen
 
+import com.geishatokyo.sqlgen.sheet.Workbook
+
 import scala.collection.mutable
 
 /**
@@ -8,24 +10,25 @@ import scala.collection.mutable
  * Create: 12/07/12 18:44
  */
 
-trait Context extends mutable.Map[String,Any] {
+class Context{
 
-  val WorkingDir = "WorkingDir"
-  val Name = "Name"
+  protected var _workingDir : Option[String] = None
+  def workingDir : String = _workingDir.getOrElse(".")
+  def workingDir_=(v : String) = _workingDir = Some(v)
 
-  def workingDir : String = getAsString(WorkingDir,"")
-  def workingDir_=(v : String) = this +=(WorkingDir -> v)
-  def name : String = getAsString(Name,"")
-  def name_=( v : String) = this +=(Name -> v)
-
-  def getAsString(key : String , dflt : => String) : String = {
-    get(key).map(_.toString).getOrElse(dflt)
+  def setWorkingDirIfNotSet(v: String) = {
+    if(_workingDir.isEmpty) _workingDir = Some(v)
   }
-  def getAsInt(key : String , dflt : => Int) : Int = {
-    get(key).map(_.toString.toInt).getOrElse(dflt)
-  }
-  def getAsBool(key : String , dflt : => Boolean) : Boolean = {
-    get(key).map(_.toString.toBoolean).getOrElse(dflt)
+
+
+  var references : List[Workbook] = Nil
+
+
+  def copy() = {
+    val c = new Context()
+    c._workingDir = _workingDir
+    c.references = references
+    c
   }
 
 }

@@ -2,7 +2,7 @@ package com.geishatokyo.sqlgen.util
 
 import com.geishatokyo.sqlgen.logger.Logger
 import java.io._
-import org.apache.poi.hssf.usermodel.HSSFWorkbook
+import org.apache.poi.ss.usermodel
 import java.security.MessageDigest
 import io.Source
 import util.matching.Regex
@@ -61,7 +61,8 @@ object FileUtil extends FileFinder {
   }
   
   def joinPath( dir : String, filename : String) : String = {
-    new File(dir,filename).getPath
+    if(dir == null || dir.length == 0) filename
+    else new File(dir,filename).getPath
   }
 
   def toAbsolutePathFromWorkingDir(relativePath : String) = {
@@ -80,9 +81,12 @@ object FileUtil extends FileFinder {
     }
   }
 
-  def loadFile(filePath : String) = {
+  def loadFile(filePath : String) : Array[Byte] = {
     val f = new File(findFile(filePath))
-    val input = new FileInputStream(f)
+    loadFile(f)
+  }
+  def loadFile(file: File) : Array[Byte] = {
+    val input = new FileInputStream(file)
     val fileData = new Array[Byte](input.available())
     input.read(fileData,0,fileData.length)
     input.close()
@@ -90,8 +94,16 @@ object FileUtil extends FileFinder {
 
   }
   
-  def loadFileAsString(filePath : String, encoding : String = "utf8") = {
+  def loadFileAsString(filePath : String, encoding : String) : String = {
     val f = new File(findFile(filePath))
+    loadFileAsString(f, encoding)
+  }
+
+
+  def loadFileAsString(f : File) : String = {
+    loadFileAsString(f,"utf-8")
+  }
+  def loadFileAsString(f : File, encoding : String) : String = {
     val input = new FileInputStream(f)
     val fileData = new Array[Byte](input.available())
     input.read(fileData,0,fileData.length)
@@ -150,7 +162,7 @@ object FileUtil extends FileFinder {
     })
   }
   
-  def saveTo(filename : String,  workbook : HSSFWorkbook) = {
+  def saveTo(filename : String,  workbook : usermodel.Workbook) = {
     _saveTo(filename,output => {
       workbook.write(output)
     })
