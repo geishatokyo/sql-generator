@@ -40,7 +40,8 @@ class SQLOutput(converter : SQLConverter) extends Output{
 
       val name = if(path.contains('.')) path
       else FileUtil.joinPath(path,s"${action}_${w.name}.sql")
-      val filename = FileUtil.joinPath(context.workingDir,name)
+      val filename = if(FileUtil.isAbsolutePath(name)) name
+      else FileUtil.joinPath(context.workingDir,name)
       FileUtil.saveTo(filename,sqls)
 
 
@@ -53,13 +54,14 @@ class SQLOutput(converter : SQLConverter) extends Output{
 
 
 object SQLOutput{
-
   def toFile(filenameBase : String)(context : Context,action : String,sqls : List[String]) = {
 
     val (dir,fn,ex) = FileUtil.splitPathAndNameAndExt(filenameBase)
-    val path = FileUtil.joinPath(
+    val filename = action + "_" + fn + ".sql"
+    val path = if(FileUtil.isAbsolutePath(filenameBase)) FileUtil.joinPath(dir, filename)
+    else FileUtil.joinPath(
       FileUtil.joinPath(context.workingDir,dir),
-      action + "_" + fn + ".sql")
+      filename)
     Logger.log("Save sql to " + path)
     FileUtil.saveTo(path,sqls)
   }

@@ -69,6 +69,10 @@ object FileUtil extends FileFinder {
     new File(workingDir,relativePath)
   }
 
+  def isAbsolutePath(path : String) : Boolean = {
+    new File(path).isAbsolute()
+  }
+
   def makeDirs( path : String) : Unit= {
     val f = new File(path)
     if(f.isFile || f.getName.substring(1).contains(".")){
