@@ -37,7 +37,7 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
   def foreach(func: Cell => Unit) : Unit = {
     if(sheet.existColumn(columnName)) {
       sheet.column(columnName).cells.foreach(c => sheetScope.withRow(c.row){
-        func
+        func(c)
       })
     }
   }
