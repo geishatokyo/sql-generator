@@ -4,22 +4,11 @@ This library supports generating SQL from Excel sheets (.xls), CSV files and oth
 
 # Getting started
 
-First, install sbt and giter8.
 
-You can create a simple project with a giter8 template.<br />
-Download template at the directory where the source .xls are.
-
-		> g8 geishatokyo/sql-gen
-
-Then
-
-		> sbt run
-
-The library finds all the .xls files in the directory and generates insert, delete and update SQL files from them.
 
 # Data sheet formats
 
-## Excel (.xls) files
+## Excel (.xls or .xlsx) files
 
 Each sheet corresponds to a database table.
 
@@ -53,8 +42,10 @@ Sample code is below.
       onSheet("Sheet1"){
         column("column1").map( c => "Map " + c.asString)
         column("column2") := "set to all rows"
-        column("column3").setIfEmpty(0)
-        column("column4").name = "NewColumnName"
+        column("column3") ?= "set to empty cell foreach rows"
+        column("column4").setIfEmpty("Act almost same as ?=")
+        column("column5").name = "NewColumnName"
+        column("column6") := { "Set another cell value" + column("column1").asString }
       }
 
       onSheet("Sheet2"){

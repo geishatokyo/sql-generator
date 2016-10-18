@@ -36,7 +36,9 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
 
   def foreach(func: Cell => Unit) : Unit = {
     if(sheet.existColumn(columnName)) {
-      sheet.column(columnName).cells.foreach(func)
+      sheet.column(columnName).cells.foreach(c => sheetScope.withRow(c.row){
+        func
+      })
     }
   }
 
@@ -46,10 +48,15 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
     columnName = newName
   }
 
-  def :=(e : => Any) : Unit = {
+  def ensureExists() : ColumnRef = {
     if(!sheet.existColumn(columnName)){
       sheet.addColumns(columnName)
     }
+    this
+  }
+
+  def :=(e : => Any) : Unit = {
+    ensureExists()
     sheet.rows.foreach(r => {
       sheetScope.withRow(r){
         val c = r(columnName)
@@ -62,6 +69,10 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
         }
       }
     })
+  }
+  def ?=(e : => Any) : Unit = {
+    ensureExists()
+    setIfEmpty(e)
   }
 
   def map(mapV : Cell => Any) : Unit = {
@@ -80,7 +91,15 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
   def setIfEmpty(func : => Any) : Unit = {
     foreach(cell => {
       if(cell.isEmpty){
-        cell.value = func
+        val v = func
+        v match{
+          case cr : ColumnRef => {
+            cell.value = cr.row(cr.columnName).value
+          }
+          case _ => {
+            cell.value = v
+          }
+        }
       }
     })
   }
