@@ -1,11 +1,10 @@
 package com.geishatokyo.sqlgen.sheet
 
 import java.util.Date
-import java.text.SimpleDateFormat
+
 import com.geishatokyo.sqlgen.SQLGenException
-import com.geishatokyo.sqlgen.util.{DateFormat, TimeUtil}
-import org.apache.poi.ss.usermodel.DateUtil
 import com.geishatokyo.sqlgen.logger.Logger
+import com.geishatokyo.sqlgen.util.{DateFormat, TimeUtil}
 
 import scala.concurrent.duration.FiniteDuration
 

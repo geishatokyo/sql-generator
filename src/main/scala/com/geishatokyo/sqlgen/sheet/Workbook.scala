@@ -1,6 +1,9 @@
 package com.geishatokyo.sqlgen.sheet
 
-import util.matching.Regex
+import com.geishatokyo.sqlgen.sheet.SheetNotFoundException
+
+import scala.collection.convert.Wrappers.DictionaryWrapper
+import scala.util.matching.Regex
 
 /**
  *
@@ -72,7 +75,7 @@ class Workbook extends scala.collection.mutable.Map[String,Sheet]{
 
   def deleteSheet(sheetName : String) = {
     getSheet(sheetName) match{
-      case Some(_) => {
+      case Some(sheet) => {
         sheets = sheets.filterNot(s => s.name == sheetName)
         true
       }
