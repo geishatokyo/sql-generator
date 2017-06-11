@@ -2,12 +2,15 @@ package com.geishatokyo.sqlgen.core
 
 import com.geishatokyo.sqlgen.SQLGenException
 
+import scala.util.matching.Regex
+
 /**
   * Created by takezoux2 on 2017/05/26.
   */
 class Workbook(val name: String, metadataRepoOp: Option[MetadataRepository] = None, actionRepoOp: Option[ActionRepository] = None) {
 
-  private var sheets: Map[String,Sheet] = Map.empty
+  private var _sheets: Map[String,Sheet] = Map.empty
+  def sheets = _sheets.values
 
   def metadataRepository = metadataRepoOp match {
     case Some(repo) => repo
@@ -24,13 +27,28 @@ class Workbook(val name: String, metadataRepoOp: Option[MetadataRepository] = No
   }
 
 
+  def apply(name: String): Sheet = {
+    _sheets.getOrElse(name, {
+      throw new SQLGenException(s"Sheet:${name} not found in Workbook:${name}")
+    })
+  }
+
+  def getSheet(name: String): Option[Sheet] = {
+    _sheets.get(name)
+  }
+
+  def sheetsMatchingTo(r: Regex) = {
+    _sheets.find {
+      case (k,v) => r.findFirstIn(k).isDefined
+    } map(_._2)
+  }
 
 
   def addSheet(sheet: Sheet): Sheet = {
     if(sheet._parent != null){
       throw new SQLGenException(s"Sheet:${sheet.name} is already added to another workbook")
     }
-    sheets = sheets + (sheet.name -> sheet)
+    _sheets = _sheets + (sheet.name -> sheet)
     sheet._parent = this
     sheet
   }
@@ -40,10 +58,10 @@ class Workbook(val name: String, metadataRepoOp: Option[MetadataRepository] = No
   }
 
   def removeSheet(name: String) = {
-    sheets.get(name) match{
+    _sheets.get(name) match{
       case Some(sheet) => {
         sheet._parent = null
-        sheets = sheets - name
+        _sheets = _sheets - name
         true
       }
       case None => {
@@ -51,6 +69,12 @@ class Workbook(val name: String, metadataRepoOp: Option[MetadataRepository] = No
       }
     }
   }
+
+
+  def contains(name: String) = {
+    _sheets.contains(name)
+  }
+
 
 
 }

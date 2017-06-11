@@ -6,5 +6,5 @@ package com.geishatokyo.sqlgen.project.flow
 trait DataProcessor {
 
 
-  def process(inputDatas: List[InputData]) : List[InputData]
+  def process(inputDatas: List[InputData]) : List[InputData] = Nil
 }

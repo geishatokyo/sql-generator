@@ -58,6 +58,8 @@ class Cell( _parent: Sheet,
     variableConverter.getApplier(Operator.Mod)(variable, variableConverter.toVariable(v))(this)
   }
 
+
+  def isEmpty = variable == null || variable.isEmpty
   /**
     *
     * @return
@@ -95,6 +97,15 @@ class Cell( _parent: Sheet,
     throw new SQLGenException(m)
   }
 
+  override def equals(obj: scala.Any): Boolean = {
+    obj match{
+      case c : Cell => this.rawValue == c.rawValue ||
+        this.variable.asString == c.variable.asString
+      case v: Variable => this.rawValue == v.raw ||
+        this.variable.asString == v.asString
+      case a: Any => this.rawValue == a || this.asString == a.toString
+    }
+  }
 }
 
 object Cell{

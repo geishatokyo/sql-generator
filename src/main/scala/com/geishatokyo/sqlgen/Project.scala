@@ -5,7 +5,7 @@ import java.util.Date
 
 import com.geishatokyo.sqlgen.project.flow.{DataProcessor, InputData}
 import com.geishatokyo.sqlgen.project.refs.{ColumnRef, SheetScope}
-import com.geishatokyo.sqlgen.sheet.{Row, Sheet, Workbook}
+import com.geishatokyo.sqlgen.core.{Row, Sheet, Workbook}
 
 import scala.util.DynamicVariable
 import scala.util.matching.Regex
@@ -52,55 +52,6 @@ trait Project extends DataProcessor{
       })
     }
   }
-  object all{
-
-    private var refSheetCache = Map[String,Option[Sheet]]()
-
-    /**
-      * 参照するワークブックも含めて、全てのシートをマージする
-      *
-      * @param name
-      */
-    def sheet(name: String) = {
-
-      val refSheet = refSheetCache.getOrElse(name,{
-        val sheets = context.references.filter(w => {
-          w.contains(name)
-        }).map(_(name))
-
-        val s = sheets match{
-          case h :: tail => {
-            Some(tail.foldLeft(h.copy())((s1,s2) => s1.merge(s2)))
-          }
-          case Nil => None
-        }
-        refSheetCache = refSheetCache + (name -> s)
-        s
-      })
-
-      val wb = workbook
-      if(wb.contains(name)){
-        val baseSheet = wb(name)
-        refSheet match{
-          case Some(refS) => {
-            baseSheet.copy.merge(refS)
-          }
-          case None => {
-            baseSheet
-          }
-        }
-      }else{
-        refSheet match{
-          case Some(refS) => {
-            refS
-          }
-          case None => {
-            throw new Exception(s"Sheet:${name} not found")
-          }
-        }
-      }
-    }
-  }
 
   def addSheet(sheetName: String) = {
     addAction(wb => {
@@ -132,7 +83,7 @@ trait Project extends DataProcessor{
   def findById(id: Any) : Option[Row] = {
     val idColumn = sheet.ids.headOption.getOrElse(throw new Exception(s"Sheet:${sheet.name} has no ids"))
     rows.find(r => {
-      r(idColumn.name) ~== id
+      r(idColumn.name) == id
     })
   }
 
@@ -175,16 +126,9 @@ trait Project extends DataProcessor{
   }
 
   def ignore() = {
-    sheet.ignore
+    sheet.metadata.ignore = true
   }
 
-
-  def process(inputDatas: List[InputData]) = {
-    inputDatas.map(data => {
-      val c = data.context
-      InputData(c,apply(c,data.workbook))
-    })
-  }
 
 
   def apply(context: Context,workbook : Workbook) = {

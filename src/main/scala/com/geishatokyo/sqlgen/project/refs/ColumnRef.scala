@@ -2,7 +2,7 @@ package com.geishatokyo.sqlgen.project.refs
 
 import java.util.Date
 
-import com.geishatokyo.sqlgen.sheet.{Cell, Column, Row, Sheet}
+import com.geishatokyo.sqlgen.core.{Cell, Column, Row, Sheet}
 
 import scala.concurrent.duration.FiniteDuration
 import scala.reflect.macros.blackbox.Context
@@ -35,7 +35,7 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
   }
 
   def foreach(func: Cell => Unit) : Unit = {
-    if(sheet.existColumn(columnName)) {
+    if(sheet.hasColumn(columnName)) {
       sheet.column(columnName).cells.foreach(c => sheetScope.withRow(c.row){
         func(c)
       })
@@ -49,8 +49,8 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
   }
 
   def ensureExists() : ColumnRef = {
-    if(!sheet.existColumn(columnName)){
-      sheet.addColumns(columnName)
+    if(!sheet.hasColumn(columnName)){
+      sheet.addHeader(columnName)
     }
     this
   }
@@ -123,7 +123,7 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
     row(columnName).asString
   }
   def asInt = {
-    row(columnName).asInt
+    row(columnName).asLong.toInt
   }
   def asLong = {
     row(columnName).asLong
@@ -132,82 +132,32 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
     row(columnName).asDouble
   }
   def asDate = {
-    row(columnName).asDate
+    row(columnName).asJavaTime
   }
 
   override def toString: String = {
     asString
   }
 
-
-  def +(duration: FiniteDuration) = {
-    val d = row(columnName).asDate
-    new Date(d.getTime + duration.toMillis)
-  }
-  def -(duration: FiniteDuration) = {
-    val d = row(columnName).asDate
-    new Date(d.getTime - duration.toMillis)
-  }
-  def +(s: String) = {
-    row(columnName).asString + s
-  }
-  
-  def +(i: Int) = {
-    row(columnName).asInt + i
-  }
-  def -(i: Int) = {
-    row(columnName).asInt - i
-  }
-  def /(i: Int) = {
-    row(columnName).asInt / i
-  }
-  def *(i: Int) = {
-    row(columnName).asInt * i
-  }
-  def ^(i: Int) = {
-    Math.pow(row(columnName).asDouble,i).toInt
+  def +(any: Any) = {
+    row(columnName) + any
   }
 
-
-  def +(i: Double) = {
-    row(columnName).asDouble + i
-  }
-  def -(i: Double) = {
-    row(columnName).asDouble - i
-  }
-  def /(i: Double) = {
-    row(columnName).asDouble / i
-  }
-  def *(i: Double) = {
-    row(columnName).asDouble * i
-  }
-  def ^(i: Double) = {
-    Math.pow(row(columnName).asDouble,i)
+  def -(any: Any) = {
+    row(columnName) - any
   }
 
-  def +(i: Long) = {
-    row(columnName).asLong + i
-  }
-  def -(i: Long) = {
-    row(columnName).asLong - i
-  }
-  def /(i: Long) = {
-    row(columnName).asLong / i
-  }
-  def *(i: Long) = {
-    row(columnName).asLong * i
-  }
-  def ^(i: Long) = {
-    Math.pow(row(columnName).asDouble,i).toLong
-  }
-  
-
-  def ignore : Unit = {
-    sheet.getColumn(columnName).foreach(c => {
-      c.header.output_? = false
-    })
+  def *(any: Any) = {
+    row(columnName) * any
   }
 
+  def /(any: Any) = {
+    row(columnName) / any
+  }
+
+  def %(any: Any) = {
+    row(columnName) % any
+  }
 
 
 

@@ -24,7 +24,5 @@ class StringVariable(s: String, dateConversion: DateConversion) extends Variable
 
   override def raw: Any = s
 
-
-
-
+  override def isEmpty: Boolean = s != null || s.length == 0
 }

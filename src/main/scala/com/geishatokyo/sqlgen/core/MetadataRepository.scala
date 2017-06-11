@@ -10,7 +10,7 @@ trait MetadataRepository {
 
   def apply(workbookName: String) : Metadata = {
     metadatas.getOrElse(workbookName, {
-      EmptyMetadata
+      new Metadata()
     })
   }
 
@@ -20,9 +20,3 @@ trait MetadataRepository {
 
 }
 
-
-object EmptyMetadata extends Metadata {
-
-
-
-}

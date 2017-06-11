@@ -22,6 +22,8 @@ class DateVariable(d: ZonedDateTime, dateConversion: DateConversion) extends Var
   override def asDate: ZonedDateTime = d
 
   override def raw: Any = d
+
+  override def isEmpty: Boolean = false
 }
 
 object DateVariable{

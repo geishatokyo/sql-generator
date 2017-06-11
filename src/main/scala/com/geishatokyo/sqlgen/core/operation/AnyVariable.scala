@@ -22,4 +22,6 @@ class AnyVariable(v: Any, dateConversion: DateConversion) extends Variable {
   }
 
   override def raw: Any = v
+
+  override def isEmpty: Boolean = v == null || asString == ""
 }

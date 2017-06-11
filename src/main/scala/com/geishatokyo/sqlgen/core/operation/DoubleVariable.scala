@@ -19,4 +19,6 @@ class DoubleVariable(v: Double, dateConversion: DateConversion) extends Variable
   override def raw: Any = v
 
   override def asString: String = if(v % 1.0 == 0) v.toLong.toString else v.toString
+
+  override def isEmpty: Boolean = false
 }

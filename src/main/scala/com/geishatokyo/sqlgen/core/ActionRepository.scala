@@ -10,5 +10,6 @@ trait ActionRepository {
 
   def getDateConversion: DateConversion
   def getVaribaleConverter(c: Cell): VariableConverter
+  def getColumnInfoAccessor(column: Column): ColumnInfoAccessor
 
 }

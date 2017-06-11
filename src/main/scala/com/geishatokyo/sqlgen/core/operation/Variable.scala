@@ -15,7 +15,7 @@ trait Variable {
   def asDate: ZonedDateTime
   def raw: Any
 
-
+  def isEmpty : Boolean
 }
 
 

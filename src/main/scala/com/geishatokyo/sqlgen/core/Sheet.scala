@@ -22,6 +22,13 @@ class Sheet(val name: String) {
   def rows = _rows
   def columns = _columns
 
+  def metadata : SheetMetadata = parent.metadata.getSheetMetadata(this.name)
+
+  def ids = {
+    val idNames = metadata.ids
+    idNames.map(header(_))
+  }
+
   def apply(rowIndex: Int, columnIndex: Int): Cell = {
     _cells(rowIndex)(columnIndex)
   }
@@ -43,6 +50,10 @@ class Sheet(val name: String) {
 
   def column(name: String) = {
     columns(columnIndexOf(name))
+  }
+
+  def hasColumn(name: String) = {
+    columns.exists(_.header.name == name)
   }
 
   def getHeader(headerName: String) : Option[Header] = {
@@ -95,6 +106,9 @@ class Sheet(val name: String) {
 
 
 
+  def copy() = {
+    val c = new Sheet(name)
+  }
 
 
 
