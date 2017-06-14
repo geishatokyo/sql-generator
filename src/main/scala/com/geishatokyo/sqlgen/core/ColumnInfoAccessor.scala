@@ -6,7 +6,7 @@ package com.geishatokyo.sqlgen.core
 trait ColumnInfoAccessor {
 
   def isId: Boolean
-  def columnType: String
+  def columnType: DataType
   def isIgnore: Boolean
   def isUnique: Boolean
   def defaultValue: Any

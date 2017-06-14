@@ -76,5 +76,9 @@ class Workbook(val name: String, metadataRepoOp: Option[MetadataRepository] = No
   }
 
 
+  private[core] def changeSheetName(sheet: Sheet, newName: String) = {
+    _sheets -= sheet.name
+    _sheets += (newName -> sheet)
+  }
 
 }

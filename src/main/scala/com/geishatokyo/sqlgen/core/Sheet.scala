@@ -5,10 +5,19 @@ import com.geishatokyo.sqlgen.SQLGenException
 /**
   * Created by takezoux2 on 2017/05/26.
   */
-class Sheet(val name: String) {
+class Sheet(private var _name: String) {
 
   private[core] var _parent : Workbook = null
   def parent = _parent
+
+  def name = _name
+  def name_=(newName: String) = {
+    if(_parent != null){
+      _parent.changeSheetName(this,newName)
+    }
+    _name = newName
+  }
+
 
   private[core] var _headers : Array[Header] = Array.empty
   private[core] var _cells : Array[Array[Cell]] = Array.empty
@@ -25,8 +34,7 @@ class Sheet(val name: String) {
   def metadata : SheetMetadata = parent.metadata.getSheetMetadata(this.name)
 
   def ids = {
-    val idNames = metadata.ids
-    idNames.map(header(_))
+    columns.filter(_.header.isId)
   }
 
   def apply(rowIndex: Int, columnIndex: Int): Cell = {
@@ -44,6 +52,8 @@ class Sheet(val name: String) {
       throw new SQLGenException(s"Header:${headerName} not found in Sheet:${name}")
     }
   }
+
+
   def header(index: Int) = {
     headers(index)
   }
@@ -102,6 +112,26 @@ class Sheet(val name: String) {
     })
     recalculate()
     columns.last
+  }
+
+  def addHeaders(headerNames: String*): Array[Column] = {
+
+    headerNames.find(this.hasColumn(_)) match{
+      case Some(name) => {
+        throw new SQLGenException(s"Header:${name} already exists")
+      }
+      case None => {}
+    }
+
+    headerNames.foreach(headerName => {
+      val columnIndex = _headers.length
+      val h = new Header(headerName)
+      _headers = _headers :+ h
+      _cells = _cells.zipWithIndex.map({
+        case (row, rowIndex) => row :+ Cell(this,rowIndex, columnIndex, null)
+      })
+    })
+    columns.takeRight(headerNames.size)
   }
 
 

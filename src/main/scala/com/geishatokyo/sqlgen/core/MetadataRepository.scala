@@ -10,7 +10,7 @@ trait MetadataRepository {
 
   def apply(workbookName: String) : Metadata = {
     metadatas.getOrElse(workbookName, {
-      new Metadata()
+      null//new Metadata()
     })
   }
 

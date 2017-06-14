@@ -2,7 +2,7 @@ package com.geishatokyo.sqlgen.core.impl
 
 import com.geishatokyo.sqlgen.core.conversion.{DateConversion, UnixTimeBaseConversion, VariousStringFormatConversion}
 import com.geishatokyo.sqlgen.core.operation.VariableConverter
-import com.geishatokyo.sqlgen.core.{ActionRepository, Cell, Column, ColumnInfoAccessor}
+import com.geishatokyo.sqlgen.core._
 
 /**
   * Created by takezoux2 on 2017/06/11.
@@ -29,11 +29,14 @@ class DefaultDateConversion extends UnixTimeBaseConversion with VariousStringFor
 
 class DefaultColumnInfoAccessor(column: Column) extends ColumnInfoAccessor {
   override def isId: Boolean = {
+    column.metadata.isId ||
     column.header.name == "id"
   }
 
-  override def columnType: String = {
-    column.metadata.columnType.map(_.toString).getOrElse("String")
+  override def columnType: DataType = {
+    column.metadata.columnType.map(c => DataType.fromString(c.toString)) getOrElse {
+      ColumnTypeGuesser.fromName(column.name)
+    }
   }
 
   override def isIgnore: Boolean = {
@@ -44,7 +47,8 @@ class DefaultColumnInfoAccessor(column: Column) extends ColumnInfoAccessor {
     column.metadata.unique == Some(true)
   }
 
-  override def defaultValue: Any = {
-    column.metadata.defaultValue.map(_.toString).getOrElse("")
+  override def defaultValue: Option[Any] = {
+    column.metadata.defaultValue.map(_.toString)
   }
 }
+

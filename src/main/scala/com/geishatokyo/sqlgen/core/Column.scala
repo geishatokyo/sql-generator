@@ -7,7 +7,7 @@ class Column(val parent: Sheet, columnIndex: Int) {
 
   val column = columnIndex
 
-
+  def name = header.name
   def apply(index: Int) = parent._cells(index)(columnIndex)
   def header = parent._headers(columnIndex)
 

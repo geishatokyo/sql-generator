@@ -19,6 +19,8 @@ object XlsConverterBuild extends Build {
     "mysql" % "mysql-connector-java" % "5.1.18" % "provided",
     "com.amazonaws" % "aws-java-sdk" % "1.2.6" % "provided",
     "org.scala-lang" % "scala-reflect" % ScalaVersion,
+    "com.typesafe" % "config" % "1.3.1",
+    "com.github.tototoshi" %% "scala-csv" % "1.3.4",
     "org.scalatest" %% "scalatest" % "3.0.2" % "test"
   )
 
