@@ -2,6 +2,8 @@ package com.geishatokyo.sqlgen.core
 
 import com.geishatokyo.sqlgen.SQLGenException
 
+import scala.collection.mutable
+
 /**
   * Created by takezoux2 on 2017/05/26.
   */
@@ -18,6 +20,7 @@ class Sheet(private var _name: String) {
     _name = newName
   }
 
+  var isIgnore = false
 
   private[core] var _headers : Array[Header] = Array.empty
   private[core] var _cells : Array[Array[Cell]] = Array.empty
@@ -31,7 +34,7 @@ class Sheet(private var _name: String) {
   def rows = _rows
   def columns = _columns
 
-  def metadata : SheetMetadata = parent.metadata.getSheetMetadata(this.name)
+  val note = mutable.Map.empty[String,Any]
 
   def ids = {
     columns.filter(_.header.isId)
@@ -131,6 +134,8 @@ class Sheet(private var _name: String) {
         case (row, rowIndex) => row :+ Cell(this,rowIndex, columnIndex, null)
       })
     })
+
+    recalculate()
     columns.takeRight(headerNames.size)
   }
 

@@ -8,3 +8,4 @@ trait DataProcessor {
 
   def process(inputDatas: List[InputData]) : List[InputData] = Nil
 }
+

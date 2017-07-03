@@ -1,10 +1,12 @@
 package com.geishatokyo.sqlgen.core
 import java.time.ZonedDateTime
+import java.time.temporal.{ChronoUnit, TemporalUnit}
 import java.util.Date
 
 import com.geishatokyo.sqlgen.SQLGenException
-import com.geishatokyo.sqlgen.core.operation.{Operator, Variable, VariableConverter}
+import com.geishatokyo.sqlgen.core.operation._
 
+import scala.collection.mutable
 import scala.util.Try
 
 /**
@@ -22,40 +24,97 @@ class Cell( _parent: Sheet,
   def column = _parent._columns(_columnIndex)
   def header = _parent.header(columnIndex)
 
+  val note = mutable.Map.empty[String,Any]
 
-  private[core] def variableConverter: VariableConverter = {
-    parent.parent.actionRepository.getVaribaleConverter(this)
-  }
 
-  private[core] var variable: Variable = null
+  private[core] var variable: Variable = NullVar
 
-  def value = if(variable == null) {
-    null
-  } else {
-    variable.raw
-  }
+  def value = variable.raw
   def value_=(v: Any) = {
-    if(variable == null || v != variable || v != variable.raw){
-      variable = variableConverter.toVariable(v)
-    }
+    variable = Variable(v)
   }
 
   def :=(v: Any) = this.value = v
 
-  def +(v: Any) = {
-    variableConverter.getApplier(Operator.Add)(variable, variableConverter.toVariable(v))(this)
+  def tryIt[T](func: => T): T = {
+    try{
+      func
+    } catch {
+      case t: Throwable => {
+        throw new SQLGenException(s"Error on cell at col:${header.name} row:${rowIndex}")
+      }
+    }
   }
-  def -(v: Any) = {
-    variableConverter.getApplier(Operator.Sub)(variable, variableConverter.toVariable(v))(this)
+
+  def +(v: Any) = tryIt{
+    this.variable.dataType match{
+      case DataType.String => {
+        variable.asString + Variable(v).asString
+      }
+      case DataType.Integer => {
+        variable.asLong + Variable(v).asLong
+      }
+      case DataType.Number => {
+        variable.asDouble + Variable(v).asDouble
+      }
+      case DataType.Date => {
+        val dur = Variable(v).asDuration
+        variable.asDate.plus(dur.toMicros, ChronoUnit.MILLIS)
+      }
+      case DataType.Duration => {
+        variable.asDuration + Variable(v).asDuration
+      }
+    }
   }
-  def *(v: Any) = {
-    variableConverter.getApplier(Operator.Mod)(variable, variableConverter.toVariable(v))(this)
+  def -(v: Any) = tryIt {
+    this.variable.dataType match{
+      case DataType.Integer => {
+        variable.asLong - Variable(v).asLong
+      }
+      case DataType.Number => {
+        variable.asDouble - Variable(v).asDouble
+      }
+      case DataType.Date => {
+        val dur = Variable(v).asDuration
+        variable.asDate.minus(dur.toMicros, ChronoUnit.MILLIS)
+      }
+      case DataType.Duration => {
+        variable.asDuration - Variable(v).asDuration
+      }
+    }
   }
-  def /(v: Any) = {
-    variableConverter.getApplier(Operator.Div)(variable, variableConverter.toVariable(v))(this)
+  def *(v: Any) = tryIt(
+    this.variable.dataType match{
+      case DataType.String => {
+        variable.asString * Variable(v).asLong.toInt
+      }
+      case DataType.Integer => {
+        variable.asLong * Variable(v).asLong
+      }
+      case DataType.Number => {
+        variable.asDouble * Variable(v).asDouble
+      }
+    }
+  )
+  def /(v: Any) = tryIt{
+    this.variable.dataType match{
+      case DataType.Integer => {
+        variable.asLong / Variable(v).asLong
+      }
+      case DataType.Number => {
+        variable.asDouble / Variable(v).asDouble
+      }
+    }
   }
-  def %(v: Any) = {
-    variableConverter.getApplier(Operator.Mod)(variable, variableConverter.toVariable(v))(this)
+  def %(v: Any) = tryIt{
+    this.variable.dataType match{
+      case DataType.Integer => {
+        variable.asLong % Variable(v).asLong
+      }
+      case DataType.Number => {
+        variable.asDouble % Variable(v).asDouble
+      }
+    }
   }
 
 

@@ -2,29 +2,21 @@ package com.geishatokyo.sqlgen.core
 
 import com.geishatokyo.sqlgen.SQLGenException
 
+import scala.collection.mutable
 import scala.util.matching.Regex
 
 /**
   * Created by takezoux2 on 2017/05/26.
   */
-class Workbook(val name: String, metadataRepoOp: Option[MetadataRepository] = None, actionRepoOp: Option[ActionRepository] = None) {
+class Workbook(val name: String) {
 
   private var _sheets: Map[String,Sheet] = Map.empty
   def sheets = _sheets.values
 
-  def metadataRepository = metadataRepoOp match {
-    case Some(repo) => repo
-    case None => Global.defaultMetadataRepository
-  }
 
-  def metadata: Metadata = {
-    metadataRepository(name)
-  }
+  val note = mutable.Map.empty[String,Any]
 
-  def actionRepository = actionRepoOp match {
-    case Some(repo) => repo
-    case None => Global.defaultActionRepository
-  }
+
 
 
   def apply(name: String): Sheet = {

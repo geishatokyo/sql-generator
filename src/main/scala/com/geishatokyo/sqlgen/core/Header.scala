@@ -1,5 +1,7 @@
 package com.geishatokyo.sqlgen.core
 
+import scala.collection.mutable
+
 /**
   * Created by takezoux2 on 2017/05/26.
   */
@@ -11,16 +13,13 @@ class Header(var name: String) {
 
   def column = parent.column(name)
 
-  def columnInfoAccessor = _parent.parent.actionRepository.getColumnInfoAccessor(column)
 
-  def isId = columnInfoAccessor.isId
+  var isId = false
 
-  def columnType = columnInfoAccessor.columnType
+  val note = mutable.Map.empty[String,Any]
 
-  def isUnique = columnInfoAccessor.columnType
+  var columnType: String = "String"
 
-  def isIgnore = columnInfoAccessor.isIgnore
-
-  def defaultValue = columnInfoAccessor.defaultValue
+  var isIgnore = false
 
 }

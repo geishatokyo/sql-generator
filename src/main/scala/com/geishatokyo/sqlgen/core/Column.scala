@@ -14,7 +14,5 @@ class Column(val parent: Sheet, columnIndex: Int) {
   def cells = parent._cells.iterator.map(_(columnIndex))
 
 
-  def metadata = parent.metadata.getColumnMetadata(header.name)
-
 
 }

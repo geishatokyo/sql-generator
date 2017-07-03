@@ -126,7 +126,7 @@ trait Project extends DataProcessor{
   }
 
   def ignore() = {
-    sheet.metadata.ignore = true
+    sheet.isIgnore
   }
 
 
