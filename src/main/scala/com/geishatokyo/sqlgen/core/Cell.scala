@@ -4,9 +4,9 @@ import java.time.temporal.{ChronoUnit, TemporalUnit}
 import java.util.Date
 
 import com.geishatokyo.sqlgen.SQLGenException
-import com.geishatokyo.sqlgen.core.operation._
 
 import scala.collection.mutable
+import scala.concurrent.duration.Duration
 import scala.util.Try
 
 /**
@@ -26,6 +26,9 @@ class Cell( _parent: Sheet,
 
   val note = mutable.Map.empty[String,Any]
 
+  def address = {
+    s"${parent.parent.name}/${parent.name}/${header.name}-${rowIndex}"
+  }
 
   private[core] var variable: Variable = NullVar
 
@@ -41,81 +44,80 @@ class Cell( _parent: Sheet,
       func
     } catch {
       case t: Throwable => {
-        throw new SQLGenException(s"Error on cell at col:${header.name} row:${rowIndex}")
+        throw new SQLGenException(s"Error on cell at col:${header.name} row:${rowIndex}",t, parent.parent)
       }
     }
   }
 
-  def +(v: Any) = tryIt{
-    this.variable.dataType match{
-      case DataType.String => {
-        variable.asString + Variable(v).asString
-      }
-      case DataType.Integer => {
-        variable.asLong + Variable(v).asLong
-      }
-      case DataType.Number => {
-        variable.asDouble + Variable(v).asDouble
-      }
-      case DataType.Date => {
-        val dur = Variable(v).asDuration
-        variable.asDate.plus(dur.toMicros, ChronoUnit.MILLIS)
-      }
-      case DataType.Duration => {
-        variable.asDuration + Variable(v).asDuration
-      }
+  implicit class ZonedDateTimeExt(date: ZonedDateTime) {
+    def +(d: Duration) = {
+      date.plus(d.toMillis, ChronoUnit.MILLIS)
+    }
+    def -(d: Duration) = {
+      date.minus(d.toMillis, ChronoUnit.MILLIS)
     }
   }
-  def -(v: Any) = tryIt {
-    this.variable.dataType match{
-      case DataType.Integer => {
-        variable.asLong - Variable(v).asLong
-      }
-      case DataType.Number => {
-        variable.asDouble - Variable(v).asDouble
-      }
-      case DataType.Date => {
-        val dur = Variable(v).asDuration
-        variable.asDate.minus(dur.toMicros, ChronoUnit.MILLIS)
-      }
-      case DataType.Duration => {
-        variable.asDuration - Variable(v).asDuration
-      }
+
+  def throwOpeError(ope: String, passed: Variable) = {
+    throw new SQLGenException(
+      s"${address} - Unsupported operation with this:${this.variable.dataType} ${ope} that:${passed.dataType}",parent.parent)
+
+  }
+
+
+  def +(_v: Any) = {
+    val v = Variable(_v)
+    Try { variable.asDouble + v.asDouble} orElse
+    Try { variable.asDate + v.asDuration} orElse
+    Try { variable.asString + v.asString} getOrElse {
+      throwOpeError("+",v)
     }
   }
-  def *(v: Any) = tryIt(
-    this.variable.dataType match{
-      case DataType.String => {
-        variable.asString * Variable(v).asLong.toInt
-      }
-      case DataType.Integer => {
-        variable.asLong * Variable(v).asLong
-      }
-      case DataType.Number => {
-        variable.asDouble * Variable(v).asDouble
-      }
-    }
-  )
-  def /(v: Any) = tryIt{
-    this.variable.dataType match{
-      case DataType.Integer => {
-        variable.asLong / Variable(v).asLong
-      }
-      case DataType.Number => {
-        variable.asDouble / Variable(v).asDouble
-      }
+  def -(_v: Any) = {
+    val v = Variable(_v)
+    Try { variable.asDouble - v.asDouble} orElse
+    Try { variable.asDate - v.asDuration} getOrElse {
+      throwOpeError("-",v)
     }
   }
-  def %(v: Any) = tryIt{
-    this.variable.dataType match{
-      case DataType.Integer => {
-        variable.asLong % Variable(v).asLong
-      }
-      case DataType.Number => {
-        variable.asDouble % Variable(v).asDouble
-      }
+  def *(_v: Any) = {
+    val v = Variable(_v)
+    Try { variable.asLong * v.asLong} orElse
+    Try { variable.asDouble * v.asDouble} orElse
+    Try { variable.asString * v.asLong.toInt} getOrElse {
+      throwOpeError("*",v)
     }
   }
+  def /(_v: Any) = {
+    val v = Variable(_v)
+    Try { variable.asLong / v.asLong} orElse
+      Try { variable.asDouble / v.asDouble} getOrElse {
+      throwOpeError("/",v)
+    }
+  }
+  def %(_v: Any) = {
+    val v = Variable(_v)
+    Try { variable.asLong % v.asLong} orElse
+      Try { variable.asDouble % v.asDouble} getOrElse {
+      throwOpeError("%",v)
+    }
+  }
+  def |(_v: Any) = {
+    val v = Variable(_v)
+    Try { variable.asBool | v.asBool} orElse
+    Try { variable.asLong | v.asLong} getOrElse {
+      throwOpeError("|",v)
+    }
+  }
+
+  def &(_v: Any) = {
+    val v = Variable(_v)
+    Try { variable.asBool & v.asBool} orElse
+      Try { variable.asLong & v.asLong} getOrElse {
+      throwOpeError("&",v)
+    }
+  }
+
 
 
   def isEmpty = variable == null || variable.isEmpty
@@ -123,7 +125,7 @@ class Cell( _parent: Sheet,
     *
     * @return
     */
-  def asLong: Long = variable.asDouble.toLong
+  def asLong: Long = variable.asLong
 
   /**
     *
@@ -143,11 +145,13 @@ class Cell( _parent: Sheet,
     */
   def asJavaTime: ZonedDateTime = variable.asDate
 
+  def asDuration = variable.asDuration
+
   /**
     *
     * @return
     */
-  def asBool: Boolean = variable.asDouble > 0
+  def asBool: Boolean = variable.asBool
 
   def rawValue: Any = variable.raw
 

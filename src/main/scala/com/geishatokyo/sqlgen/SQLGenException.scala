@@ -1,6 +1,7 @@
 package com.geishatokyo.sqlgen
 
-import sheet.Workbook
+import com.geishatokyo.sqlgen.core.Workbook
+
 
 /**
  *

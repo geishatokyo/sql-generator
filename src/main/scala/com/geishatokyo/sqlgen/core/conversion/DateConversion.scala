@@ -1,7 +1,8 @@
 package com.geishatokyo.sqlgen.core.conversion
 
-import java.time.{Instant, LocalDateTime, ZoneId, ZonedDateTime}
-import java.time.format.DateTimeFormatter
+import java.time._
+import java.time.format.{DateTimeFormatter, ResolverStyle}
+import java.time.temporal.ChronoField
 
 import com.geishatokyo.sqlgen.SQLGenException
 
@@ -63,8 +64,8 @@ trait DurationConversion extends DateConversion {
 trait VariousStringFormatConversion extends DateConversion{
 
   val formats = Array(
-    DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss.SSS"),
-    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS"),
+    DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"),
+    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
     DateTimeFormatter.ISO_OFFSET_DATE_TIME,
     DateTimeFormatter.BASIC_ISO_DATE,
     DateTimeFormatter.ofPattern("yyyy/MM/dd"),
@@ -79,9 +80,21 @@ trait VariousStringFormatConversion extends DateConversion{
   override def stringToDate(s: String): ZonedDateTime = {
     formats.view.map(f => {
       try{
-        Some(ZonedDateTime.parse(s, f))
+        val p = f.parse(s)
+        if(p.isSupported(ChronoField.HOUR_OF_DAY)) {
+          Some(ZonedDateTime.of(LocalDateTime.from(p), ZoneId.systemDefault()))
+        } else {
+          Some(ZonedDateTime.of(
+            LocalDate.from(p),
+            LocalTime.MIN,
+            ZoneId.systemDefault()
+          ))
+        }
       }catch{
-        case t: Throwable => None
+        case t: Throwable => {
+          println("##" + t.getMessage)
+          None
+        }
       }
     }).find(_.isDefined).map(_.get).getOrElse{
       throw new SQLGenException(s"Wrong date format ${s}")

@@ -40,10 +40,10 @@ class Sheet(private var _name: String) {
     columns.filter(_.header.isId)
   }
 
-  def apply(rowIndex: Int, columnIndex: Int): Cell = {
+  def apply(columnIndex: Int, rowIndex: Int): Cell = {
     _cells(rowIndex)(columnIndex)
   }
-  def update(rowIndex: Int, columnIndex: Int, v: Any) = {
+  def update(columnIndex: Int, rowIndex: Int, v: Any) = {
     apply(rowIndex, columnIndex) := v
   }
 
@@ -84,7 +84,7 @@ class Sheet(private var _name: String) {
       case (a, columnIndex) => Cell(this, rowIndex, columnIndex, a)
     }
 
-    _cells = this._cells.+:(row.toArray)
+    _cells = this._cells :+ (row.toArray)
     recalculate()
     _rows.last
   }
