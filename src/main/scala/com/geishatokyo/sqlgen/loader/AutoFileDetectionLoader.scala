@@ -10,13 +10,9 @@ import scala.util.matching.Regex
 /**
   * Created by takezoux2 on 2017/07/05.
   */
-class AutoFileDetectionLoader(patterns: Seq[Pattern], _defaultLoader : Option[Loader] = None) extends Loader{
+class AutoFileDetectionLoader(patterns: Seq[Pattern]) extends Loader{
 
 
-  def defaultLoader: Loader = _defaultLoader orElse
-    patterns.headOption.map(_.loader) getOrElse {
-    throw new SQLGenException("No default loader")
-  }
 
   override def load(file: File): Workbook = {
     patterns.find(p => {
@@ -26,13 +22,22 @@ class AutoFileDetectionLoader(patterns: Seq[Pattern], _defaultLoader : Option[Lo
         p.loader.load(file)
       }
       case None => {
-        defaultLoader.load(file)
+        throw new SQLGenException(s"Can't detect loader for ${file}")
       }
     }
   }
 
   override def load(name: String, input: InputStream): Workbook = {
-    defaultLoader.load(name, input)
+    patterns.find(p => {
+      p.fileRegex.findFirstIn(name).isDefined
+    }) match{
+      case Some(p) => {
+        p.loader.load(name, input)
+      }
+      case None => {
+        throw new SQLGenException(s"Can't detect loader for ${name}")
+      }
+    }
   }
 
 
@@ -47,7 +52,9 @@ object AutoFileDetectionLoader {
 
   val default: AutoFileDetectionLoader = new AutoFileDetectionLoader(
     List(
-      Pattern.withExtension("csv", new CSVLoader())
+      Pattern.withExtension("csv", new CSVLoader()),
+      Pattern.withExtension("xlsx", new XLSLoader()),
+      Pattern.withExtension("xls", new XLSLoader())
     )
   )
 

@@ -147,6 +147,15 @@ class Cell( _parent: Sheet,
 
   def asDuration = variable.asDuration
 
+  def asDate = variable.asDate
+
+  def asOldDate: java.util.Date = {
+    val i = asDate.toInstant
+    Date.from(i)
+  }
+
+  def dataType = variable.dataType
+
   /**
     *
     * @return

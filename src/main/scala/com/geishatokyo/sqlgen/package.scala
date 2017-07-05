@@ -1,6 +1,7 @@
 package com.geishatokyo
 
 import com.geishatokyo.sqlgen.core.Workbook
+import com.geishatokyo.sqlgen.process.converter.csv.CSVConverterProc
 import com.geishatokyo.sqlgen.process.input.{DirectoryLoaderInput, FileLoaderInput, WorkbookInput}
 import com.geishatokyo.sqlgen.process.output.ConsoleOutputProc
 import com.geishatokyo.sqlgen.process.{Proc, ProjectProc}
@@ -32,9 +33,15 @@ package object sqlgen {
     new ProjectProc(p)
   }
 
+  def csv = {
+    new CSVConverterProc()
+  }
+
+
+
 
   def showConsole = {
-    new ConsoleOutputProc()
+    csv.toConsole
   }
 
 

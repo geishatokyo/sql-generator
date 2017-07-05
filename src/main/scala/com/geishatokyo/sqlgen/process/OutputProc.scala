@@ -1,6 +1,7 @@
 package com.geishatokyo.sqlgen.process
 
 import java.io.File
+import java.nio.file.Paths
 
 import com.geishatokyo.sqlgen.SQLGenException
 import com.geishatokyo.sqlgen.core.Workbook
@@ -8,34 +9,30 @@ import com.geishatokyo.sqlgen.core.Workbook
 /**
   * Created by takezoux2 on 2017/07/05.
   */
-trait OutputProc[DataType] extends Proc{
+trait OutputProc[DataType] extends Proc with OutputSupport{
 
   def dataKey: String
-  def filename: String
 
-  def save(path: String, d: DataType): Unit
+  def output(data: MultiData[DataType], c: Context): Unit
 
-
-  def getExportPath(c: Context): String = {
-    if(c.has(OutputProc.ExportDir)) {
-      new File(c[String](OutputProc.ExportDir), filename).getAbsolutePath
-    } else {
-      new File(c.workingDir, filename).getAbsolutePath
-    }
-  }
 
   override def apply(c: Context): Context = {
-    val d = c[DataType](dataKey)
-    val path = getExportPath(c)
-    save(path, d)
+    val d = c[MultiData[DataType]](dataKey)
+    output(d, c)
     c
   }
 }
 
-trait WorkbookOutputProc extends OutputProc[Workbook] {
-  override def dataKey = Context.Workbook
+trait OutputSupport {
+
+  def getPath(c: Context, dir: String, name: String): File = {
+    if(c.has(Context.ExportDir)) {
+      Paths.get(c(Context.ExportDir), dir, name).toFile
+    } else if(c.has(Context.WorkingDir)) {
+      Paths.get(c.workingDir, dir, name).toFile
+    } else {
+      Paths.get(dir,name).toFile
+    }
+  }
 }
 
-object OutputProc {
-  val ExportDir = "exportDir"
-}

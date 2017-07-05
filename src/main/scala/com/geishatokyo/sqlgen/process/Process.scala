@@ -24,6 +24,10 @@ trait Proc  {
   }
 
 
+  override def toString() = {
+    getClass.getSimpleName.stripSuffix("Proc")
+  }
+
 }
 
 object EmptyProc extends Proc {
@@ -40,7 +44,12 @@ case class ProcNode(beforeProc: Proc, currentProc: Proc) extends Proc {
 
   override def execute(c: Context): Context = {
     val c2 = beforeProc.execute(c)
-    currentProc.apply(c2)
+    currentProc.execute(c2)
+  }
+
+
+  override def toString(): String = {
+    beforeProc.toString() + " >> " + currentProc.toString()
   }
 
 }

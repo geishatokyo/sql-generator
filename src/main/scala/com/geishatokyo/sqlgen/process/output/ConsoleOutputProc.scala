@@ -1,38 +1,21 @@
 package com.geishatokyo.sqlgen.process.output
 
 import com.geishatokyo.sqlgen.core.Workbook
-import com.geishatokyo.sqlgen.process.{Context, Proc}
+import com.geishatokyo.sqlgen.process.{Context, MultiData, OutputProc, Proc}
 
 /**
   * Created by takezoux2 on 2017/07/05.
   */
-class ConsoleOutputProc extends Proc {
+class ConsoleOutputProc(val dataKey: String) extends OutputProc[Any] {
 
-  override def apply(c: Context): Context = {
-    val wb = c.workbook
-    println(toString(wb))
-    c
-  }
 
-  def toString(wb: Workbook) = {
-    val builder = new StringBuilder()
-
-    def appendLn(s: String) = builder.append(s + "\n")
-
-    appendLn("# @Workbook " + wb.name)
-    wb.sheets.foreach(s => {
-      appendLn(s"# @Sheet ${s.name}")
-      appendLn(s.headers.map(_.name).mkString(","))
-      s.rows.foreach(row => {
-        appendLn(row.cells.map(_.asString).mkString(","))
-      })
-
-      appendLn("")
+  override def output(data: MultiData[Any], c: Context): Unit = {
+    data.datas.foreach(d => {
+      println("Name: " + d.name)
+      println(d.asString)
     })
-
-    builder.toString()
-
   }
+
 
 
 }

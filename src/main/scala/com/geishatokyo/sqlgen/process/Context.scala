@@ -32,6 +32,8 @@ trait Context
 object Context {
   val Workbook = "workbook"
   val WorkingDir = "workingDir"
+
+  val ExportDir  ="exportDir"
 }
 
 

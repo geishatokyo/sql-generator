@@ -3,8 +3,7 @@ package com.geishatokyo.sqlgen
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.geishatokyo.sqlgen.project.flow.{DataProcessor, InputData}
-import com.geishatokyo.sqlgen.project.refs.{ColumnRef, SheetScope}
+import com.geishatokyo.sqlgen.project.refs.SheetScope
 import com.geishatokyo.sqlgen.core.{Row, Sheet, Workbook}
 import com.geishatokyo.sqlgen.process.Context
 
@@ -14,7 +13,7 @@ import scala.util.matching.Regex
 /**
  * Created by takezoux2 on 15/05/04.
  */
-trait Project extends DataProcessor{
+trait Project{
 
   protected val currentWorkbook = new DynamicVariable[Workbook](null)
   protected val currentContext = new DynamicVariable[Context](null)
