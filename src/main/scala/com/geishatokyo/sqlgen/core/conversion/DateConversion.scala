@@ -54,9 +54,14 @@ trait DurationConversion extends DateConversion {
       case Array(n, "msec") => n.toLong.millis
       case Array(n, "sec") => n.toLong.seconds
       case Array(n, "min") => n.toLong.minutes
+      case Array(n, "minute") => n.toLong.minutes
+      case Array(n, "minutes") => n.toLong.minutes
       case Array(n, "hour") => n.toLong.hours
+      case Array(n, "hours") => n.toLong.hours
       case Array(n, "day") => n.toLong.days
+      case Array(n, "days") => n.toLong.days
       case Array(n, "week") => (n.toLong * 7).days
+      case Array(n, "weeks") => (n.toLong * 7).days
     }
   }
 }

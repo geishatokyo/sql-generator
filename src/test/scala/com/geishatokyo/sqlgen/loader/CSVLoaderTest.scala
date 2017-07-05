@@ -9,7 +9,7 @@ class CSVLoaderTest extends FlatSpec with Matchers{
 
   it should "load csv" in {
 
-    val source = StringListSource("Workbook",List(
+    val source =
       """#@Sheet User
         |id,username,message
         |1,tom,"escape "",""
@@ -25,11 +25,11 @@ class CSVLoaderTest extends FlatSpec with Matchers{
         |3,bbb
         |4,bbb
       """.stripMargin
-    ))
 
-    val loader = new CSVLoader(source)
 
-    val wb = loader.load()
+    val loader = new CSVLoader()
+
+    val wb = loader.loadFromString("Workbook", source)
 
     assert(wb.name == "Workbook")
     assert(wb.sheets.size == 2)

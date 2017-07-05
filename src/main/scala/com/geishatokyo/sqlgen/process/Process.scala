@@ -6,12 +6,32 @@ import com.geishatokyo.sqlgen.core.Workbook
   * Created by takezoux2 on 2017/06/30.
   */
 
-trait Proc extends Function2[Context,Workbook,Workbook]
+trait Proc  {
+
+  def apply(c: Context): Context
 
 
-trait Context
-{
+  def >>(proc: Proc): Proc = {
+    ProcNode(this,proc)
+  }
 
-  def get[T](key: String): Option[T]
+  def execute(c: Context): Context = {
+    apply(c)
+  }
+
+
+}
+
+case class ProcNode(beforeProc: Proc, currentProc: Proc) extends Proc {
+
+  override def apply(c: Context): Context = {
+    currentProc.apply(c)
+  }
+
+  override def execute(c: Context): Context = {
+    val c2 = beforeProc.execute(c)
+    currentProc.apply(c2)
+  }
+
 
 }

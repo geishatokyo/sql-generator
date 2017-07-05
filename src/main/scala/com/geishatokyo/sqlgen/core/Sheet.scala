@@ -73,6 +73,40 @@ class Sheet(private var _name: String) {
     headers.find(_.name == headerName)
   }
 
+  def addRow(row: Row): Row = {
+
+    if(row.parent.headers != this.headers &&
+      !row.parent.headers.forall(h => this.headers.exists(_.name == h.name))
+    ) {
+      throw new SQLGenException(s"Row header is not match")
+
+    }
+    appendRow(row)
+    recalculate()
+    _rows.last
+  }
+  def addRows(rows: Row*) : Unit = {
+    val headers = rows.map(_.parent.headers).distinct
+
+    val allGreen = headers.forall(header => {
+      header == this.headers ||
+      header.forall(h => this.headers.exists(_.name == h.name))
+    })
+    if(!allGreen) {
+      throw new SQLGenException(s"Row header is not match")
+    }
+    rows.foreach(row => appendRow(row))
+    recalculate()
+  }
+  private def appendRow(row: Row) = {
+
+    val rowIndex = _cells.size
+    val values = this.headers.zipWithIndex.map(h => {
+      Cell(this,rowIndex, h._2, row(h._1.name).variable)
+    })
+    _cells = this._cells :+ (values.toArray)
+  }
+
   def addRow(values: Any*): Row = {
 
     if(values.size != _headers.size){
@@ -141,8 +175,18 @@ class Sheet(private var _name: String) {
 
 
 
-  def copy() = {
-    val c = new Sheet(name)
+  def copy(): Sheet = {
+    val newSheet = new Sheet(name)
+
+    newSheet._headers = this._headers.map(_.copy(newSheet))
+    this.note.foreach(t => {
+      newSheet.note(t._1) = t._2
+    })
+    newSheet.addRows(this.rows:_*)
+    newSheet.isIgnore = this.isIgnore
+
+    newSheet
+
   }
 
 

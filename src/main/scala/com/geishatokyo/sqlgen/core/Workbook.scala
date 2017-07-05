@@ -28,6 +28,9 @@ class Workbook(val name: String) {
   def getSheet(name: String): Option[Sheet] = {
     _sheets.get(name)
   }
+  def hasSheet(name: String) = {
+    _sheets.contains(name)
+  }
 
   def sheetsMatchingTo(r: Regex) = {
     _sheets.find {
@@ -44,6 +47,7 @@ class Workbook(val name: String) {
     sheet._parent = this
     sheet
   }
+
 
   def addSheet(name: String):Sheet = {
     addSheet(new Sheet(name))

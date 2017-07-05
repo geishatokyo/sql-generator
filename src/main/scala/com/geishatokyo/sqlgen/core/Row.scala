@@ -3,7 +3,7 @@ package com.geishatokyo.sqlgen.core
 /**
   * Created by takezoux2 on 2017/05/26.
   */
-class Row(parent: Sheet,val rowIndex : Int) {
+class Row(val parent: Sheet,val rowIndex : Int) {
 
   val _cells = parent._cells(rowIndex)
 

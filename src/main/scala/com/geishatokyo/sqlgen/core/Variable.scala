@@ -4,6 +4,7 @@ import java.time.{ZoneId, ZonedDateTime}
 import java.util.Date
 
 import scala.concurrent.duration._
+import scala.util.Try
 
 /**
   * Created by takezoux2 on 2017/06/08.
@@ -69,30 +70,79 @@ class DoubleVar(d: Double) extends Variable
 }
 
 class StringVar(s: String) extends Variable {
-  override def dataType: DataType = DataType.String
+  override def dataType: DataType = {
+    if(tDuration.isSuccess) DataType.Duration
+    else if(tDate.isSuccess) DataType.Date
+    else if(tLong.isSuccess) DataType.Integer
+    else if(tBool.isSuccess) DataType.Bool
+    else if(tDoubnle.isSuccess) DataType.Number
+    else DataType.String
+  }
+
+  private var double: Option[Try[Double]] = None
+  private def tDoubnle: Try[Double] = double match {
+    case Some(t) => t
+    case None => {
+      val t = Try{s.toDouble}
+      double= Some(t)
+      t
+    }
+  }
+  private var date: Option[Try[ZonedDateTime]] = None
+  private def tDate: Try[ZonedDateTime] = date match {
+    case Some(t) => t
+    case None => {
+      val t = Try{Global.dateConversion.stringToDate(s)}
+      date = Some(t)
+      t
+    }
+  }
+  private var long: Option[Try[Long]] = None
+  private def tLong: Try[Long] = long match {
+    case Some(t) => t
+    case None => {
+      val t = Try{s.toLong}
+      long = Some(t)
+      t
+    }
+  }
+
+  private var duration: Option[Try[Duration]] = None
+  private def tDuration: Try[Duration] = duration match {
+    case Some(t) => t
+    case None => {
+      val t = Try{Global.dateConversion.stringToDuration(s)}
+      duration = Some(t)
+      t
+    }
+  }
+  private var bool: Option[Try[Boolean]] = None
+  private def tBool: Try[Boolean] = bool match {
+    case Some(t) => t
+    case None => {
+      val t = Try{s.toBoolean}
+      bool = Some(t)
+      t
+    }
+  }
 
 
-  override lazy val asDouble: Double = s.toDouble
 
-  override lazy val asLong: Long = s.toLong
+  override lazy val asDouble: Double = tDoubnle.get
+
+  override lazy val asLong: Long = tLong.get
 
   override def asString: String = s
 
-  override lazy val asDate: ZonedDateTime = {
-    Global.dateConversion.stringToDate(s)
-  }
+  override lazy val asDate: ZonedDateTime = tDate.get
 
-  override lazy val asBool: Boolean = {
-    s.toBoolean
-  }
+  override lazy val asBool: Boolean = tBool.get
 
   override def raw: Any = s
 
   override def isEmpty: Boolean = s.length == 0
 
-  override lazy val asDuration: Duration = {
-    Global.dateConversion.stringToDuration(s)
-  }
+  override lazy val asDuration: Duration = tDuration.get
 }
 
 class ConversionError(v: Any) extends Exception("Fail to convert varibable:" + v)

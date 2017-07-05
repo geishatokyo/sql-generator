@@ -22,4 +22,15 @@ class Header(var name: String) {
 
   var isIgnore = false
 
+
+  def copy(parent: Sheet) = {
+    val h = new Header(name)
+    h._parent = parent
+    h.isId = this.isId
+    this.note.foreach(v => h.note(v._1) = v._2)
+    h.columnType = this.columnType
+    h.isIgnore = this.isIgnore
+    h
+  }
+
 }
