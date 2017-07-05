@@ -6,6 +6,7 @@ import java.util.Date
 import com.geishatokyo.sqlgen.project.flow.{DataProcessor, InputData}
 import com.geishatokyo.sqlgen.project.refs.{ColumnRef, SheetScope}
 import com.geishatokyo.sqlgen.core.{Row, Sheet, Workbook}
+import com.geishatokyo.sqlgen.process.Context
 
 import scala.util.DynamicVariable
 import scala.util.matching.Regex
@@ -44,12 +45,7 @@ trait Project extends DataProcessor{
     if(wb.contains(name)){
       wb(name)
     }else{
-      //参照するワークブックにも含まれているかチェック
-      context.references.find(w => {
-        w.contains(name)
-      }).map(_(name)).getOrElse({
-        throw new Exception(s"Sheet:${name} not found")
-      })
+      throw new Exception(s"Sheet:${name} not found")
     }
   }
 

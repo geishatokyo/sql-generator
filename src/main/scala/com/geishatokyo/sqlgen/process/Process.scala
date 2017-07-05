@@ -15,11 +15,21 @@ trait Proc  {
     ProcNode(this,proc)
   }
 
+  def execute(): Context = {
+    execute(new DefaultContext())
+  }
+
   def execute(c: Context): Context = {
     apply(c)
   }
 
 
+}
+
+object EmptyProc extends Proc {
+  override def apply(c: Context): Context = {
+    c
+  }
 }
 
 case class ProcNode(beforeProc: Proc, currentProc: Proc) extends Proc {
@@ -32,6 +42,5 @@ case class ProcNode(beforeProc: Proc, currentProc: Proc) extends Proc {
     val c2 = beforeProc.execute(c)
     currentProc.apply(c2)
   }
-
 
 }

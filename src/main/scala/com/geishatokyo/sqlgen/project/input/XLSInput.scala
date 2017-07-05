@@ -2,8 +2,8 @@ package com.geishatokyo.sqlgen.project.input
 
 import java.io.File
 
-import com.geishatokyo.sqlgen.Context
-import com.geishatokyo.sqlgen.project.flow.{InputData, Input}
+import com.geishatokyo.sqlgen.process.{Context, DefaultContext}
+import com.geishatokyo.sqlgen.project.flow.{Input, InputData}
 import com.geishatokyo.sqlgen.sheet.Workbook
 
 /**
@@ -16,8 +16,8 @@ class XLSInput(files: List[File]) extends Input {
 
     files.map(f => {
       val wb = XLSLoader.load(f)
-      val context = new Context()
-      context.setWorkingDirIfNotSet(f.getParent)
+      val context = new DefaultContext()
+      context("hoge") = f.getParent
       InputData(context,wb)
     })
   }

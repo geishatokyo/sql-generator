@@ -1,7 +1,7 @@
 package com.geishatokyo.sqlgen.project.output
 
-import com.geishatokyo.sqlgen.Context
 import com.geishatokyo.sqlgen.logger.Logger
+import com.geishatokyo.sqlgen.process.Context
 import com.geishatokyo.sqlgen.project.flow.{InputData, Output}
 import com.geishatokyo.sqlgen.sheet.Workbook
 import com.geishatokyo.sqlgen.sheet.convert.XLSConverter

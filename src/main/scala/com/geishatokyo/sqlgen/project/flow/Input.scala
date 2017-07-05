@@ -1,6 +1,7 @@
 package com.geishatokyo.sqlgen.project.flow
 
-import com.geishatokyo.sqlgen.{Project, Context}
+import com.geishatokyo.sqlgen.process.{Context, DefaultContext}
+import com.geishatokyo.sqlgen.Project
 import com.geishatokyo.sqlgen.sheet.Workbook
 
 /**
@@ -8,7 +9,7 @@ import com.geishatokyo.sqlgen.sheet.Workbook
   */
 trait Input {
 
-  protected var context = new Context()
+  protected var context: Context = new DefaultContext()
 
   def modifyContext(func: Context => Context) = {
     context = func(context)

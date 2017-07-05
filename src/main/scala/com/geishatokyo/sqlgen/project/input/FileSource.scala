@@ -2,7 +2,6 @@ package com.geishatokyo.sqlgen.project.input
 
 import java.io.File
 
-import com.geishatokyo.sqlgen.Context
 import com.geishatokyo.sqlgen.project.flow.{InputData, Input}
 import com.geishatokyo.sqlgen.sheet.Workbook
 import com.geishatokyo.sqlgen.util.FileUtil
@@ -25,8 +24,8 @@ class FileInput(files: File*) extends Input{
 
     val wbs = xlss.map(f => {
       val wb = XLSLoader.load(f)
-      val c = context.copy()
-      c.setWorkingDirIfNotSet(f.getParent)
+      val c = context
+      c("hoge") = f.getParent
       InputData(c,wb)
     }).toList
 
@@ -40,8 +39,8 @@ class FileInput(files: File*) extends Input{
           val sheet = CSVLoader.load(f)
           wb.addSheet(sheet)
         })
-        val c = context.copy()
-        c.setWorkingDirIfNotSet(dir)
+        val c = context
+        c("hoge") = dir
         InputData(c,wb)
       }
     }).toList

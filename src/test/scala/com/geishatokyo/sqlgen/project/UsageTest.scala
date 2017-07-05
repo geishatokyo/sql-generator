@@ -1,15 +1,42 @@
 package com.geishatokyo.sqlgen.project
 
 //import com.geishatokyo.sqlgen.{Context, StandardGuess, Project}
+import com.geishatokyo.sqlgen.Project
 import com.geishatokyo.sqlgen.project.input.WorkbookInput
-import com.geishatokyo.sqlgen.project.output.{ConsoleOutput}
-import com.geishatokyo.sqlgen.sheet.{Sheet, Workbook}
-import org.scalatest.{Matchers, FlatSpec}
+import com.geishatokyo.sqlgen.project.output.ConsoleOutput
+import com.geishatokyo.sqlgen.core.{Sheet, Workbook}
+import org.scalatest.{FlatSpec, Matchers}
+import com.geishatokyo.sqlgen._
 
 /**
  * Created by takezoux2 on 15/05/04.
  */
 class UsageTest extends FlatSpec with Matchers{
+
+
+  it should "" in {
+
+    val wb = new Workbook("Test")
+    val s = wb.addSheet("User")
+    s.addHeaders("id","nickname","age","lastLogin")
+    s.addRow(1,"hoge","23","2017/06/23")
+    s.addRow(2,"bob", 33, "2017/06/22")
+
+    workbook(wb) >> MyProject >> showConsole execute
+
+  }
+
+
+
+  object MyProject extends Project {
+
+    onSheet("User") {
+      column("id") := { column("id").asLong * 100 + column("age").asLong}
+      column("nickname") := "Mr. " + column("nickname")
+    }
+  }
+
+
 //
 //  it should "process workbook" in {
 //    val wb = new Workbook()

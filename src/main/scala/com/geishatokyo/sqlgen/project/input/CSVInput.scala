@@ -1,6 +1,5 @@
 package com.geishatokyo.sqlgen.project.input
 
-import com.geishatokyo.sqlgen.Context
 import com.geishatokyo.sqlgen.project.flow.{InputData, Input}
 import com.geishatokyo.sqlgen.sheet.{Sheet, Workbook}
 
@@ -16,7 +15,7 @@ class CSVInput(csvs: List[String]) extends Input {
         workbook.addSheet(sheet)
       }
     })
-    List(InputData(context.copy(),workbook))
+    List(InputData(context,workbook))
   }
 
 }

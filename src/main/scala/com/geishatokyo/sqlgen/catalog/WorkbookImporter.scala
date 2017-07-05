@@ -21,7 +21,7 @@ class WorkbookImporter(files: File*) extends DataProcessor{
         w1.merge(w2)
       }))
       inputDatas.foreach(id => {
-        id.context.references = refs
+        //id.context.references = refs
       })
     }
 
