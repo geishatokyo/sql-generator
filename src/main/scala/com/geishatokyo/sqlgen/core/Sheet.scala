@@ -44,6 +44,7 @@ class Sheet(private var _name: String) {
 
   def rows_=(rows: Array[Row]): Unit = {
     if(this._rows == rows) {
+      checkHeaders(rows)
       _cells = Array.empty
       _rows = Array.empty
       _columns = Array.empty
@@ -51,6 +52,7 @@ class Sheet(private var _name: String) {
     }
   }
   def rows_=(rows: Seq[Row]) = {
+    checkHeaders(rows)
     _cells = Array.empty
     _rows = Array.empty
     _columns = Array.empty
@@ -110,18 +112,24 @@ class Sheet(private var _name: String) {
     _rows.last
   }
   def addRows(rows: Row*) : Unit = {
+    checkHeaders(rows)
+    rows.foreach(row => appendRow(row))
+    recalculate()
+  }
+
+  private def checkHeaders(rows: Seq[Row]) = {
+
     val headers = rows.map(_.parent.headers).distinct
 
     val allGreen = headers.forall(header => {
       header == this.headers ||
-      header.forall(h => this.headers.exists(_.name == h.name))
+        header.forall(h => this.headers.exists(_.name == h.name))
     })
     if(!allGreen) {
       throw SQLGenException.atSheet(this, s"Row header is not match")
     }
-    rows.foreach(row => appendRow(row))
-    recalculate()
   }
+
   private def appendRow(row: Row) = {
 
     val rowIndex = _cells.size
@@ -196,7 +204,7 @@ class Sheet(private var _name: String) {
     recalculate()
     columns.takeRight(headerNames.size)
   }
-  
+
 
 
 
