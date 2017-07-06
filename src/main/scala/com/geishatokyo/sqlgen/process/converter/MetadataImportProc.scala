@@ -1,5 +1,6 @@
 package com.geishatokyo.sqlgen.process.converter
 
+import com.geishatokyo.sqlgen.logger.Logger
 import com.geishatokyo.sqlgen.meta.{MetaLoader, Metadata}
 import com.geishatokyo.sqlgen.process.{Context, Proc}
 
@@ -9,9 +10,14 @@ import com.geishatokyo.sqlgen.process.{Context, Proc}
 class MetadataImportProc(path: String, dataKey: String, metaLoader: MetaLoader) extends Proc {
 
   override def apply(c: Context): Context = {
-    val meta = metaLoader.load(path)
-    c(dataKey) = meta
-    c
+    if(c.has(dataKey)) {
+      Logger.log(s"Metadata:${dataKey} already imported")
+      c
+    }else {
+      val meta = metaLoader.load(path)
+      c(dataKey) = meta
+      c
+    }
   }
 }
 

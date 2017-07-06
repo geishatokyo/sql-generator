@@ -1,7 +1,10 @@
 package com.geishatokyo.sqlgen.process.converter.sql
 
 import com.geishatokyo.sqlgen.logger.Logger
-import com.geishatokyo.sqlgen.core.{ Sheet}
+import com.geishatokyo.sqlgen.core.Sheet
+import com.geishatokyo.sqlgen.generator.sql.sqlite.SqliteQueryGenerator
+import com.geishatokyo.sqlgen.generator.sql.{QueryType, SQLQueryGenerator}
+import com.geishatokyo.sqlgen.process.Context
 
 /**
  *
@@ -9,8 +12,19 @@ import com.geishatokyo.sqlgen.core.{ Sheet}
  * Create: 12/07/11 23:48
  */
 
-class SQLiteConverter extends SQLConverter {
+class SqliteConverterProc(val queryType: QueryType) extends SQLConverterProc {
 
+  override def dbType: String = "sqlite"
+
+  override def metadataKey: String = SqliteConverterProc.MetadataKey
+
+  override def createSqlQueryGenerator(c: Context): SQLQueryGenerator = {
+    new SqliteQueryGenerator()
+  }
+
+  override def forType(queryType: QueryType): SQLConverterProc = {
+    new SqliteConverterProc(queryType)
+  }
   /*
   var makeTableNameToLowerCase = true
 
@@ -165,4 +179,8 @@ class SQLiteConverter extends SQLConverter {
       "'" + v.replace("'","''") + "'"
     }
   }*/
+}
+
+object SqliteConverterProc {
+  val MetadataKey = "metadata.sql.sqlite"
 }

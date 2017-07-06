@@ -19,6 +19,9 @@ class MySQLConverterProc(val queryType: QueryType) extends SQLConverterProc {
 
   override def metadataKey: String = MySQLConverterProc.MetadataKey
 
+  override def forType(queryType: QueryType): SQLConverterProc = {
+    new MySQLConverterProc(queryType)
+  }
 
   override def createSqlQueryGenerator(c: Context): SQLQueryGenerator = {
     new MySQLQueryGenerator()

@@ -73,11 +73,6 @@ trait SQLQueryGenerator {
 
   }
 
-  /**
-    * @param cell
-    * @param className
-    * @return
-    */
   def toValue(cell: Cell, className: String): String
 
   def toLineComment(m: String): String = "-- " + m

@@ -1,5 +1,6 @@
 package com.geishatokyo.sqlgen.process.converter.sql
 
+import com.geishatokyo.sqlgen.core.Workbook
 import com.geishatokyo.sqlgen.generator.sql.{QueryType, SQLQueryGenerator}
 import com.geishatokyo.sqlgen.meta.{MetaLoader, Metadata, TypeSafeConfigMetaLoader}
 import com.geishatokyo.sqlgen.process.converter.{MetadataImportProc, SetMetadataProc}
@@ -18,6 +19,10 @@ trait SQLConverterProc extends ConverterProc[String] {
 
   def metaLoader: MetaLoader = new TypeSafeConfigMetaLoader()
 
+  def forInsert: SQLConverterProc = forType(QueryType.Insert)
+  def forReplace: SQLConverterProc = forType(QueryType.Replace)
+  def forDelete: SQLConverterProc = forType(QueryType.Delete)
+  def forType(queryType: QueryType): SQLConverterProc
 
   private var metaProc : Option[Proc] = None
   override def thisProc: Proc = {
@@ -44,6 +49,10 @@ trait SQLConverterProc extends ConverterProc[String] {
     }
   }
 
+  def getName(wb: Workbook): String = {
+    s"${dbType}-${wb.name}-${queryType}.sql"
+  }
+
   override def dataKey: String = s"result.sql.${dbType}.${queryType}"
 
   override def convert(c: Context): MultiData[String] = {
@@ -65,7 +74,7 @@ trait SQLConverterProc extends ConverterProc[String] {
     })
 
     MultiData(StringData(
-      s"${wb.name}.${queryType}.sql",
+      getName(wb),
       builder.toString()
     ))
   }

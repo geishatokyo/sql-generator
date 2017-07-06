@@ -2,8 +2,9 @@ package com.geishatokyo
 
 import com.geishatokyo.sqlgen.core.Workbook
 import com.geishatokyo.sqlgen.generator.sql.QueryType
+import com.geishatokyo.sqlgen.generator.sql.sqlite.SqliteQueryGenerator
 import com.geishatokyo.sqlgen.process.converter.csv.CSVConverterProc
-import com.geishatokyo.sqlgen.process.converter.sql.MySQLConverterProc
+import com.geishatokyo.sqlgen.process.converter.sql.{MySQLConverterProc, SqliteConverterProc}
 import com.geishatokyo.sqlgen.process.input.{DirectoryLoaderInput, FileLoaderInput, WorkbookInput}
 import com.geishatokyo.sqlgen.process.output.ConsoleOutputProc
 import com.geishatokyo.sqlgen.process.{Proc, ProjectProc}
@@ -41,6 +42,9 @@ package object sqlgen {
 
   def mysql = {
     new MySQLConverterProc(QueryType.Replace)
+  }
+  def sqlite = {
+    new SqliteConverterProc(QueryType.Replace)
   }
 
 
