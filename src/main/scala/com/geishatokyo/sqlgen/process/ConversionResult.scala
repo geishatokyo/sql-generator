@@ -4,7 +4,7 @@ package com.geishatokyo.sqlgen.process
   * Created by takezoux2 on 2017/07/05.
   */
 
-trait ConvertedData[T]{
+trait ConvertedData[+T]{
   def name: String
   def value: T
 
@@ -18,4 +18,4 @@ case class StringData(name: String, value: String) extends ConvertedData[String]
 }
 
 
-case class MultiData[T](datas : ConvertedData[T]*)
+case class MultiData[+T](datas : ConvertedData[T]*)

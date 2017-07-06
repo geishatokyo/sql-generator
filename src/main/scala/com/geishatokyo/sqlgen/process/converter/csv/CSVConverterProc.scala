@@ -8,7 +8,7 @@ import com.geishatokyo.sqlgen.process._
   */
 class CSVConverterProc extends ConverterProc[String]{
 
-  override def dataKey: String = "result.csv"
+  override def dataKey = Key("result.csv")
 
   override def convert(c: Context): MultiData[String] = {
     val w = c.workbook

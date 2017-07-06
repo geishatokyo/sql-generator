@@ -40,6 +40,11 @@ class UsageTest extends FlatSpec with Matchers{
       column("id") := { column("id").asLong * 100 + column("age").asLong}
       column("nickname") := "Mr. " + column("nickname")
     }
+
+
+    onSheet("Hoge") {
+    }
+
   }
 
 

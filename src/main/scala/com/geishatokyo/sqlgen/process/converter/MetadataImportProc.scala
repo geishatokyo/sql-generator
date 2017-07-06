@@ -4,12 +4,12 @@ import java.io.File
 
 import com.geishatokyo.sqlgen.logger.Logger
 import com.geishatokyo.sqlgen.meta.{MetaLoader, Metadata}
-import com.geishatokyo.sqlgen.process.{Context, Proc}
+import com.geishatokyo.sqlgen.process.{Context, Key, Proc}
 
 /**
   * Created by takezoux2 on 2017/07/06.
   */
-class MetadataImportProc(path: String, dataKey: String, metaLoader: MetaLoader) extends Proc {
+class MetadataImportProc(path: String, dataKey: Key[Metadata], metaLoader: MetaLoader) extends Proc {
 
   override def apply(c: Context): Context = {
     if(c.has(dataKey)) {
@@ -30,7 +30,7 @@ class MetadataImportProc(path: String, dataKey: String, metaLoader: MetaLoader) 
 }
 
 
-class SetMetadataProc(dataKey: String, metadata: Metadata) extends Proc{
+class SetMetadataProc(dataKey: Key[Metadata], metadata: Metadata) extends Proc{
   override def apply(c: Context): Context = {
     c(dataKey) = metadata
     c

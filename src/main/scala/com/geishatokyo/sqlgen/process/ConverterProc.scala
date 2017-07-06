@@ -7,7 +7,7 @@ import com.geishatokyo.sqlgen.process.output.{ConsoleOutputProc, FileOutputProc}
   */
 trait ConverterProc[T] extends Proc {
 
-  def dataKey: String
+  def dataKey: Key[MultiData[T]]
 
   def convert(c: Context): MultiData[T]
 

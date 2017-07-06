@@ -3,12 +3,12 @@ package com.geishatokyo.sqlgen.process.output
 import java.io.{File, FileOutputStream}
 import java.nio.file.Paths
 
-import com.geishatokyo.sqlgen.process.{Context, MultiData, OutputProc}
+import com.geishatokyo.sqlgen.process.{Context, Key, MultiData, OutputProc}
 
 /**
   * Created by takezoux2 on 2017/07/05.
   */
-class FileOutputProc(dir: String, val dataKey: String) extends OutputProc[Any] {
+class FileOutputProc(dir: String, val dataKey: Key[MultiData[Any]]) extends OutputProc[Any] {
 
 
   override def output(data: MultiData[Any], c: Context): Unit = {

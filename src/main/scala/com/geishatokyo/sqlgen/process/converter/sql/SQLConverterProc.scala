@@ -31,7 +31,7 @@ trait SQLConverterProc extends ConverterProc[String] with UsingMetaFile{
     s"${dbType}-${wb.name}-${queryType}.sql"
   }
 
-  override def dataKey: String = s"result.sql.${dbType}.${queryType}"
+  override def dataKey: Key[MultiData[String]] = Key(s"result.sql.${dbType}.${queryType}")
 
   override def convert(c: Context): MultiData[String] = {
 

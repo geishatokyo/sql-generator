@@ -11,13 +11,13 @@ import com.geishatokyo.sqlgen.core.Workbook
   */
 trait OutputProc[DataType] extends Proc with OutputSupport{
 
-  def dataKey: String
+  def dataKey: Key[MultiData[DataType]]
 
   def output(data: MultiData[DataType], c: Context): Unit
 
 
   override def apply(c: Context): Context = {
-    val d = c[MultiData[DataType]](dataKey)
+    val d = c(dataKey)
     output(d, c)
     c
   }

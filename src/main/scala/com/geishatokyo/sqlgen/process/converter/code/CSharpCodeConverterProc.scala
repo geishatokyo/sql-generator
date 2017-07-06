@@ -2,7 +2,7 @@ package com.geishatokyo.sqlgen.process.converter.code
 
 import com.geishatokyo.sqlgen.generator.code.csharp.CSharpCodeGenerator
 import com.geishatokyo.sqlgen.process.converter.UsingMetaFile
-import com.geishatokyo.sqlgen.process.{Context, ConverterProc, MultiData, StringData}
+import com.geishatokyo.sqlgen.process._
 
 /**
   * Created by takezoux2 on 2017/07/06.
@@ -14,9 +14,9 @@ trait CSharpCodeConverterProc extends ConverterProc[String] with UsingMetaFile{
 
   override def defaultMetaFilePath: String = s"conf/${codeType}.meta.conf"
 
-  override def metadataKey: String = s"meta.code.${codeType}"
+  override def metadataKey = Key(s"meta.code.${codeType}")
 
-  override def dataKey: String = s"result.code.${codeType}"
+  override def dataKey = Key(s"result.code.${codeType}")
 
   val generator = new CSharpCodeGenerator()
 

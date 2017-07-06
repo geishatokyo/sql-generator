@@ -1,7 +1,7 @@
 package com.geishatokyo.sqlgen.process.converter
 
 import com.geishatokyo.sqlgen.meta.{MetaLoader, Metadata, TypeSafeConfigMetaLoader}
-import com.geishatokyo.sqlgen.process.{Context, Proc}
+import com.geishatokyo.sqlgen.process.{Context, Key, Proc}
 
 /**
   * Created by takezoux2 on 2017/07/06.
@@ -9,7 +9,7 @@ import com.geishatokyo.sqlgen.process.{Context, Proc}
 trait UsingMetaFile { self: Proc =>
 
   def defaultMetaFilePath: String
-  def metadataKey : String
+  def metadataKey : Key[Metadata]
   def metaLoader: MetaLoader = new TypeSafeConfigMetaLoader()
 
   private var metaProc : Proc = {

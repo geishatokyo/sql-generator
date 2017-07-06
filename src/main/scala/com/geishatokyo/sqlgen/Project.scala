@@ -38,7 +38,7 @@ trait Project{
     w
   }
 
-  def sheet(name : String) = {
+  def sheet(name : String): Sheet = {
     val wb = workbook
     if(wb.contains(name)){
       wb(name)
