@@ -1,5 +1,7 @@
 package com.geishatokyo.sqlgen.process.converter
 
+import java.io.File
+
 import com.geishatokyo.sqlgen.logger.Logger
 import com.geishatokyo.sqlgen.meta.{MetaLoader, Metadata}
 import com.geishatokyo.sqlgen.process.{Context, Proc}
@@ -14,7 +16,13 @@ class MetadataImportProc(path: String, dataKey: String, metaLoader: MetaLoader) 
       Logger.log(s"Metadata:${dataKey} already imported")
       c
     }else {
-      val meta = metaLoader.load(path)
+      val f = new File(path)
+      val meta = if(!f.exists() || !f.isFile ) {
+        Logger.log(s"Metadata:${path} not exists")
+        Metadata.Empty
+      } else {
+        metaLoader.load(path)
+      }
       c(dataKey) = meta
       c
     }

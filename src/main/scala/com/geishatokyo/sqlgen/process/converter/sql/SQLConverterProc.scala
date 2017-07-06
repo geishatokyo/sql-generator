@@ -3,51 +3,29 @@ package com.geishatokyo.sqlgen.process.converter.sql
 import com.geishatokyo.sqlgen.core.Workbook
 import com.geishatokyo.sqlgen.generator.sql.{QueryType, SQLQueryGenerator}
 import com.geishatokyo.sqlgen.meta.{MetaLoader, Metadata, TypeSafeConfigMetaLoader}
-import com.geishatokyo.sqlgen.process.converter.{MetadataImportProc, SetMetadataProc}
+import com.geishatokyo.sqlgen.process.converter.{MetadataImportProc, SetMetadataProc, UsingMetaFile}
 import com.geishatokyo.sqlgen.process._
 
 /**
   * Created by takezoux2 on 2017/07/05.
   */
-trait SQLConverterProc extends ConverterProc[String] {
+trait SQLConverterProc extends ConverterProc[String] with UsingMetaFile{
 
   def dbType : String
-  def metadataKey : String
   def queryType: QueryType
   def createSqlQueryGenerator(c: Context): SQLQueryGenerator
 
 
-  def metaLoader: MetaLoader = new TypeSafeConfigMetaLoader()
 
   def forInsert: SQLConverterProc = forType(QueryType.Insert)
   def forReplace: SQLConverterProc = forType(QueryType.Replace)
   def forDelete: SQLConverterProc = forType(QueryType.Delete)
   def forType(queryType: QueryType): SQLConverterProc
 
-  private var metaProc : Option[Proc] = None
-  override def thisProc: Proc = {
-    metaProc match{
-      case Some(p) => p >> this
-      case None => this
-    }
+  def defaultMetaFilePath = {
+    s"conf/${dbType}.meta.conf"
   }
 
-  def withMeta(meta: Metadata) = {
-    this.metaProc = Some(new SetMetadataProc(metadataKey, meta))
-    this
-  }
-  def withMetaFile(path: String) = {
-    this.metaProc = Some(new MetadataImportProc(path, metadataKey, metaLoader) )
-    this
-  }
-
-  def getMetadata(c: Context): Metadata = {
-    if(c.has(metadataKey)) {
-      c(metadataKey)
-    } else {
-      Metadata.Empty
-    }
-  }
 
   def getName(wb: Workbook): String = {
     s"${dbType}-${wb.name}-${queryType}.sql"

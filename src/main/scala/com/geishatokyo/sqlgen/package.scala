@@ -1,8 +1,10 @@
 package com.geishatokyo
 
 import com.geishatokyo.sqlgen.core.Workbook
+import com.geishatokyo.sqlgen.generator.code.csharp.CSharpCodeGenerator
 import com.geishatokyo.sqlgen.generator.sql.QueryType
 import com.geishatokyo.sqlgen.generator.sql.sqlite.SqliteQueryGenerator
+import com.geishatokyo.sqlgen.process.converter.code.CSharpCodeConverterProc
 import com.geishatokyo.sqlgen.process.converter.csv.CSVConverterProc
 import com.geishatokyo.sqlgen.process.converter.sql.{MySQLConverterProc, SqliteConverterProc}
 import com.geishatokyo.sqlgen.process.input.{DirectoryLoaderInput, FileLoaderInput, WorkbookInput}
