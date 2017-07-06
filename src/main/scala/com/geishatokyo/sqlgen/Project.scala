@@ -3,7 +3,6 @@ package com.geishatokyo.sqlgen
 import java.text.SimpleDateFormat
 import java.util.Date
 
-import com.geishatokyo.sqlgen.project.refs.SheetScope
 import com.geishatokyo.sqlgen.core.{Row, Sheet, Workbook}
 import com.geishatokyo.sqlgen.process.Context
 
