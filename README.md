@@ -26,10 +26,11 @@ Sample code is below.
 
       def main(args : Array[String]) {
       
-        files("hoge.xls","fuga.csv","aaa.xlsx") >>
-          merge >> imports("dir_path/for/reference_files") >> 
+        fromFile("hoge.xls","fuga.csv","aaa.xlsx") >>
           YourProject >>
-          asXls.toDir("output/xls") >> asMySQL.toDir("output/sql")
+          xls.toDir("output/xls") >> 
+          mysql.toDir("output/sql") <>
+          csv.toConsole execute()
          
       }
 
