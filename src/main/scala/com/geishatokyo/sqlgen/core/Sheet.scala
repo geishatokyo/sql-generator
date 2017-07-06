@@ -20,6 +20,14 @@ class Sheet(private var _name: String) {
     _name = newName
   }
 
+  def address = {
+    if(parent != null) {
+      s"${parent.name}/${this.name}"
+    } else {
+      s"UnknownWB/${this.name}"
+    }
+  }
+
   var isIgnore = false
 
   private[core] var _headers : Array[Header] = Array.empty
@@ -52,7 +60,7 @@ class Sheet(private var _name: String) {
   }
   def header(headerName : String) = {
     getHeader(headerName).getOrElse{
-      throw new SQLGenException(s"Header:${headerName} not found in Sheet:${name}")
+      throw SQLGenException.atSheet(this, s"Header:${headerName} not found")
     }
   }
 
@@ -78,7 +86,7 @@ class Sheet(private var _name: String) {
     if(row.parent.headers != this.headers &&
       !row.parent.headers.forall(h => this.headers.exists(_.name == h.name))
     ) {
-      throw new SQLGenException(s"Row header is not match")
+      throw SQLGenException.atSheet(this,s"Row header is not match")
 
     }
     appendRow(row)
@@ -93,7 +101,7 @@ class Sheet(private var _name: String) {
       header.forall(h => this.headers.exists(_.name == h.name))
     })
     if(!allGreen) {
-      throw new SQLGenException(s"Row header is not match")
+      throw SQLGenException.atSheet(this, s"Row header is not match")
     }
     rows.foreach(row => appendRow(row))
     recalculate()
@@ -110,7 +118,7 @@ class Sheet(private var _name: String) {
   def addRow(values: Any*): Row = {
 
     if(values.size != _headers.size){
-      throw new SQLGenException(s"Row length must be ${_headers.size} but was ${values.size}")
+      throw SQLGenException.atSheet(this, s"Row length must be ${_headers.size} but was ${values.size}")
     }
     val rowIndex = rows.size
     val row: Seq[Cell] = values.zipWithIndex.map{
@@ -139,7 +147,7 @@ class Sheet(private var _name: String) {
 
   def addHeader(headerName: String): Column = {
     if(_headers.exists(_.name == headerName)){
-      throw new SQLGenException(s"Header:${headerName} already exists")
+      throw SQLGenException.atSheet(this, s"Header:${headerName} already exists")
     }
     val columnIndex = _headers.length
     val h = new Header(headerName)
@@ -155,7 +163,7 @@ class Sheet(private var _name: String) {
 
     headerNames.find(this.hasColumn(_)) match{
       case Some(name) => {
-        throw new SQLGenException(s"Header:${name} already exists")
+        throw SQLGenException.atSheet(this, s"Header:${name} already exists")
       }
       case None => {}
     }

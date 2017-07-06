@@ -2,6 +2,7 @@ package com.geishatokyo.sqlgen
 
 //import com.geishatokyo.sqlgen.{Context, StandardGuess, Project}
 import com.geishatokyo.sqlgen.core.Workbook
+import com.geishatokyo.sqlgen.meta.{ColumnMeta, Metadata, SheetMeta}
 import org.scalatest.{FlatSpec, Matchers}
 
 /**
@@ -10,7 +11,7 @@ import org.scalatest.{FlatSpec, Matchers}
 class UsageTest extends FlatSpec with Matchers{
 
 
-  it should "" in {
+  it should "be used as such" in {
 
     val wb = new Workbook("Test")
     val s = wb.addSheet("User")
@@ -18,9 +19,16 @@ class UsageTest extends FlatSpec with Matchers{
     s.addRow(1,"hoge","23","2017/06/23")
     s.addRow(2,"bob", 33, "2017/06/22")
 
-    println("Graph: " + (workbook(wb) >> MyProject >> showConsole).toString())
+    val graph = workbook(wb) >> MyProject >> showConsole >>
+      mysql.withMeta(Metadata(List(SheetMeta("User",List(
+        ColumnMeta("id"),
+        ColumnMeta("nickname"),
+        ColumnMeta("age")
+    ))))).toConsole
 
-    workbook(wb) >> MyProject >> showConsole execute
+    println("Graph: " + graph.toString())
+
+    graph.execute()
 
   }
 

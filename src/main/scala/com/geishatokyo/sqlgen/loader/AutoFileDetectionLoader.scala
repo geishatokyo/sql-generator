@@ -22,7 +22,7 @@ class AutoFileDetectionLoader(patterns: Seq[Pattern]) extends Loader{
         p.loader.load(file)
       }
       case None => {
-        throw new SQLGenException(s"Can't detect loader for ${file}")
+        throw SQLGenException(s"Can't detect loader for ${file}")
       }
     }
   }
@@ -35,7 +35,7 @@ class AutoFileDetectionLoader(patterns: Seq[Pattern]) extends Loader{
         p.loader.load(name, input)
       }
       case None => {
-        throw new SQLGenException(s"Can't detect loader for ${name}")
+        throw SQLGenException(s"Can't detect loader for ${name}")
       }
     }
   }

@@ -97,12 +97,11 @@ trait VariousStringFormatConversion extends DateConversion{
         }
       }catch{
         case t: Throwable => {
-          println("##" + t.getMessage)
           None
         }
       }
     }).find(_.isDefined).map(_.get).getOrElse{
-      throw new SQLGenException(s"Wrong date format ${s}")
+      throw new Exception(s"Wrong date format ${s}")
     }
   }
 }

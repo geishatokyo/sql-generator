@@ -19,7 +19,7 @@ trait Context
 
   def apply[T](key: String): T = {
     get(key).getOrElse {
-      throw new SQLGenException(s"'${key}' is not set in Context")
+      throw SQLGenException(s"'${key}' is not set in Context")
     }
   }
   def has(key: String): Boolean = get(key).isDefined

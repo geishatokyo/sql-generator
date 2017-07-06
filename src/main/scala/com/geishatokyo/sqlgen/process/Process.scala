@@ -10,9 +10,10 @@ trait Proc  {
 
   def apply(c: Context): Context
 
+  def thisProc: Proc = this
 
   def >>(proc: Proc): Proc = {
-    ProcNode(this,proc)
+    ProcNode(thisProc,proc)
   }
 
   def execute(): Context = {
@@ -20,7 +21,7 @@ trait Proc  {
   }
 
   def execute(c: Context): Context = {
-    apply(c)
+    thisProc.apply(c)
   }
 
 

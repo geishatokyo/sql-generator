@@ -21,6 +21,7 @@ class Row(val parent: Sheet,val rowIndex : Int) {
   def header(index: Int) = parent.header(index)
   def getHeader(name: String) = parent.getHeader(name)
 
+  def address = s"${parent.address}/row:${rowIndex}"
 
 
 }

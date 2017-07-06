@@ -27,7 +27,7 @@ class Cell( _parent: Sheet,
   val note = mutable.Map.empty[String,Any]
 
   def address = {
-    s"${parent.parent.name}/${parent.name}/${header.name}-${rowIndex}"
+    s"${_parent.address}/${header.name}-${rowIndex}"
   }
 
   private[core] var variable: Variable = NullVar
@@ -39,16 +39,6 @@ class Cell( _parent: Sheet,
 
   def :=(v: Any) = this.value = v
 
-  def tryIt[T](func: => T): T = {
-    try{
-      func
-    } catch {
-      case t: Throwable => {
-        throw new SQLGenException(s"Error on cell at col:${header.name} row:${rowIndex}",t, parent.parent)
-      }
-    }
-  }
-
   implicit class ZonedDateTimeExt(date: ZonedDateTime) {
     def +(d: Duration) = {
       date.plus(d.toMillis, ChronoUnit.MILLIS)
@@ -59,8 +49,8 @@ class Cell( _parent: Sheet,
   }
 
   def throwOpeError(ope: String, passed: Variable) = {
-    throw new SQLGenException(
-      s"${address} - Unsupported operation with this:${this.variable.dataType} ${ope} that:${passed.dataType}",parent.parent)
+    throw SQLGenException.atCell( this,
+      s"Unsupported operation with this:${this.variable.dataType} ${ope} that:${passed.dataType}")
 
   }
 
@@ -164,10 +154,6 @@ class Cell( _parent: Sheet,
 
   def rawValue: Any = variable.raw
 
-  private def throwE(message: String) = {
-    val m = s"${this.parent.parent.name}/${this.parent.name} Row:${this.rowIndex} Column:${this.header.name} -- ${message}"
-    throw new SQLGenException(m)
-  }
 
   override def equals(obj: scala.Any): Boolean = {
     obj match{

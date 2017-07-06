@@ -18,7 +18,7 @@ trait InputProc extends Proc {
       if(mergeWithExistingWorkbook) {
         WorkbookMerger.merge(c.workbook, workbook)
       } else {
-        throw new SQLGenException("Workbook already exists")
+        throw SQLGenException("Workbook already exists")
       }
     } else {
       c(Context.Workbook) = workbook

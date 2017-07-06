@@ -31,7 +31,7 @@ trait Loader {
     if(path.hasNext){
       path.map(path => load(path)).reduceLeft(WorkbookMerger.merge _)
     } else {
-      throw new SQLGenException("No files are passed")
+      throw SQLGenException("No files are passed")
     }
   }
 
@@ -39,7 +39,7 @@ trait Loader {
     if(path.hasNext){
       path.map(path => load(path)).reduceLeft(WorkbookMerger.merge _)
     } else {
-      throw new SQLGenException("No files are passed")
+      throw SQLGenException("No files are passed")
     }
   }
 
@@ -47,7 +47,7 @@ trait Loader {
     if(path.hasNext){
       path.map(path => load(name, path)).reduceLeft(WorkbookMerger.merge _)
     } else {
-      throw new SQLGenException("No files are passed")
+      throw SQLGenException("No files are passed")
     }
   }
 }

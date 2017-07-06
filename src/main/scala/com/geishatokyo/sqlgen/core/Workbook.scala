@@ -21,7 +21,7 @@ class Workbook(val name: String) {
 
   def apply(name: String): Sheet = {
     _sheets.getOrElse(name, {
-      throw new SQLGenException(s"Sheet:${name} not found in Workbook:${name}")
+      throw SQLGenException.atWorkbook(this, s"Sheet:${name} not found")
     })
   }
 
@@ -41,7 +41,7 @@ class Workbook(val name: String) {
 
   def addSheet(sheet: Sheet): Sheet = {
     if(sheet._parent != null){
-      throw new SQLGenException(s"Sheet:${sheet.name} is already added to another workbook")
+      throw SQLGenException.atWorkbook(this, s"Sheet:${sheet.name} is already added to another workbook")
     }
     _sheets = _sheets + (sheet.name -> sheet)
     sheet._parent = this
