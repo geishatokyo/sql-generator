@@ -42,6 +42,22 @@ class Sheet(private var _name: String) {
   def rows = _rows
   def columns = _columns
 
+  def rows_=(rows: Array[Row]): Unit = {
+    if(this._rows == rows) {
+      _cells = Array.empty
+      _rows = Array.empty
+      _columns = Array.empty
+      addRows(rows:_*)
+    }
+  }
+  def rows_=(rows: Seq[Row]) = {
+    _cells = Array.empty
+    _rows = Array.empty
+    _columns = Array.empty
+    addRows(rows:_*)
+  }
+
+
   val note = mutable.Map.empty[String,Any]
 
   def ids = {
@@ -180,6 +196,7 @@ class Sheet(private var _name: String) {
     recalculate()
     columns.takeRight(headerNames.size)
   }
+  
 
 
 

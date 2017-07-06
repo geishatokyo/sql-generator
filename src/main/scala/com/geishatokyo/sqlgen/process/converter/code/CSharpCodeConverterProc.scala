@@ -34,7 +34,7 @@ trait CSharpCodeConverterProc extends ConverterProc[String] with UsingMetaFile{
 
     val className = getClassName(c)
     MultiData(StringData(className + ".cs", generateCode(c, codeLines)))
-    
+
   }
 
   def getClassName(c: Context): String

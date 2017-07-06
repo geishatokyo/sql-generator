@@ -41,19 +41,45 @@ class TypeSafeConfigMetaLoader extends MetaLoader{
   private def loadSheet(config: Config): SheetMeta = {
 
     val name = config.getString(NameProp)
-    if(config.hasPath(ColumnProp)) {
+    val s = if(config.hasPath(ColumnProp)) {
       val cols = config.getConfigList(ColumnProp).asScala.map(loadColumn(_)).toList
       SheetMeta(name, cols)
     } else {
       SheetMeta(name, Nil)
     }
 
+    setString(config, "className", s.className = _)
+    setStringList(config, "primaryIndex", s.primaryIndex = _)
+    s
   }
   private def loadColumn(config: Config): ColumnMeta = {
 
     val name = config.getString(NameProp)
 
-    ColumnMeta(name)
+    val c = ColumnMeta(name)
+
+    setString(config, "className", c.className = _)
+    setBool(config, "isIgnore", c.isIgnore = _)
+
+    c
+  }
+
+  private def setString(config: Config, key: String, func: String => Unit): Unit = {
+    if(config.hasPath(key)) {
+      func(config.getString(key))
+    }
+  }
+
+  private def setBool(config: Config, key: String, func: Boolean => Unit): Unit = {
+    if(config.hasPath(key)) {
+      func(config.getBoolean(key))
+    }
+  }
+
+  private def setStringList(config: Config, key: String, func : List[String] => Unit): Unit = {
+    if(config.hasPath(key)) {
+      func(config.getStringList(key).asScala.toList)
+    }
   }
 
 }

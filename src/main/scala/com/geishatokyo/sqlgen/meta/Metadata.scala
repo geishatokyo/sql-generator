@@ -38,7 +38,6 @@ case class SheetMeta(name: String,
 case class ColumnMeta(name: String) {
 
   var className: String = Metadata.AutoClass
-  var isRequre: Boolean = true
   var isIgnore: Boolean = false
 
 }
