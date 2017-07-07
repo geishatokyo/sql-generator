@@ -1,6 +1,6 @@
 package com.geishatokyo.sqlgen
 
-import com.geishatokyo.sqlgen.core.{Cell, Row, Sheet}
+import com.geishatokyo.sqlgen.core.{Cell, DataType, Row, Sheet}
 
 import scala.language.experimental.macros
 import scala.util.DynamicVariable
@@ -51,6 +51,10 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
     this
   }
 
+  /**
+    * Set value to foreach cell
+    * @param e
+    */
   def :=(e : => Any) : Unit = {
     ensureExists()
     sheet.rows.foreach(r => {
@@ -66,6 +70,11 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
       }
     })
   }
+
+  /**
+    * Set value only when cell is empty.
+    * @param e
+    */
   def ?=(e : => Any) : Unit = {
     ensureExists()
     setIfEmpty(e)
@@ -111,6 +120,20 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
   def mapTo(pf: PartialFunction[Any,Any]) = {
     foreach(cell => {
       cell.value = pf(cell.value)
+    })
+  }
+
+  def mapEnum[E <: Enumeration](e: E) = {
+    foreach(cell => {
+      if(cell.dataType == DataType.Integer) {
+      } else {
+        val s = cell.asString
+        try{
+          cell.value = e.withName(s).id
+        } catch{
+          case t: Throwable => //変換できないときは無視
+        }
+      }
     })
   }
 

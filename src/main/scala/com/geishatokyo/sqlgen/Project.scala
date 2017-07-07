@@ -5,6 +5,7 @@ import java.util.Date
 
 import com.geishatokyo.sqlgen.core.{Row, Sheet, Workbook}
 import com.geishatokyo.sqlgen.process.Context
+import com.geishatokyo.sqlgen.query.{Query, WorkbookSearcher}
 
 import scala.util.DynamicVariable
 import scala.util.matching.Regex
@@ -95,6 +96,38 @@ trait Project{
   }
 
 
+  private val workbookSearcher = new WorkbookSearcher()
+  /**
+    * Queryを使用して、全参照からRowを探す
+    * @param q
+    * @return
+    */
+  def select(q: Query) : List[Row] = {
+    workbookSearcher.findRows(workbook, q) ++
+      (context.get(Context.Import) match{
+      case Some(wbs) => wbs.flatMap(workbookSearcher.findRows(_, q))
+      case None => Nil
+    })
+  }
+
+  /**
+    * Queryを使用して、はじめに見つかったRowを取得する
+    * @param q
+    * @return
+    */
+  def selectOne(q: Query) : Row = {
+    workbookSearcher.findFirstRow(workbook, q) orElse {
+      context.get(Context.Import) match{
+        case Some(wbs) => wbs.view.map(workbookSearcher.findFirstRow(_,q)).
+          find(_.isDefined).flatten
+        case None => None
+      }
+    } getOrElse {
+      throw SQLGenException(s"No rows found by query:${q}")
+    }
+  }
+
+
   protected var preActions : List[(Workbook => Workbook)] = Nil
   protected var actions : List[(Workbook => Workbook)] = Nil
   protected var postActions : List[Workbook => Workbook] = Nil
@@ -131,6 +164,9 @@ trait Project{
     }
     this.actions = func :: this.actions
   }
+
+
+
 
   def ignore() = {
     sheet.isIgnore
