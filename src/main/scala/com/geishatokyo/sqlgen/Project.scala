@@ -40,10 +40,23 @@ trait Project{
 
   def sheet(name : String): Sheet = {
     val wb = workbook
-    if(wb.contains(name)){
+    if(wb.contains(name)) {
       wb(name)
-    }else{
-      throw new Exception(s"Sheet:${name} not found")
+    } else{
+      context.get(Context.Import) match{
+        case Some(importWbs) => {
+          importWbs.find(_.contains(name)) match{
+            case Some(wb) => wb(name)
+            case None => {
+              throw new Exception(s"Sheet:${name} not found")
+            }
+          }
+        }
+        case None => {
+          throw new Exception(s"Sheet:${name} not found")
+
+        }
+      }
     }
   }
 

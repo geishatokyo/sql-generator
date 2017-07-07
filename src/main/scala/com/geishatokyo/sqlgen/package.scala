@@ -7,7 +7,7 @@ import com.geishatokyo.sqlgen.generator.sql.sqlite.SqliteQueryGenerator
 import com.geishatokyo.sqlgen.process.converter.code.CSharpCodeConverterProc
 import com.geishatokyo.sqlgen.process.converter.csv.CSVConverterProc
 import com.geishatokyo.sqlgen.process.converter.sql.{MySQLConverterProc, SqliteConverterProc}
-import com.geishatokyo.sqlgen.process.input.{DirectoryLoaderInput, FileLoaderInput, WorkbookInput}
+import com.geishatokyo.sqlgen.process.input.{FileImportProc, FileLoaderInput, WorkbookInput}
 import com.geishatokyo.sqlgen.process.output.ConsoleOutputProc
 import com.geishatokyo.sqlgen.process.{Proc, ProjectProc}
 
@@ -27,7 +27,11 @@ package object sqlgen {
   }
 
   def inDir(dir: String): Proc = {
-    DirectoryLoaderInput.auto(dir)
+    FileLoaderInput.auto(dir)
+  }
+
+  def imports(fileOrDirs: String*): Proc = {
+    FileImportProc.auto(fileOrDirs:_*)
   }
 
   def workbook(w: Workbook): Proc = {
