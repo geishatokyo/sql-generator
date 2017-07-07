@@ -14,7 +14,7 @@ class XLSLoader extends Loader {
   val logger = Logger.logger
 
   override def load(name: String, input: InputStream): Workbook = {
-
+    //Logger.log(s"Load xls ${name}")
     val xls = WorkbookFactory.create(input)
     implicit val formulaEvaluator = xls.getCreationHelper.createFormulaEvaluator()
 

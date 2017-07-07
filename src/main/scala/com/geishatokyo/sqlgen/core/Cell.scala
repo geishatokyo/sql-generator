@@ -109,37 +109,48 @@ class Cell( _parent: Sheet,
   }
 
 
+  def tryConversionError[T](toType: String)(func: => T): T = {
+    try{
+      func
+    }catch{
+      case t: Throwable => {
+        throw SQLGenException.atCell(this,s"Fail to convert to ${toType}",t)
+      }
+    }
+  }
 
   def isEmpty = variable == null || variable.isEmpty
   /**
     *
     * @return
     */
-  def asLong: Long = variable.asLong
+  def asLong: Long = tryConversionError("Long") { variable.asLong }
+
+  def asInt : Int = tryConversionError("Int") { variable.asLong.toInt }
 
   /**
     *
     * @return
     */
-  def asString: String = variable.asString
+  def asString: String = tryConversionError("Strihg") { variable.asString}
 
   /**
     *
     * @return
     */
-  def asDouble: Double = variable.asDouble
+  def asDouble: Double = tryConversionError("Double") { variable.asDouble}
 
   /**
     *
     * @return
     */
-  def asJavaTime: ZonedDateTime = variable.asDate
+  def asJavaTime: ZonedDateTime = tryConversionError("Date") { variable.asDate }
 
-  def asDuration = variable.asDuration
+  def asDuration = tryConversionError("Duration") { variable.asDuration}
 
-  def asDate = variable.asDate
+  def asDate = tryConversionError("Date") { variable.asDate }
 
-  def asOldDate: java.util.Date = {
+  def asOldDate: java.util.Date = tryConversionError("java.util.Date") {
     val i = asDate.toInstant
     Date.from(i)
   }

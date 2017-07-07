@@ -4,6 +4,7 @@ import java.io.{ByteArrayInputStream, File, FileInputStream, InputStream}
 
 import com.geishatokyo.sqlgen.SQLGenException
 import com.geishatokyo.sqlgen.core.Workbook
+import com.geishatokyo.sqlgen.logger.Logger
 import com.geishatokyo.sqlgen.process.WorkbookMerger
 
 
@@ -13,8 +14,9 @@ import com.geishatokyo.sqlgen.process.WorkbookMerger
 trait Loader {
   def load(path: String): Workbook = load(new File(path))
   def load(file: File): Workbook = {
+    Logger.log("load file " + file.getAbsolutePath)
     val name = if(file.getName.indexOf(".") >= 0) {
-      file.getName.substring(file.getName.indexOf(".") + 1)
+      file.getName.substring(0,file.getName.indexOf("."))
     } else {
       file.getName
     }

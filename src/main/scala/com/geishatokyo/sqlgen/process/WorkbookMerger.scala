@@ -20,7 +20,7 @@ object WorkbookMerger {
       w1.note(t._1) = t._2
     })
 
-    w2
+    w1
   }
 
   def mergeSheet(s1: Sheet, s2: Sheet) = {

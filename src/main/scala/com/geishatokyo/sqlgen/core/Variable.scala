@@ -150,9 +150,9 @@ class ConversionError(v: Any) extends Exception("Fail to convert varibable:" + v
 object NullVar extends Variable {
   override def dataType: DataType = DataType.Null
 
-  override def asDouble: Double = throw new ConversionError(null)
+  override def asDouble: Double = 0
 
-  override def asLong: Long = throw new ConversionError(null)
+  override def asLong: Long = 0
 
   override def asString: String = ""
 

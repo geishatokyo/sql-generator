@@ -10,7 +10,7 @@ import com.geishatokyo.sqlgen.meta.{ColumnMeta, Metadata}
 /**
   * Created by takezoux2 on 2017/07/06.
   */
-class MySQLQueryGenerator(protected val throwExceptionWhenMetaNotFound: Boolean = true) extends SQLQueryGenerator  {
+class MySQLQueryGenerator(protected val throwExceptionWhenMetaNotFound: Boolean = false) extends SQLQueryGenerator  {
 
 
 

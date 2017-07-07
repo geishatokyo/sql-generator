@@ -26,8 +26,15 @@ object FileLoaderInput {
 
   def auto(files: String*): Proc = {
     if(files.size == 0) return EmptyProc
-    val dir = new File(files.head).getParent
-    new FileLoaderInput(AutoFileDetectionLoader.default, dir,_ => true, files)
+
+    val dir = if(new File(files.head).isFile) new File(files.head).getParent
+    else files.head
+
+    new FileLoaderInput(AutoFileDetectionLoader.default, dir,f => {
+      f.getName.endsWith(".csv") ||
+      f.getName.endsWith(".xls") ||
+      f.getName.endsWith(".xlsx")
+    }, files)
   }
 
   def csv(files: String*): Proc = {

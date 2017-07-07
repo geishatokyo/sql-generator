@@ -20,7 +20,7 @@ class SqliteConverterProc(val queryType: QueryType) extends SQLConverterProc {
   override def metadataKey: Key[Metadata] = SqliteConverterProc.MetadataKey
 
   override def createSqlQueryGenerator(c: Context): SQLQueryGenerator = {
-    new SqliteQueryGenerator()
+    new SqliteQueryGenerator(false)
   }
 
   override def forType(queryType: QueryType): SQLConverterProc = {

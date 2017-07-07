@@ -9,16 +9,22 @@ trait ImportProc extends Proc{
 
   def importKey: Key[List[Workbook]] = Context.Import
 
-  def load(c: Context): Workbook
+  def load(c: Context): Option[Workbook]
 
   override def apply(c: Context): Context = {
-    val wb = load(c)
-    if(c.has(importKey)) {
-      val workbooks = c(importKey)
-      c(importKey) = wb :: workbooks
-    } else {
-      c(importKey) = wb :: Nil
+    load(c) match {
+      case Some(wb) => {
+        if(c.has(importKey)) {
+          val workbooks = c(importKey)
+          c(importKey) = wb :: workbooks
+        } else {
+          c(importKey) = wb :: Nil
+        }
+        c
+      }
+      case None => {
+        c
+      }
     }
-    c
   }
 }

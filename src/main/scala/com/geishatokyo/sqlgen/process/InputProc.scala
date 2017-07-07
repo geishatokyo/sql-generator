@@ -8,20 +8,26 @@ import com.geishatokyo.sqlgen.core.Workbook
   */
 trait InputProc extends Proc {
 
-  def load(c: Context) : Workbook
+  def load(c: Context) : Option[Workbook]
   def mergeWithExistingWorkbook = true
   def workingDir: Option[String]
 
   override def apply(c: Context): Context = {
-    val workbook = load(c)
-    if(c.hasWorkbook) {
-      if(mergeWithExistingWorkbook) {
-        WorkbookMerger.merge(c.workbook, workbook)
-      } else {
-        throw SQLGenException("Workbook already exists")
+    load(c) match {
+      case Some(workbook) => {
+        if(c.hasWorkbook) {
+          if(mergeWithExistingWorkbook) {
+            WorkbookMerger.merge(c.workbook, workbook)
+          } else {
+            throw SQLGenException("Workbook already exists")
+          }
+        } else {
+          c(Context.Workbook) = workbook
+        }
       }
-    } else {
-      c(Context.Workbook) = workbook
+      case None => {
+        throw SQLGenException("No files are loaded.Please check xls,xlsx,csv file exists in directory")
+      }
     }
 
     workingDir match{

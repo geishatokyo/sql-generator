@@ -24,7 +24,7 @@ class MySQLConverterProc(val queryType: QueryType) extends SQLConverterProc {
   }
 
   override def createSqlQueryGenerator(c: Context): SQLQueryGenerator = {
-    new MySQLQueryGenerator()
+    new MySQLQueryGenerator(false)
   }
 }
 

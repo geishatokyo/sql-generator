@@ -124,7 +124,7 @@ trait Project{
         case None => None
       }
     } getOrElse {
-      throw SQLGenException(s"No rows found by query:${q}")
+      throw SQLGenException.atSheet(sheet, s"No rows found by query:${q}")
     }
   }
 

@@ -178,7 +178,11 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
     row(columnName) % any
   }
 
+  def isIgnore: Boolean = sheet.header(columnName).isIgnore
+  def isIgnore_=(v: Boolean) = sheet.header(columnName).isIgnore = v
 
+  def isId: Boolean = sheet.header(columnName).isId
+  def isId_=(v: Boolean) = sheet.header(columnName).isId = v
 
 
 }

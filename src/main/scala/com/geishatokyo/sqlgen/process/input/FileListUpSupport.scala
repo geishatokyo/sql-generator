@@ -15,14 +15,21 @@ trait FileListUpSupport { self: Proc =>
   def filter: File => Boolean
   def loader: Loader
 
-  def load(c: Context): Workbook = {
+  def excludeDirs = Set("target","output","input","conf","configure")
+
+  def load(c: Context): Option[Workbook] = {
 
     val yielder = new Yielder()
     fileOrDirs.foreach(path => {
       val f = new File(path)
       listUp(f, yielder.apply _)
     })
-    loader.loadMultiFile(yielder.elements.iterator)
+
+    if(yielder.elements.size > 0) {
+      Some(loader.loadMultiFile(yielder.elements.iterator))
+    } else {
+      None
+    }
   }
 
   class Yielder{
@@ -42,11 +49,18 @@ trait FileListUpSupport { self: Proc =>
         yieldFunc(currentDir)
       }
     }else if(currentDir.listFiles() != null) {
-      currentDir.listFiles().foreach(f => {
-        listUp(f, yieldFunc)
-      })
+      if(isTargetDir(currentDir)) {
+        currentDir.listFiles().foreach(f => {
+          listUp(f, yieldFunc)
+        })
+      }
     }
 
+  }
+  protected def isTargetDir(dir: File) = {
+    !excludeDirs.contains(dir.getName) &&
+      !dir.getName.startsWith(".") &&
+      !dir.isHidden
   }
 
 }

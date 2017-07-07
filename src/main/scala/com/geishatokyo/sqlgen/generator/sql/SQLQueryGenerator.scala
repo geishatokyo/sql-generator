@@ -44,7 +44,15 @@ trait SQLQueryGenerator {
         }
       }
       case None => {
-        row.parent.headers.filter(h => !h.isIgnore && h.isId).map(_.name).toList
+        val ids = row.parent.headers.filter(h => !h.isIgnore && h.isId).map(_.name).toList
+
+        if(ids.size == 0) {
+          if(row.parent.hasColumn("id")) {
+            List("id")
+          } else {
+            Nil
+          }
+        } else ids
       }
     }
   }

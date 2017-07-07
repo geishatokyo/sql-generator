@@ -8,7 +8,7 @@ import scala.util.matching.Regex
 /**
   * Created by takezoux2 on 2017/05/26.
   */
-class Workbook(val name: String) {
+class Workbook(var name: String) {
 
   private var _sheets: Map[String,Sheet] = Map.empty
   def sheets = _sheets.values

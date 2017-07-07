@@ -66,7 +66,7 @@ case class Pattern(fileRegex: Regex, loader: Loader)
 object Pattern {
 
   def withExtension(ext: String, loader: Loader) = {
-    Pattern(s"""\.${ext}$$""".r, loader)
+    Pattern(s"""\\.${ext}$$""".r, loader)
   }
 
 }

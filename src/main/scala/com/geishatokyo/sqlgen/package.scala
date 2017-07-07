@@ -8,6 +8,7 @@ import com.geishatokyo.sqlgen.process.converter.code.CSharpCodeConverterProc
 import com.geishatokyo.sqlgen.process.converter.csv.CSVConverterProc
 import com.geishatokyo.sqlgen.process.converter.sql.{MySQLConverterProc, SqliteConverterProc}
 import com.geishatokyo.sqlgen.process.input.{FileImportProc, FileLoaderInput, WorkbookImportProc, WorkbookInput}
+import com.geishatokyo.sqlgen.process.misc.RenameWorkbookProc
 import com.geishatokyo.sqlgen.process.output.ConsoleOutputProc
 import com.geishatokyo.sqlgen.process.{Proc, ProjectProc}
 
@@ -100,5 +101,13 @@ package object sqlgen {
   }
 
 
+  /**
+    * ワークブックの名前を変更する
+    * @param workbookName
+    * @return
+    */
+  def rename(workbookName: String) = {
+    new RenameWorkbookProc(workbookName)
+  }
 
 }

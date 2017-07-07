@@ -13,7 +13,7 @@ class CSVConverterProc extends ConverterProc[String]{
   override def convert(c: Context): MultiData[String] = {
     val w = c.workbook
     MultiData(
-      StringData(w.name, toString(w))
+      StringData(w.name + ".csv", toString(w))
     )
   }
   def toString(wb: Workbook) = {
