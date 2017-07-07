@@ -1,6 +1,7 @@
 package com.geishatokyo.sqlgen
 
 import java.text.SimpleDateFormat
+import java.time.{LocalDate, LocalTime, ZoneId, ZonedDateTime}
 import java.util.Date
 
 import com.geishatokyo.sqlgen.core.{Row, Sheet, Workbook}
@@ -215,21 +216,24 @@ trait Project{
   }
 
   /**
-    * 現時刻のString表現を取得
     *
     * @return
     */
   def now = {
-    new SimpleDateFormat("YYYY/MM/DD HH:mm:ss").format(new Date)
+    ZonedDateTime.now()
   }
 
   /**
-    * 今日の日付のString表現を取得
+    * 今日の00:00:00を取得
     *
     * @return
     */
   def today = {
-    new SimpleDateFormat("YYYY/MM/DD").format(new Date)
+    ZonedDateTime.of(
+      LocalDate.now(),
+      LocalTime.MIN,
+      ZoneId.systemDefault()
+    )
   }
 
 

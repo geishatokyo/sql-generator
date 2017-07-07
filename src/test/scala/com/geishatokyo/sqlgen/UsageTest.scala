@@ -54,7 +54,7 @@ class UsageTest extends FlatSpec with Matchers{
     onSheet("User") {
       column("gender").mapEnum(Gender)
       column("nickname") := "Mr. " + column("nickname")
-      column("newColumn") := selectOne(Query.from("Hero").idOf(column("id").asLong))("name")
+      column("newColumn") := selectOne(Query.from("Hero").idOf(column("id")))("name")
 
     }
 
@@ -64,50 +64,6 @@ class UsageTest extends FlatSpec with Matchers{
 
   }
 
-
-//
-//  it should "process workbook" in {
-//    val wb = new Workbook()
-//    val sheet = new Sheet("User")
-//    sheet.addColumns("id","name","thumb")
-//    sheet.addRow(List("1","Tom","tom.jpg"))
-//    sheet.addRow(List("2","Bob",""))
-//    wb.addSheet(sheet)
-//
-//    val r = SampleProject(new Context(),wb)
-//
-//
-//    println("##" + r.toString)
-//
-//  }
-//  it should "aaa" in {
-//
-//    val wb = new Workbook()
-//    val sheet = new Sheet("User")
-//    sheet.addColumns("id","name","thumb")
-//    sheet.addRow(List("1","Tom","tom.jpg"))
-//    sheet.addRow(List("2","Bob",""))
-//    wb.addSheet(sheet)
-//
-//    new WorkbookInput(wb) >> SampleProject >> (new ConsoleOutput)
-//  }
-//
-//  object SampleProject extends Project with StandardGuess{
-//
-//    onSheet("User"){
-//
-//      rows.foreach(row => {
-//        row("id") := row("id").asInt * 2
-//      })
-//
-//      column("aaaa") := column("id")
-//      column("bbbb") := {
-//        findById(2).map(_("name")).getOrElse("Unkonwn")
-//      }
-//      column("date") := "2016/01/01"
-//    }
-//
-//  }
 
 
 }
