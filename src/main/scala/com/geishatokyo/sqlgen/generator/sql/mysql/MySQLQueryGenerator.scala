@@ -14,7 +14,7 @@ class MySQLQueryGenerator(protected val throwExceptionWhenMetaNotFound: Boolean 
 
 
 
-  val format = DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")
+  val format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
   /**
     * @param cell
@@ -41,7 +41,7 @@ class MySQLQueryGenerator(protected val throwExceptionWhenMetaNotFound: Boolean 
         cell.asDouble.toString
       }
       case MySQLColumnKind.Date => {
-        format.format(cell.asDate)
+        escape(format.format(cell.asDate))
       }
       case MySQLColumnKind.String => {
         escape(cell.asString)
