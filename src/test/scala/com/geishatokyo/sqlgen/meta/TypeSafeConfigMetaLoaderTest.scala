@@ -38,7 +38,7 @@ class TypeSafeConfigMetaLoaderTest extends FlatSpec with Matchers {
 
     val metadata = loader.loadConfig(config)
 
-
+    println(metadata)
     assert(metadata.sheetMetas.size == 2)
 
     assert(metadata == Metadata(List(

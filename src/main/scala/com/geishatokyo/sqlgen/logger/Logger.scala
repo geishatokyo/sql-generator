@@ -21,6 +21,7 @@ object Logger extends Logger{
 
   def log(message: String, e: Exception) {logger.log(message,e)}
 
+
   
   def replace( valueType : String , before : String , after : String){
     logger.replace(valueType,before,after)

@@ -22,6 +22,7 @@ class TypeSafeConfigMetaLoader extends MetaLoader{
   val SheetProp = "sheets"
   val NameProp = "name"
   val ColumnProp = "columns"
+  val ClassNameProp = "className"
 
 
   def loadConfig(config: Config): Metadata = {
@@ -48,7 +49,7 @@ class TypeSafeConfigMetaLoader extends MetaLoader{
       SheetMeta(name, Nil)
     }
 
-    setString(config, "className", s.className = _)
+    setString(config, ClassNameProp, s.className = _)
     setStringList(config, "primaryIndex", s.primaryIndex = _)
     s
   }
@@ -58,7 +59,7 @@ class TypeSafeConfigMetaLoader extends MetaLoader{
 
     val c = ColumnMeta(name)
 
-    setString(config, "className", c.className = _)
+    setString(config, ClassNameProp, c.className = _)
     setBool(config, "isIgnore", c.isIgnore = _)
 
     c

@@ -85,9 +85,13 @@ trait SQLQueryGenerator {
 
   def toLineComment(m: String): String = "-- " + m
 
-  protected def escape(s: String) = {
-    // TODO ちゃんとエスケープする
-    '"' + s + '"'
+  protected def escape(_s: String) = {
+    val s = _s.replace("\n","\\n")
+    if(s.contains("\"")) {
+      "'" + s.replace("'","\\'") + "'"
+    } else {
+      '"' + s + '"'
+    }
   }
 
   private var checkResult = Map[String,Option[String]]()

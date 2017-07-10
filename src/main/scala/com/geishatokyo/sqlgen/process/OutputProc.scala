@@ -26,7 +26,9 @@ trait OutputProc[DataType] extends Proc with OutputSupport{
 trait OutputSupport {
 
   def getPath(c: Context, dir: String, name: String): File = {
-    if(c.has(Context.ExportDir)) {
+    if(Paths.get(dir).isAbsolute) {
+      new File(dir,name)
+    } else if(c.has(Context.ExportDir)) {
       Paths.get(c(Context.ExportDir), dir, name).toFile
     } else if(c.has(Context.WorkingDir)) {
       Paths.get(c.workingDir, dir, name).toFile

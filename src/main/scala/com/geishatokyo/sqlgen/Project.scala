@@ -5,6 +5,7 @@ import java.time.{LocalDate, LocalTime, ZoneId, ZonedDateTime}
 import java.util.Date
 
 import com.geishatokyo.sqlgen.core.{Row, Sheet, Workbook}
+import com.geishatokyo.sqlgen.logger.Logger
 import com.geishatokyo.sqlgen.process.Context
 import com.geishatokyo.sqlgen.query.{Query, WorkbookSearcher}
 
@@ -166,6 +167,60 @@ trait Project{
     this.actions = func :: this.actions
   }
 
+  /**
+    * 条件をチェックし、条件を満たしていない場合、ログにWarningメッセージを出す
+    * @param validationFunc
+    * @param message
+    */
+  def warn(validationFunc: => Boolean, message: String) = {
+    def showWarnMessage() = {
+      val address = if(sheetScope != null && sheetScope.row != null) {
+        sheetScope.row.address
+      } else if(currentSheet.value != null){
+        currentSheet.value.address
+      } else if(currentWorkbook.value != null) {
+        currentWorkbook.value.name
+      } else {
+        "--"
+      }
+
+      Logger.log("!Werning! " + address + " :" + message)
+    }
+    if(!validationFunc) {
+      showWarnMessage()
+    }
+  }
+
+  def validate(validationFunc: => Boolean): Unit = {
+    validate(validationFunc, "Invalid data")
+  }
+  def validate(validationFunc: => Boolean, message: String): Unit = {
+
+    def throwSQLGenException(t: Throwable) = {
+      if(sheetScope != null && sheetScope.row != null) {
+        throw SQLGenException.atRow(sheetScope.row,message,t)
+      } else if(currentSheet.value != null){
+        throw SQLGenException.atSheet(currentSheet.value, message,t)
+      } else if(currentWorkbook.value != null) {
+        throw SQLGenException.atWorkbook(currentWorkbook.value, message,t)
+      } else {
+        throw SQLGenException.apply(message,t)
+      }
+    }
+
+
+    try{
+      val success = validationFunc
+      if(!success) {
+        throwSQLGenException(null)
+      }
+    } catch{
+      case e: SQLGenException => throw e
+      case t: Throwable => {
+        throwSQLGenException(t)
+      }
+    }
+  }
 
 
 
