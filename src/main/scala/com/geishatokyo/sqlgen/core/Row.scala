@@ -1,5 +1,7 @@
 package com.geishatokyo.sqlgen.core
 
+import com.geishatokyo.sqlgen.SQLGenException
+
 /**
   * Created by takezoux2 on 2017/05/26.
   */
@@ -12,7 +14,11 @@ class Row(val parent: Sheet,val rowIndex : Int) {
     _cells(index)
   }
   def apply(name: String): Cell = {
-    apply(parent.columnIndexOf(name))
+    val index = parent.columnIndexOf(name)
+    if(index < 0) {
+      throw SQLGenException.atSheet(parent,s"Header${name} not found")
+    }
+    apply(index)
   }
 
   def cells = _cells

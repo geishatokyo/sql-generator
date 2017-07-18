@@ -18,7 +18,7 @@ class SqliteQueryGenerator(val throwExceptionWhenMetaNotFound: Boolean = false) 
           case DataType.Integer => cell.asLong.toString
           case DataType.Number => cell.asDouble.toString
           case DataType.Bool => cell.asBool.toString
-          case DataType.Date => cell.asLong.toString // Date型が無いので、unixTimeで保存
+          case DataType.Date => cell.asDate.toInstant.toEpochMilli.toString // Date型が無いので、unixTimeで保存
           case DataType.Duration => throw SQLGenException.atCell(cell, "Not supported data type:" + cell.dataType)
           case DataType.Null => "NULL"
           case _ => escape(cell.asString)
@@ -28,7 +28,7 @@ class SqliteQueryGenerator(val throwExceptionWhenMetaNotFound: Boolean = false) 
         cell.asLong.toString
       }
       case SqliteColumnKind.Date => {
-        cell.asLong.toString
+        cell.asDate.toInstant.toEpochMilli.toString
       }
       case SqliteColumnKind.Number => {
         cell.asDouble.toString
