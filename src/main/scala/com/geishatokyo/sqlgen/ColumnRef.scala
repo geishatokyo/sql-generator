@@ -1,6 +1,7 @@
 package com.geishatokyo.sqlgen
 
 import com.geishatokyo.sqlgen.core.{Cell, DataType, Row, Sheet}
+import com.geishatokyo.sqlgen.logger.Logger
 
 import scala.language.experimental.macros
 import scala.util.DynamicVariable
@@ -183,6 +184,42 @@ class ColumnRef(sheet: Sheet, var columnName : String, sheetScope: SheetScope) {
 
   def isId: Boolean = sheet.header(columnName).isId
   def isId_=(v: Boolean) = sheet.header(columnName).isId = v
+
+
+  /**
+    * 条件を満たしていない場合、生成を中断する
+    * @param validationFunc
+    * @param message
+    */
+  def validate(validationFunc: Cell => Boolean, message: String = "Invalid data") = {
+    foreach(cell => try{
+      if(!validationFunc(cell)) {
+        throw SQLGenException.atRow(cell.row, message)
+      }
+    } catch {
+      case t: SQLGenException => throw t
+      case t: Throwable => throw SQLGenException.atRow(cell.row,message,t)
+    })
+  }
+
+  /**
+    * 警告を表示
+    * @param warningFunc
+    * @param message
+    */
+  def warning(warningFunc: Cell => Boolean, message: String = "Warning. FIXME!") = {
+    foreach(cell => try{
+      if(!warningFunc(cell)) {
+        Logger.logWarning(message)
+      }
+    } catch {
+      case t: SQLGenException => throw t
+      case t: Throwable => throw SQLGenException.atRow(cell.row,"Other error is thrown",t)
+    })
+
+  }
+
+
 
 
 }
