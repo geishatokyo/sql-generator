@@ -17,20 +17,18 @@ class CSharpCodeGenerator(withLabel: Boolean = true) {
     }
   }
 
-  protected def getColumnMeta(c: Column)(implicit metadata: Metadata): ColumnMeta = {
+  protected def getColumnMeta(c: Column)(implicit metadata: Metadata): Option[ColumnMeta] = {
     metadata.getSheetMeta(c.parent.name).flatMap(sm => {
       sm.getColumnMeta(c.header.name)
-    }).getOrElse {
-      throw SQLGenException.atSheet(c.parent,s"C# metadata for column:${c.name} not found")
-    }
+    })
   }
 
   def createStatement(row: Row)(implicit metadata: Metadata): String = {
     val className = getClassName(row)
 
-    val params = row.cells.map(c => {
-      val meta = getColumnMeta(c.column)
-
+    val params = row.cells.flatMap(c => {
+      getColumnMeta(c.column).map(meta => (c,meta))
+    }).map({ case (c,meta) =>
       val csharpType = if(meta.className == Metadata.AutoClass) {
         c.dataType match{
           case DataType.Integer => "long"
