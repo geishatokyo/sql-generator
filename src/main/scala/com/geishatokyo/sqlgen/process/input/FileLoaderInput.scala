@@ -5,6 +5,9 @@ import java.io.File
 import com.geishatokyo.sqlgen.core.Workbook
 import com.geishatokyo.sqlgen.loader.{AutoFileDetectionLoader, CSVLoader, Loader}
 import com.geishatokyo.sqlgen.process.{Context, EmptyProc, InputProc, Proc}
+import com.geishatokyo.sqlgen.setting.SettingLoader
+
+import scala.util.matching.Regex
 
 /**
   * Created by takezoux2 on 2017/07/05.
@@ -31,9 +34,7 @@ object FileLoaderInput {
     else files.head
 
     new FileLoaderInput(AutoFileDetectionLoader.default, dir,f => {
-      f.getName.endsWith(".csv") ||
-      f.getName.endsWith(".xls") ||
-      f.getName.endsWith(".xlsx")
+      !isExcludeFile(f) && isTargetFile(f)
     }, files)
   }
 
@@ -43,6 +44,42 @@ object FileLoaderInput {
     new FileLoaderInput(new CSVLoader(), dir,f => f.getName.endsWith(".csv"), files)
   }
 
+  lazy val isExcludeFile: File => Boolean = {
+    SettingLoader.getString("SG_EXCLUDE_FILE_REGEX") match{
+      case Some(regex) => {
+        isMatchRegex(regex.r) _
+      }
+      case _ => DefaultRule.isBackUpFile _
+    }
+  }
+
+  lazy val isTargetFile: File => Boolean = {
+    SettingLoader.getString("SG_TARGET_FILE_REGEX") match{
+      case Some(regex) => {
+        isMatchRegex(regex.r) _
+      }
+      case _ => f => DefaultRule.isAnyXLS(f) || DefaultRule.isAnyCSV(f)
+    }
+  }
+
+  def isMatchRegex(r: Regex)(f: File) = r.findFirstIn(f.getName).isDefined
+
+
+  object DefaultRule {
+    def isBackUpFile(f: File) = {
+      f.getName.startsWith("~") //エクセルのバックアップファイル
+    }
+
+    def isAnyCSV(f: File) = {
+      f.getName.endsWith(".csv")
+    }
+
+    def isAnyXLS(f: File) = {
+      f.getName.endsWith(".xlsx") ||
+        f.getName.endsWith(".xlsm") || // マクロ入り
+        f.getName.endsWith(".xls")
+    }
+  }
 
 
 }

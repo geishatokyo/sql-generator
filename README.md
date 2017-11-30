@@ -60,3 +60,6 @@ Sample code is below.
     }
 
 
+## その他
+
+* [環境変数の設定](docs/Env.md)

@@ -10,7 +10,7 @@ import scala.util.matching.Regex
 /**
   * Created by takezoux2 on 2017/07/05.
   */
-class AutoFileDetectionLoader(patterns: Seq[Pattern]) extends Loader{
+class AutoFileDetectionLoader(patterns: Seq[Pattern], defaultLoader: Option[Loader]) extends Loader{
 
 
 
@@ -22,7 +22,9 @@ class AutoFileDetectionLoader(patterns: Seq[Pattern]) extends Loader{
         p.loader.load(file)
       }
       case None => {
-        throw SQLGenException(s"Can't detect loader for ${file}")
+        defaultLoader.map(_.load(file)).getOrElse {
+          throw SQLGenException(s"Can't detect loader for ${file}")
+        }
       }
     }
   }
@@ -52,10 +54,9 @@ object AutoFileDetectionLoader {
 
   val default: AutoFileDetectionLoader = new AutoFileDetectionLoader(
     List(
-      Pattern.withExtension("csv", new CSVLoader()),
-      Pattern.withExtension("xlsx", new XLSLoader()),
-      Pattern.withExtension("xls", new XLSLoader())
-    )
+      Pattern.withExtension("csv", new CSVLoader())
+    ),
+    Some(new XLSLoader())
   )
 
 }

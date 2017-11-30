@@ -26,6 +26,10 @@ trait Project{
 
   def context = currentContext.value
 
+  /**
+    * 現在のスコープのSheetを取得
+    * @return
+    */
   def sheet = {
     val s = currentSheet.value
     if(s == null) {
@@ -33,6 +37,11 @@ trait Project{
     }
     s
   }
+
+  /**
+    * 現在のスコープのWorkbookを取得
+    * @return
+    */
   def workbook = {
     val w = currentWorkbook.value
     if(w == null){
@@ -41,6 +50,11 @@ trait Project{
     w
   }
 
+  /**
+    * 指定した名前のシートを取得
+    * @param name
+    * @return
+    */
   def sheet(name : String): Sheet = {
     val wb = workbook
     if(wb.contains(name)) {
@@ -63,25 +77,96 @@ trait Project{
     }
   }
 
-  def addSheet(sheetName: String) = {
-    addAction(wb => {
-      if(!wb.contains(sheetName)){
-        wb.addSheet(new Sheet(sheetName))
+  def isSheetExists(name: String): Boolean = {
+    val wb = workbook
+    if(wb.contains(name)) {
+      true
+    } else{
+      context.get(Context.Import) match{
+        case Some(importWbs) => {
+          importWbs.find(_.contains(name)) match{
+            case Some(wb) => true
+            case None => {
+              false
+            }
+          }
+        }
+        case None => {
+          false
+        }
       }
-      wb
-    })
+    }
+  }
+
+  /**
+    * 指定した名前のシートを追加
+    * すでに存在する場合は何も起きない
+    * Sheetスコープ内で使用した場合、即座にSheetを取得可能
+    * @param sheetName
+    */
+  def addSheet(sheetName: String) = {
+    if(currentSheet == null) {
+      addAction(wb => {
+        if (!wb.contains(sheetName)) {
+          wb.addSheet(new Sheet(sheetName))
+        }
+        wb
+      })
+    } else {
+      val wb = this.workbook
+      if (!wb.contains(sheetName)) {
+        wb.addSheet(new Sheet(sheetName))
+      } else {
+        wb("sheetName")
+      }
+    }
   }
 
 
+  /**
+    * 現在のスコープのSheetのカラムへの参照を取得する
+    * @param name
+    * @return
+    */
   def column(name : String) : ColumnRef = {
     new ColumnRef(sheet,name,sheetScope)
   }
 
+  /**
+    * 現在のスコープのSheetの全行を取得
+    * @return
+    */
   def rows = {
     sheet.rows
   }
+  /**
+    * 現在のスコープのSheetの全列を取得
+    * @return
+    */
   def columns = {
     sheet.columns
+  }
+
+  /**
+    * 前処理を追加
+    * @param func
+    */
+  def before( func: => Unit) = {
+    addPreActions(w => {
+      func
+      w
+    })
+  }
+
+  /**
+    * 後処理を追加
+    * @param func
+    */
+  def after( func: => Unit) = {
+    addPostActions(w => {
+      func
+      w
+    })
   }
 
   /**
@@ -223,7 +308,10 @@ trait Project{
   }
 
 
-
+  /**
+    * 現在のスコープのSheetを無視設定にする
+    * @return
+    */
   def ignore() = {
     sheet.isIgnore
   }
@@ -271,7 +359,7 @@ trait Project{
   }
 
   /**
-    *
+    * 現在時刻を取得する
     * @return
     */
   def now = {
