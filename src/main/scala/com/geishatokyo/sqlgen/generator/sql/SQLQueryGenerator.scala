@@ -101,9 +101,9 @@ trait SQLQueryGenerator {
     case None => {
       metadata.getSheetMeta(sheet.name) match {
         case Some(meta) => {
-          val fields = sheet.headers.map(_.name).toSet
+          val fields = sheet.headers.map(_.name.toUpperCase).toSet
 
-          meta.columnMetas.find(c => !fields.contains(c.name)) match {
+          meta.columnMetas.find(c => !fields.contains(c.name.toUpperCase)) match {
             case Some(column) => {
               val message = s"Field:${column.name} not exists"
               checkResult += (sheet.address -> Some(message))
@@ -147,7 +147,7 @@ trait SQLQueryGenerator {
     }
     val name = getTableName(row)
     val fieldAndValues = getFieldNameAndValue(row)
-    ids.find(id => !fieldAndValues.exists(_._1 == id)) match {
+    ids.find(id => !fieldAndValues.exists(_._1.toUpperCase == id.toUpperCase)) match {
       case Some(idNotExists) => {
         throw SQLGenException.atSheet(row.parent, s"Wrong id name:${idNotExists}")
       }
@@ -169,7 +169,7 @@ trait SQLQueryGenerator {
 
     val name = getTableName(row)
     val fieldAndValues = getFieldNameAndValue(row)
-    ids.find(id => !fieldAndValues.exists(_._1 == id)) match {
+    ids.find(id => !fieldAndValues.exists(_._1.toUpperCase == id.toUpperCase)) match {
       case Some(idNotExists) => {
         throw SQLGenException.atSheet(row.parent, s"Wrong id name:${idNotExists}")
       }

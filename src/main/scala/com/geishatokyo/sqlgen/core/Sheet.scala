@@ -1,22 +1,23 @@
 package com.geishatokyo.sqlgen.core
 
 import com.geishatokyo.sqlgen.SQLGenException
+import com.geishatokyo.sqlgen.setting.WorkbookConfSupport
 
 import scala.collection.mutable
 
 /**
   * Created by takezoux2 on 2017/05/26.
   */
-class Sheet(private var _name: String) {
+class Sheet(private[core] var _parent : Workbook,
+            private var _name: String) extends WorkbookConfSupport {
 
-  private[core] var _parent : Workbook = null
   def parent = _parent
+
+  def config = parent.config
+
 
   def name = _name
   def name_=(newName: String) = {
-    if(_parent != null){
-      _parent.changeSheetName(this,newName)
-    }
     _name = newName
   }
 
@@ -74,7 +75,7 @@ class Sheet(private var _name: String) {
   }
 
   def columnIndexOf(headerName: String) : Int = {
-    _headers.indexWhere(_.name == headerName)
+    _headers.indexWhere(h => eqStr(h.name,headerName))
   }
   def header(headerName : String) = {
     getHeader(headerName).getOrElse{
@@ -92,17 +93,17 @@ class Sheet(private var _name: String) {
   }
 
   def hasColumn(name: String) = {
-    columns.exists(_.header.name == name)
+    columns.exists(h => eqStr(h.header.name, name))
   }
 
   def getHeader(headerName: String) : Option[Header] = {
-    headers.find(_.name == headerName)
+    headers.find(h => eqStr(h.name, headerName))
   }
 
   def addRow(row: Row): Row = {
 
     if(row.parent.headers != this.headers &&
-      !row.parent.headers.forall(h => this.headers.exists(_.name == h.name))
+      !row.parent.headers.forall(h => this.headers.exists(header => eqStr(header.name,h.name)))
     ) {
       throw SQLGenException.atSheet(this,s"Row header is not match")
 
@@ -123,7 +124,7 @@ class Sheet(private var _name: String) {
 
     val allGreen = headers.forall(header => {
       header == this.headers ||
-        header.forall(h => this.headers.exists(_.name == h.name))
+        header.forall(h => this.headers.exists(header => eqStr(header.name, h.name)))
     })
     if(!allGreen) {
       throw SQLGenException.atSheet(this, s"Row header is not match")
@@ -170,7 +171,7 @@ class Sheet(private var _name: String) {
 
 
   def addHeader(headerName: String): Column = {
-    if(_headers.exists(_.name == headerName)){
+    if(_headers.exists(h => eqStr(h.name, headerName))){
       throw SQLGenException.atSheet(this, s"Header:${headerName} already exists")
     }
     val columnIndex = _headers.length
@@ -208,8 +209,11 @@ class Sheet(private var _name: String) {
 
 
 
-  def copy(): Sheet = {
-    val newSheet = new Sheet(name)
+  def copyTo(wb: Workbook): Sheet = {
+    if(wb.contains(this.name)) {
+      throw SQLGenException.atWorkbook(wb, s"Workbook:${wb.name} already contains Sheet:${name}")
+    }
+    val newSheet = wb.addSheet(name)
 
     newSheet._headers = this._headers.map(_.copy(newSheet))
     this.note.foreach(t => {

@@ -1,6 +1,7 @@
 package com.geishatokyo.sqlgen.core
 
 import com.geishatokyo.sqlgen.SQLGenException
+import com.geishatokyo.sqlgen.setting.{DefaultWorkbookConfig, WorkbookConfSupport, WorkbookConfiguration}
 
 import scala.collection.mutable
 import scala.util.matching.Regex
@@ -8,56 +9,53 @@ import scala.util.matching.Regex
 /**
   * Created by takezoux2 on 2017/05/26.
   */
-class Workbook(var name: String) {
+class Workbook(var name: String, val config: WorkbookConfiguration = DefaultWorkbookConfig) extends WorkbookConfSupport {
 
-  private var _sheets: Map[String,Sheet] = Map.empty
-  def sheets = _sheets.values
+  private var _sheets: List[Sheet] = Nil
+  def sheets = _sheets
 
 
   val note = mutable.Map.empty[String,Any]
 
-
-
-
   def apply(name: String): Sheet = {
-    _sheets.getOrElse(name, {
+    getSheet(name) getOrElse {
       throw SQLGenException.atWorkbook(this, s"Sheet:${name} not found")
-    })
+    }
   }
 
   def getSheet(name: String): Option[Sheet] = {
-    _sheets.get(name)
+    _sheets.find(s => eqStr(s.name,name))
   }
   def hasSheet(name: String) = {
-    _sheets.contains(name)
+    _sheets.exists(s => eqStr(s.name,name))
   }
 
   def sheetsMatchingTo(r: Regex) = {
     _sheets.find {
-      case (k,v) => r.findFirstIn(k).isDefined
-    } map(_._2)
+      s => r.findFirstIn(s.name).isDefined
+    }
   }
 
 
   def addSheet(sheet: Sheet): Sheet = {
-    if(sheet._parent != null){
+    if(sheet._parent != this && sheet._parent != null){
       throw SQLGenException.atWorkbook(this, s"Sheet:${sheet.name} is already added to another workbook")
     }
-    _sheets = _sheets + (sheet.name -> sheet)
+    _sheets = _sheets :+ sheet
     sheet._parent = this
     sheet
   }
 
 
   def addSheet(name: String):Sheet = {
-    addSheet(new Sheet(name))
+    addSheet(new Sheet(this, name))
   }
 
   def removeSheet(name: String) = {
-    _sheets.get(name) match{
+    getSheet(name) match{
       case Some(sheet) => {
         sheet._parent = null
-        _sheets = _sheets - name
+        _sheets = _sheets.filter(_ != sheet)
         true
       }
       case None => {
@@ -68,13 +66,7 @@ class Workbook(var name: String) {
 
 
   def contains(name: String) = {
-    _sheets.contains(name)
-  }
-
-
-  private[core] def changeSheetName(sheet: Sheet, newName: String) = {
-    _sheets -= sheet.name
-    _sheets += (newName -> sheet)
+    hasSheet(name)
   }
 
 }

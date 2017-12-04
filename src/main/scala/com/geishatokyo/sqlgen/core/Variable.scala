@@ -128,15 +128,15 @@ class StringVar(s: String) extends Variable {
 
 
 
-  override lazy val asDouble: Double = tDoubnle.get
+  override lazy val asDouble: Double = tDoubnle orElse tBool.map(b => if(b) 1.0 else 0.0) get
 
-  override lazy val asLong: Long = tLong.get
+  override lazy val asLong: Long = tLong orElse tBool.map(b => if(b) 1L else 0L) get
 
   override def asString: String = s
 
   override lazy val asDate: ZonedDateTime = tDate.get
 
-  override lazy val asBool: Boolean = tBool.get
+  override lazy val asBool: Boolean = tBool orElse tLong.map(_ == 1) get
 
   override def raw: Any = s
 

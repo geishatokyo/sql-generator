@@ -69,12 +69,14 @@ trait DurationConversion extends DateConversion {
 trait VariousStringFormatConversion extends DateConversion{
 
   val formats = Array(
-    DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss"),
-    DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"),
+    DateTimeFormatter.ofPattern("yyyy/M/d H:m:s"),
+    DateTimeFormatter.ofPattern("yyyy/M/d H:m:s.S"),
+    DateTimeFormatter.ofPattern("yyyy-M-d H:m:s"),
+    DateTimeFormatter.ofPattern("yyyy-M-d H:m:s.S"),
     DateTimeFormatter.ISO_OFFSET_DATE_TIME,
     DateTimeFormatter.BASIC_ISO_DATE,
-    DateTimeFormatter.ofPattern("yyyy/MM/dd"),
-    DateTimeFormatter.ofPattern("yyyy-MM-dd")
+    DateTimeFormatter.ofPattern("yyyy/M/d"),
+    DateTimeFormatter.ofPattern("yyyy-M-d")
   )
 
 

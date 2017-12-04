@@ -22,7 +22,7 @@ class XLSLoader extends Loader {
 
     val size = xls.getNumberOfSheets()
     (0 until size).foreach(i => {
-      loadSheet(xls.getSheetAt(i)) match{
+      loadSheet(wb, xls.getSheetAt(i)) match{
         case Some(s) => wb.addSheet(s)
         case None =>
       }
@@ -33,7 +33,7 @@ class XLSLoader extends Loader {
   }
 
 
-  private def loadSheet(xls: usermodel.Sheet)(implicit formulaEvaluator : FormulaEvaluator) : Option[Sheet] = {
+  private def loadSheet(wb: Workbook, xls: usermodel.Sheet)(implicit formulaEvaluator : FormulaEvaluator) : Option[Sheet] = {
 
     val sheetName = xls.getSheetName
 
@@ -43,7 +43,7 @@ class XLSLoader extends Loader {
       return None
     }
 
-    val sheet = new Sheet(sheetName)
+    val sheet = new Sheet(wb, sheetName)
     loadHeaders(xls,sheet)
 
     val rows = (1 until rowSize).map(i => {

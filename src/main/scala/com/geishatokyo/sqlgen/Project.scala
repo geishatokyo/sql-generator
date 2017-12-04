@@ -108,14 +108,14 @@ trait Project{
     if(currentSheet == null) {
       addAction(wb => {
         if (!wb.contains(sheetName)) {
-          wb.addSheet(new Sheet(sheetName))
+          wb.addSheet(new Sheet(wb, sheetName))
         }
         wb
       })
     } else {
       val wb = this.workbook
       if (!wb.contains(sheetName)) {
-        wb.addSheet(new Sheet(sheetName))
+        wb.addSheet(new Sheet(wb, sheetName))
       } else {
         wb("sheetName")
       }

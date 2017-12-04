@@ -27,7 +27,7 @@ class Cell( _parent: Sheet,
   val note = mutable.Map.empty[String,Any]
 
   def address = {
-    s"${_parent.address}/${header.name}-${rowIndex}"
+    s"${_parent.address} col:${header.name} row:${rowIndex}"
   }
 
   private[core] var variable: Variable = NullVar

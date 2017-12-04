@@ -13,7 +13,7 @@ object WorkbookMerger {
       if(w1.hasSheet(s.name)) {
         mergeSheet(w1(s.name), s)
       } else {
-        w1.addSheet(s.copy())
+        s.copyTo(w1)
       }
     })
     w2.note.foreach(t => {
