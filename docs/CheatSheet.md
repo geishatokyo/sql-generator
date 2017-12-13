@@ -21,6 +21,7 @@
 |sheet|Sheet|現在のScopeのSheetを取得|
 |rows|List[Row]|現在のSheetのRowsを取得|
 |columns|List[Column]|現在のSheetのColumnsを取得|
+|column(_columnName_)|ColumnRef|Columnの実態では無く、Columnの参照を取得|
 |now|ZonedDateTime|現在の時間を取得|
 |today|ZonedDateTime|今日の0時の時間を取得|
 
@@ -50,9 +51,9 @@
 |Code|戻り値|説明|
 |:--|:--|:--|
 |sheet.headers|List[Header]||
-|sheet.addHeader(_headerName_: String)|Unit|カラムを追加|
-|sheet.addHeaders(_headerName_: String*)|Unit|カラムを複数追加|
-|sheet.header(_hName_:String)|Header||
+|sheet.addHeader(_columnName_: String)|Unit|カラムを追加|
+|sheet.addHeaders(_columnName_: String*)|Unit|カラムを複数追加|
+|sheet.header(_columnName_:String)|Header||
 |sheet.header(_index_:Int)|Header||
 |header.isIgnore = true or false|||
 |header.isId = true or false|||
@@ -69,6 +70,18 @@
 |row(_index_)|Cell||
 |row(_name_:String)|Cell||
 |row.parent|Sheet||
+|row.cells|List[Cell]|
+
+## ColumnRef
+
+|Code|戻り値|説明|
+|:--|:--|:--|
+|colRef := Any||全てのColumnのCellに値をセット|
+|colRef ?= Any||全ての空のCellに値をセット|
+|```colRef.foreach(Cell => Unit)```||全てのColumnのCellで処理をする|
+|```colRef.map(Cell => Any)```||全てのColumnのCellを戻り値で置き換え|
+
+
 
 ## Cell
 
@@ -93,7 +106,7 @@ Cellの中身を気にせず演算等が出来るようになっています。
 
 ## Query
 
-簡易のQueryに寄る検索
+簡易のQueryによる検索。
 現在のWorkbook+外部workbookやDBなど全てから検索が可能
 
 
@@ -101,7 +114,7 @@ Cellの中身を気にせず演算等が出来るようになっています。
 |:--|:--|:--|
 |select(_query_)|List[Row]||
 |selectOne(_query_)|Row|Rowが見つからない場合は例外|
-|exists(_query)|Boolean||
+|exists(_query_)|Boolean||
 
 |Code|
 |:--|

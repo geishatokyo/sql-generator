@@ -57,8 +57,10 @@ Sample code is below.
         
         sheet.addRow(List("2","tom","value for aaa"))
 
-        warn(column("age").cells.forall(_.asInt >= 20), "20歳以下です") //　ログのみ
-        validate(column("age").cells.forall(_.asInt >= 10), "10歳以下は不正な値です" )// 例外が起きる
+        column("age").foreach(c => {
+          warn(c.asInt <=> 20, "20歳以下です") // ログのみ
+          validate(c.asInt <= 10, "10歳以下は不正な値です") // 例外
+        })
       }
 
     }
