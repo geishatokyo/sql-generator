@@ -37,16 +37,17 @@ Sample code is below.
       addSheet("NewSheet");
       
       onSheet("SheetToIgnore"){
-        ignore
+        sheet.ignore = true
       }
 
       onSheet("Sheet1"){
-        column("column1").map( c => "Map " + c.asString)
-        column("column2") := "set to all rows"
-        column("column3") ?= "set to empty cell foreach rows"
-        column("column4").setIfEmpty("Act almost same as ?=")
-        column("column5").name = "NewColumnName"
-        column("column6") := { "Set another cell value" + column("column1").asString }
+        sheet.rows.foreach(row => {
+          if(row("needUpdate").asBool) {
+            row("updateMethod") := "auto"
+          }
+          row("age") ?= 20
+          row("a") = row("b").asInt + row("c").asInt
+        })
       }
 
       onSheet("Sheet2"){
@@ -55,10 +56,14 @@ Sample code is below.
         })
         
         sheet.addRow(List("2","tom","value for aaa"))
+
+        warn(column("age").cells.forall(_.asInt >= 20), "20歳以下です") //　ログのみ
+        validate(column("age").cells.forall(_.asInt >= 10), "10歳以下は不正な値です" )// 例外が起きる
       }
 
     }
 
+* [CheetSheet](docs/CheetSheet.md)
 
 ## その他
 

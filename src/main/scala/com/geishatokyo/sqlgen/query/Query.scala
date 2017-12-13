@@ -5,6 +5,13 @@ import scala.util.matching.Regex
 /**
   * データアクセスのためのシンプルなクエリの実装
   *
+  * ```
+  * Query.from("User").where(
+  *   Eq("gender","male") or
+  *   (Eq("age", 20) and Range("age", 15, 20))
+  * )
+  * ```
+  *
   * Created by takezoux2 on 2017/07/07.
   */
 case class Query(from: From, where: Condition) {

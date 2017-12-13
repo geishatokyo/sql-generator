@@ -105,7 +105,7 @@ trait Project{
     * @param sheetName
     */
   def addSheet(sheetName: String) = {
-    if(currentSheet == null) {
+    if(currentSheet.value == null) {
       addAction(wb => {
         if (!wb.contains(sheetName)) {
           wb.addSheet(new Sheet(wb, sheetName))
@@ -117,7 +117,7 @@ trait Project{
       if (!wb.contains(sheetName)) {
         wb.addSheet(new Sheet(wb, sheetName))
       } else {
-        wb("sheetName")
+        wb(sheetName)
       }
     }
   }
@@ -212,6 +212,9 @@ trait Project{
     } getOrElse {
       throw SQLGenException.atSheet(sheet, s"No rows found by query:${q}")
     }
+  }
+  def exists(q: Query) : Boolean = {
+    select(q).length > 0
   }
 
 
@@ -321,8 +324,9 @@ trait Project{
   def apply(context: Context,workbook : Workbook) = {
     currentWorkbook.withValue(workbook) {
       currentContext.withValue(context) {
-        val applyed = actions.reverse.foldLeft(workbook)((wb, ac) => ac(wb))
-        postActions.reverse.foldLeft(applyed)((wb, ac) => ac(wb))
+        val endPre = preActions.reverse.foldLeft(workbook)((wb,ac) => ac(wb))
+        val applied = actions.reverse.foldLeft(endPre)((wb, ac) => ac(wb))
+        postActions.reverse.foldLeft(applied)((wb, ac) => ac(wb))
       }
     }
   }
@@ -389,6 +393,26 @@ trait Project{
       })
     }
   }
+
+  def createSheet(sheetName: String)(initFunc: Sheet => Unit) = {
+
+    def createSheetAction() = {
+      if(!workbook.contains(sheetName)) {
+        val sheet = workbook.addSheet(sheetName)
+        currentSheet.withValue(sheet){
+          initFunc(sheet)
+        }
+      }
+    }
+
+    if(currentWorkbook.value != null) {
+      createSheetAction()
+    } else {
+      before({createSheetAction()})
+    }
+
+  }
+
 
 }
 

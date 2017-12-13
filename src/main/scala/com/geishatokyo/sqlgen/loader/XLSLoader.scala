@@ -61,6 +61,16 @@ class XLSLoader extends Loader {
 
   def loadRow(sheet : Sheet, row: usermodel.Row)(implicit formulaEvaluator : FormulaEvaluator) : List[Variable] = {
     if(row == null) return Nil
+
+    // 空白行はスキップ
+    if(row.getPhysicalNumberOfCells == 0) return Nil
+    // #開始の行もスキップ
+    if(
+      row.getCell(0) != null &&
+      row.getCell(0).getCellTypeEnum == CellType.STRING &&
+      row.getCell(0).getStringCellValue.startsWith("#")
+    ) return Nil
+
     (0 until sheet.columnSize).map({
       case index => {
         val cell = row.getCell(index)

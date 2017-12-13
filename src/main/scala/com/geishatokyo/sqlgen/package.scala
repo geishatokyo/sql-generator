@@ -40,6 +40,9 @@ package object sqlgen {
   def inDir(dir: String): Proc = {
     FileLoaderInput.auto(dir)
   }
+  def fromFilesOrDirs(dirOrFile: String*): Proc = {
+    FileLoaderInput.auto(dirOrFile:_*)
+  }
 
   /**
     * 指定したWorkbookを読み込む
