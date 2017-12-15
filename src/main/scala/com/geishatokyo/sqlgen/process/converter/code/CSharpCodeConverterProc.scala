@@ -25,7 +25,7 @@ trait CSharpCodeConverterProc extends ConverterProc[String] with UsingMetaFile{
     val gen = this.generator
     implicit val m = this.getMetadata(c)
 
-    val codeLines = c.workbook.sheets.map(sheet => {
+    val codeLines = c.workbook.sheets.filterNot(_.isIgnore).map(sheet => {
       val lines = sheet.rows.map(row => {
         gen.createStatement(row)
       }).toList

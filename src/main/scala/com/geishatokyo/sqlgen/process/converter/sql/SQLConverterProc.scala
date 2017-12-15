@@ -44,11 +44,12 @@ trait SQLConverterProc extends ConverterProc[String] with UsingMetaFile{
     def append(m: String) = builder.append(m + "\n")
 
     append(sqlQueryGenerator.toLineComment(s"Workbook:${wb.name}"))
-    wb.sheets.foreach(sheet => {
+    wb.sheets.filterNot(_.isIgnore).foreach(sheet => {
       append(sqlQueryGenerator.toLineComment("Table:" + sheet.name))
       sheet.rows.foreach(row => {
         append(sqlQueryGenerator.toSQL(queryType, row))
       })
+
     })
 
     MultiData(StringData(

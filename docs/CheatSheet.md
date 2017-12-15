@@ -121,10 +121,10 @@ Cellの中身を気にせず演算等が出来るようになっています。
 |Query.from(_sheetName_).whereEq("id",21)|
 |Query.from(_sheetName_).idOf(233)|
 |```Query.from(_sheetName_).where(
-    Eq("age",32) and Eq("gender","male")
+    Eq("age",32) & Eq("gender","male")
 )```|
 |```Query.from(_sheetName_).where(
-    Eq("age",22) or Eq("age", 20)
+    Eq("age",22) | Eq("age", 20)
 )```|
 |```Query.from(_sheetName_).where(
     Range("age",10,20)

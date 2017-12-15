@@ -316,7 +316,7 @@ trait Project{
     * @return
     */
   def ignore() = {
-    sheet.isIgnore
+    sheet.isIgnore = true
   }
 
 

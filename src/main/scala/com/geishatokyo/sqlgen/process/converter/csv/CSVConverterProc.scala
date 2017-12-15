@@ -22,7 +22,7 @@ class CSVConverterProc extends ConverterProc[String]{
     def appendLn(s: String) = builder.append(s + "\n")
 
     appendLn("# @Workbook " + wb.name)
-    wb.sheets.foreach(s => {
+    wb.sheets.filterNot(_.isIgnore).foreach(s => {
       appendLn(s"# @Sheet ${s.name}")
       appendLn(s.headers.map(_.name).mkString(","))
       s.rows.foreach(row => {

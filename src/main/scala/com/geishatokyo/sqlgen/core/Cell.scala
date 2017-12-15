@@ -175,6 +175,10 @@ class Cell( _parent: Sheet,
       case a: Any => this.rawValue == a || this.asString == a.toString
     }
   }
+
+  override def toString: String = {
+    asString
+  }
 }
 
 object Cell{
