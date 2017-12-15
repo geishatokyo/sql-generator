@@ -65,7 +65,7 @@ Sample code is below.
 
     }
 
-* [CheetSheet](docs/CheetSheet.md)
+* [CheatSheet](docs/CheatSheet.md)
 
 ## その他
 
