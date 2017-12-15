@@ -4,7 +4,7 @@ import com.geishatokyo.sqlgen.logger.Logger
 import java.io._
 import org.apache.poi.ss.usermodel
 import java.security.MessageDigest
-import io.Source
+import scala.io.Source
 import util.matching.Regex
 
 
