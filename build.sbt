@@ -14,7 +14,7 @@ lazy val root = (project in file(".")).settings(commonSettings:_*).settings(
     "org.apache.poi" % "poi-ooxml" % "3.16",
     "org.scala-lang.modules" %% "scala-parser-combinators" % "1.0.6",
     "mysql" % "mysql-connector-java" % "5.1.18" % "provided",
-    "com.amazonaws" % "aws-java-sdk" % "1.2.6" % "provided",
+    "com.amazonaws" % "aws-java-sdk" % "1.11.248" % "provided",
     "com.typesafe" % "config" % "1.3.1",
     "com.github.tototoshi" %% "scala-csv" % "1.3.4",
     "org.scalatest" %% "scalatest" % "3.0.2" % "test"
