@@ -86,7 +86,7 @@ trait SQLQueryGenerator {
   def toLineComment(m: String): String = "-- " + m
 
   protected def escape(_s: String) = {
-    val s = _s.replace("\n","\\n")
+    val s = _s.replace("\\","\\\\").replace("\n","\\n")
     if(s.contains("\"")) {
       "'" + s.replace("'","\\'") + "'"
     } else {
