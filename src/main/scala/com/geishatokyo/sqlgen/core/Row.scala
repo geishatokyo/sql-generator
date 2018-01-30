@@ -36,5 +36,8 @@ class Row(val parent: Sheet,val rowIndex : Int) {
 
   def address = s"${parent.address}/row:${rowIndex}"
 
+  def ++(values: Map[String,Any]): Map[String, Any] = {
+    parent.headers.map(_.name).zip(_cells).toMap ++ values
+  }
 
 }

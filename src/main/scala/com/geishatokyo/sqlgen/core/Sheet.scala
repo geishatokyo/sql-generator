@@ -102,16 +102,34 @@ class Sheet(private[core] var _parent : Workbook,
 
   def addRow(row: Row): Row = {
 
-    if(row.parent.headers != this.headers &&
-      !row.parent.headers.forall(h => this.headers.exists(header => eqStr(header.name,h.name)))
-    ) {
-      throw SQLGenException.atSheet(this,s"Row header is not match")
-
+    if(row.parent.headers != this.headers) {
+      val notExists = this.headers.filter(h => {
+        !row.parent.headers.exists(h2 => {
+          eqStr(h.name, h2.name  )
+        })
+      })
+      if(notExists.size > 0) {
+        throw SQLGenException.atSheet(this, s"Row header is not match.Not founds:${notExists.map(_.name).mkString(",")}")
+      }
     }
     appendRow(row)
     recalculate()
     _rows.last
   }
+
+  def addRow(row: Map[String,Any]): Row = {
+    val notExists = this.headers.filter(h => {
+      !row.exists(t => {
+        eqStr(t._1, h.name)
+      })
+    })
+    if(notExists.size > 0) {
+      throw SQLGenException.atSheet(this,s"Row header is not match.Not founds:${notExists.map(_.name).mkString(",")}")
+    }
+    val values = this.headers.map(h => row.find(t => eqStr(t._1, h.name)).get._2)
+    addRow(values:_*)
+  }
+
   def addRows(rows: Row*) : Unit = {
     checkHeaders(rows)
     rows.foreach(row => appendRow(row))

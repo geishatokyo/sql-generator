@@ -1,6 +1,6 @@
 
 val commonSettings = Seq(
-  version := "0.9.2-SNAPSHOT",
+  version := "0.9.3-SNAPSHOT",
   organization := "com.geishatokyo",
   description := "Converter from xls to sql",
   scalaVersion := "2.12.2"
@@ -17,6 +17,9 @@ lazy val root = (project in file(".")).settings(commonSettings:_*).settings(
     "com.amazonaws" % "aws-java-sdk" % "1.11.248" % "provided",
     "com.typesafe" % "config" % "1.3.1",
     "com.github.tototoshi" %% "scala-csv" % "1.3.4",
+    "org.scalikejdbc" %% "scalikejdbc"       % "3.1.0",
+    "com.h2database"  %  "h2"                % "1.4.196",
+    "ch.qos.logback"  %  "logback-classic"   % "1.2.3",
     "org.scalatest" %% "scalatest" % "3.0.2" % "test"
   )
 )
