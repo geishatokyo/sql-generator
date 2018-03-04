@@ -33,15 +33,18 @@ class UsageTest extends FlatSpec with Matchers{
       ColumnMeta("gender")
     ))))
 
-    val graph = workbook(wb) >>
+    val cached = (workbook(wb) >>
       importsWB(referenceWB) >>
       setMeta(metadata) >>
-      MyProject >>
+      MyProject).cached
+
+    val graph = cached >>
       showConsole >>
       mysql.toConsole
 
     println("Graph: " + graph.toString())
 
+    graph.execute()
     graph.execute()
 
   }
