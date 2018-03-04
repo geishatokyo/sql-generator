@@ -13,7 +13,6 @@ import com.geishatokyo.sqlgen.meta.{ColumnMeta, Metadata}
 class MySQLQueryGenerator(protected val throwExceptionWhenMetaNotFound: Boolean = false) extends SQLQueryGenerator  {
 
 
-
   val format = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
 
   /**
@@ -21,9 +20,9 @@ class MySQLQueryGenerator(protected val throwExceptionWhenMetaNotFound: Boolean 
     * @param className
     * @return
     */
-  def toValue(cell: Cell, className: String): String = {
+  def toValue(cell: Cell, className: Option[String]): String = {
     className match{
-      case Metadata.AutoClass => {
+      case None | Some(Metadata.AutoClass) => {
         cell.dataType match{
           case DataType.Integer => cell.asLong.toString
           case DataType.Number => cell.asDouble.toString
@@ -34,16 +33,16 @@ class MySQLQueryGenerator(protected val throwExceptionWhenMetaNotFound: Boolean 
           case _ => escape(cell.asString)
         }
       }
-      case MySQLColumnKind.Integer => {
+      case Some(MySQLColumnKind.Integer) => {
         cell.asLong.toString
       }
-      case MySQLColumnKind.Number => {
+      case Some(MySQLColumnKind.Number) => {
         cell.asDouble.toString
       }
-      case MySQLColumnKind.Date => {
+      case Some(MySQLColumnKind.Date) => {
         escape(format.format(cell.asDate))
       }
-      case MySQLColumnKind.String => {
+      case Some(MySQLColumnKind.String) => {
         escape(cell.asString)
       }
       case _ => {

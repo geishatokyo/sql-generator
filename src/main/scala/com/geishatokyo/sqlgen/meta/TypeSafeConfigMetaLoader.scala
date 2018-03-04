@@ -2,6 +2,7 @@ package com.geishatokyo.sqlgen.meta
 
 import java.io.{InputStream, InputStreamReader}
 
+import com.geishatokyo.sqlgen.SQLGenException
 import com.typesafe.config.{Config, ConfigFactory}
 
 import scala.collection.JavaConverters._
@@ -26,17 +27,18 @@ class TypeSafeConfigMetaLoader extends MetaLoader{
 
 
   def loadConfig(config: Config): Metadata = {
-
-
-    if(config.hasPath(SheetProp)) {
-      Metadata(config.getConfigList(SheetProp).asScala.map(conf => {
+    if(config.hasPath(SheetProp) && config.hasPath(NameProp)) {
+      val name = config.getString(NameProp)
+      Metadata(name, config.getConfigList(SheetProp).asScala.map(conf => {
         loadSheet(conf)
       }).toList)
     } else {
-      Metadata(Nil)
+      if(!config.hasPath(NameProp)) {
+        throw SQLGenException("Metadata needs name property")
+      } else {
+        throw SQLGenException("Metadata needs sheets property")
+      }
     }
-
-
   }
 
   private def loadSheet(config: Config): SheetMeta = {

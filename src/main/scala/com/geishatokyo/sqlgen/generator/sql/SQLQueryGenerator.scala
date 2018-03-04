@@ -13,7 +13,7 @@ trait SQLQueryGenerator {
 
   protected def throwExceptionWhenMetaNotFound: Boolean
 
-  def toSQL(queryType: QueryType, row: Row)(implicit metadata: Metadata) = {
+  def toSQL(queryType: QueryType, row: Row) = {
     queryType match {
       case QueryType.Insert => createInsertSQL(row)
       case QueryType.Replace => createReplaceSQL(row)
@@ -21,67 +21,27 @@ trait SQLQueryGenerator {
     }
   }
 
-  protected def getTableName(row: Row)(implicit metadata: Metadata) = {
-    metadata.getSheetMeta(row.parent.name) match{
-      case Some(metadata) => metadata.className
-      case None => row.parent.name
+
+  protected def getIds(row: Row): List[String] = {
+    val ids = row.parent.ids.map(_.name).toList
+    if(ids.size == 0) {
+      println(row.parent.headers.map(_.name).toList)
+      if(row.parent.hasColumn("id")) {
+        List("id")
+      } else {
+        Nil
+      }
+    } else {
+      ids
     }
   }
-
-  protected def getColumnMeta(c: Column)(implicit metadata: Metadata) = {
-    metadata.getSheetMeta(c.parent.name).flatMap(sm => {
-      sm.getColumnMeta(c.header.name)
+  protected def getFieldNameAndValue(row: Row): Seq[(String,String)] = {
+    row.cells.filterNot(_.header.isIgnore).map(c => {
+      (c.header.name, toValue(c, c.header.columnType))
     })
   }
 
-  protected def getIds(row: Row)(implicit metadata: Metadata): List[String] = {
-    metadata.getSheetMeta(row.parent.name) match {
-      case Some(metadata) => {
-        if(metadata.primaryIndex.size > 0) {
-          metadata.primaryIndex
-        } else {
-          row.parent.headers.filter(h => !h.isIgnore && h.isId).map(_.name).toList
-        }
-      }
-      case None => {
-        val ids = row.parent.headers.filter(h => !h.isIgnore && h.isId).map(_.name).toList
-
-        if(ids.size == 0) {
-          if(row.parent.hasColumn("id")) {
-            List("id")
-          } else {
-            Nil
-          }
-        } else ids
-      }
-    }
-  }
-  protected def getFieldNameAndValue(row: Row)(implicit metadata: Metadata): Seq[(String,String)] = {
-
-    if(!metadata.getSheetMeta(row.parent.name).isDefined) {
-      if(throwExceptionWhenMetaNotFound) {
-        throw SQLGenException.atSheet(row.parent,s"Metadata for Sheet:${row.parent.name} not found")
-      }
-      row.cells.filter(!_.header.isIgnore).map(c => {
-        (c.header.name, toValue(c, Metadata.AutoClass))
-      })
-    } else {
-      row.cells.flatMap(c => {
-        if(c.header.isIgnore) None
-        else getColumnMeta(c.column) match{
-          case Some(m) => {
-            if(m.isIgnore ) None
-            else Some((c.header.name, toValue(c, m.className)))
-          }
-          case None => None
-        }
-      }).toList
-    }
-
-
-  }
-
-  def toValue(cell: Cell, className: String): String
+  def toValue(cell: Cell, className: Option[String]): String
 
   def toLineComment(m: String): String = "-- " + m
 
@@ -94,58 +54,23 @@ trait SQLQueryGenerator {
     }
   }
 
-  private var checkResult = Map[String,Option[String]]()
-  protected def checkAllFieldsExists(sheet: Sheet)(implicit metadata: Metadata) = checkResult.get(sheet.address) match{
-    case Some(Some(error)) => throw SQLGenException.atSheet(sheet,error)
-    case Some(None) =>
-    case None => {
-      metadata.getSheetMeta(sheet.name) match {
-        case Some(meta) => {
-          val fields = sheet.headers.map(_.name.toUpperCase).toSet
-
-          meta.columnMetas.find(c => !fields.contains(c.name.toUpperCase)) match {
-            case Some(column) => {
-              val message = s"Field:${column.name} not exists"
-              checkResult += (sheet.address -> Some(message))
-              throw SQLGenException.atSheet(sheet,message)
-            }
-            case None => {
-              checkResult += (sheet.address -> None)
-            }
-          }
-        }
-        case None => {
-          if (throwExceptionWhenMetaNotFound) {
-            val message =  s"Metadata for Sheet:${sheet.name} not found"
-            checkResult += (sheet.address -> Some(message))
-            throw SQLGenException.atSheet(sheet, message)
-          }else {
-            checkResult += (sheet.address -> None)
-          }
-
-        }
-      }
-    }
-  }
 
 
-  def createInsertSQL(row: Row)(implicit metadata: Metadata) : String= {
-    checkAllFieldsExists(row.parent)
+  def createInsertSQL(row: Row) : String= {
 
-    val name = getTableName(row)
+    val name = row.parent.name
     val fieldAndValues = getFieldNameAndValue(row)
     createInsert(name, fieldAndValues)
   }
 
   protected def createInsert(tableName: String, fieldAndValues: Seq[(String,String)]): String
 
-  def createReplaceSQL(row: Row)(implicit metadata: Metadata) = {
-    checkAllFieldsExists(row.parent)
+  def createReplaceSQL(row: Row) = {
     val ids = getIds(row)
     if(ids.size == 0) {
       throw SQLGenException.atSheet(row.parent, "No ids")
     }
-    val name = getTableName(row)
+    val name = row.parent.name
     val fieldAndValues = getFieldNameAndValue(row)
     ids.find(id => !fieldAndValues.exists(_._1.toUpperCase == id.toUpperCase)) match {
       case Some(idNotExists) => {
@@ -160,14 +85,13 @@ trait SQLQueryGenerator {
   protected def createReplace(tableName: String, ids: List[String], fieldAndValues: Seq[(String,String)]): String
 
 
-  def createDeleteSQL(row: Row)(implicit metadata: Metadata) = {
-    checkAllFieldsExists(row.parent)
+  def createDeleteSQL(row: Row) = {
     val ids = getIds(row)
     if(ids.size == 0) {
       throw SQLGenException.atSheet(row.parent, "No ids")
     }
 
-    val name = getTableName(row)
+    val name = row.parent.name
     val fieldAndValues = getFieldNameAndValue(row)
     ids.find(id => !fieldAndValues.exists(_._1.toUpperCase == id.toUpperCase)) match {
       case Some(idNotExists) => {

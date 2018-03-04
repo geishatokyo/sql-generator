@@ -15,9 +15,11 @@ import com.geishatokyo.sqlgen.process.{Context, Key}
 
 class SqliteConverterProc(val queryType: QueryType) extends SQLConverterProc {
 
+
+  override def metadataName: String = "Sqlite"
+
   override def dbType: String = "sqlite"
 
-  override def metadataKey: Key[Metadata] = SqliteConverterProc.MetadataKey
 
   override def createSqlQueryGenerator(c: Context): SQLQueryGenerator = {
     new SqliteQueryGenerator(false)

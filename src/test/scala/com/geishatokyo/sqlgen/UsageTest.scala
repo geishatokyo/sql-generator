@@ -26,16 +26,19 @@ class UsageTest extends FlatSpec with Matchers{
     s2.addRow(1,"Superman",100)
     s2.addRow(2,"OnePunchMan",120)
 
+    val metadata = Metadata("MySQL",List(SheetMeta("User",List(
+      ColumnMeta("id"),
+      ColumnMeta("nickname"),
+      ColumnMeta("age"),
+      ColumnMeta("gender")
+    ))))
+
     val graph = workbook(wb) >>
       importsWB(referenceWB) >>
+      setMeta(metadata) >>
       MyProject >>
       showConsole >>
-      mysql.withMeta(Metadata(List(SheetMeta("User",List(
-        ColumnMeta("id"),
-        ColumnMeta("nickname"),
-        ColumnMeta("age"),
-        ColumnMeta("gender")
-    ))))).toConsole
+      mysql.toConsole
 
     println("Graph: " + graph.toString())
 

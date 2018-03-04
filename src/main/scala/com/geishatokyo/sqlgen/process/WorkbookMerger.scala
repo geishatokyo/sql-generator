@@ -17,7 +17,10 @@ object WorkbookMerger {
       }
     })
     w2.note.foreach(t => {
-      w1.note(t._1) = t._2
+      w1.addNote(t._1, t._2)
+    })
+    w2.metadatas.foreach(t => {
+      w1.addMetadata(t._2)
     })
 
     w1

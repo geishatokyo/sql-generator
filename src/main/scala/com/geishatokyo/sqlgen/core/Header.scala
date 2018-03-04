@@ -18,7 +18,11 @@ class Header(var name: String) {
 
   val note = mutable.Map.empty[String,Any]
 
-  var columnType: String = "String"
+  /**
+    * カラムの型情報を示す。
+    * 通常はカラム毎に型が推測されるため、使用されていない
+    */
+  var columnType: Option[String] = None
 
   var isIgnore = false
 

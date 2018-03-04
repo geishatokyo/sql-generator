@@ -1,9 +1,10 @@
 
 val commonSettings = Seq(
-  version := "0.9.3-SNAPSHOT",
+  version := "0.9.4-SNAPSHOT",
   organization := "com.geishatokyo",
   description := "Converter from xls to sql",
-  scalaVersion := "2.12.2"
+  scalaVersion := "2.12.4",
+  crossScalaVersions := Seq("2.12.4","2.11.12")
 )
 
 

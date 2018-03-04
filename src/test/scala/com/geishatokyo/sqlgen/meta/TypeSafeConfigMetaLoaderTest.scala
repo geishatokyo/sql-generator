@@ -12,6 +12,7 @@ class TypeSafeConfigMetaLoaderTest extends FlatSpec with Matchers {
 
     val config = ConfigFactory.parseString(
       """
+        |name: CSharp
         |sheets : [{
         |  name: User
         |  columns: [{
@@ -41,7 +42,7 @@ class TypeSafeConfigMetaLoaderTest extends FlatSpec with Matchers {
     println(metadata)
     assert(metadata.sheetMetas.size == 2)
 
-    assert(metadata == Metadata(List(
+    assert(metadata == Metadata("CSharp",List(
       SheetMeta("User",List(
         ColumnMeta("id"),
         ColumnMeta("nickname")

@@ -4,13 +4,15 @@ import com.geishatokyo.sqlgen.core.Workbook
 import com.geishatokyo.sqlgen.generator.code.csharp.CSharpCodeGenerator
 import com.geishatokyo.sqlgen.generator.sql.QueryType
 import com.geishatokyo.sqlgen.generator.sql.sqlite.SqliteQueryGenerator
+import com.geishatokyo.sqlgen.meta.{Metadata, TypeSafeConfigMetaLoader}
 import com.geishatokyo.sqlgen.process.converter.code.CSharpCodeConverterProc
-import com.geishatokyo.sqlgen.process.converter.csv.CSVConverterProc
+import com.geishatokyo.sqlgen.process.converter.csv._
 import com.geishatokyo.sqlgen.process.converter.sql.{MySQLConverterProc, SqliteConverterProc}
 import com.geishatokyo.sqlgen.process.input.{FileImportProc, FileLoaderInput, WorkbookImportProc, WorkbookInput}
+import com.geishatokyo.sqlgen.process.mete.{MetaImportProc, MetaSetProc}
 import com.geishatokyo.sqlgen.process.misc.RenameWorkbookProc
 import com.geishatokyo.sqlgen.process.output.ConsoleOutputProc
-import com.geishatokyo.sqlgen.process.{Proc, ProjectProc}
+import com.geishatokyo.sqlgen.process.{ConverterProc, Proc, ProjectProc}
 
 /**
   * usage:
@@ -53,6 +55,13 @@ package object sqlgen {
     new WorkbookInput(w)
   }
 
+  def importMeta(filePaths: String*) = {
+    new MetaImportProc(new TypeSafeConfigMetaLoader(), filePaths:_*)
+  }
+  def setMeta(metadatas: Metadata*) = {
+    new MetaSetProc(metadatas:_*)
+  }
+
   /**
     * 参照(ReadOnly)としてWorkbookをファイルから読み込む
     * @param fileOrDirs
@@ -74,8 +83,16 @@ package object sqlgen {
     * CSV形式へ変換する
     * @return
     */
-  def csv = {
-    new CSVConverterProc()
+  def csv: ConverterProc[String] = {
+    csv(true)
+  }
+
+  def csv(singleFile: Boolean = true): ConverterProc[String] = {
+    if(singleFile) {
+      new SingleFileCSVConverterProc()
+    } else {
+      new SheetSeparatedCSVConverterProc()
+    }
   }
 
   /**

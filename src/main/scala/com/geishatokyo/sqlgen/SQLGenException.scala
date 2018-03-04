@@ -1,6 +1,6 @@
 package com.geishatokyo.sqlgen
 
-import com.geishatokyo.sqlgen.core.{Cell, Row, Sheet, Workbook}
+import com.geishatokyo.sqlgen.core._
 
 
 /**
@@ -36,6 +36,16 @@ object SQLGenException {
 
   def atRow(row: Row, message: String, t: Throwable = null) = {
     new SQLGenException(row.address, message, t)
+  }
+
+  def atColumn(col: Column, message: String, t: Throwable = null): SQLGenException = {
+    new SQLGenException(col.address, message, t)
+
+  }
+
+  def atHeader(header: Header, message: String, t: Throwable = null): SQLGenException = {
+    new SQLGenException(header.column.address, message, t)
+
   }
 
 }

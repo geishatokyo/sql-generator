@@ -10,39 +10,26 @@ import com.geishatokyo.sqlgen.meta.{ColumnMeta, Metadata}
 class CSharpCodeGenerator(withLabel: Boolean = true) {
 
 
-  protected def getClassName(row: Row)(implicit metadata: Metadata) = {
-    metadata.getSheetMeta(row.parent.name) match{
-      case Some(metadata) => metadata.className
-      case None => row.parent.name
-    }
-  }
+  def createStatement(row: Row): String = {
+    val className = row.parent.name
 
-  protected def getColumnMeta(c: Column)(implicit metadata: Metadata): Option[ColumnMeta] = {
-    metadata.getSheetMeta(c.parent.name).flatMap(sm => {
-      sm.getColumnMeta(c.header.name)
-    })
-  }
-
-  def createStatement(row: Row)(implicit metadata: Metadata): String = {
-    val className = getClassName(row)
-
-    val params = row.cells.flatMap(c => {
-      getColumnMeta(c.column).map(meta => (c,meta))
-    }).map({ case (c,meta) =>
-      val csharpType = if(meta.className == Metadata.AutoClass) {
-        c.dataType match{
-          case DataType.Integer => "long"
-          case DataType.Number => "double"
-          case DataType.Bool => "bool"
-          case DataType.Date => "DateTime"
-          case DataType.String => "string"
-          case d => {
-            throw SQLGenException.atCell(c, s"Not supported DataType:${d}")
+    val params = row.cells.map( c => {
+      val csharpType = c.header.columnType match {
+        case None | Some(Metadata.AutoClass) => {
+          c.dataType match {
+            case DataType.Integer => "long"
+            case DataType.Number => "double"
+            case DataType.Bool => "bool"
+            case DataType.Date => "DateTime"
+            case DataType.String => "string"
+            case d => {
+              throw SQLGenException.atCell(c, s"Not supported DataType:${d}")
+            }
           }
         }
-      } else {
-        meta.className
+        case Some(t) => t
       }
+
 
       val v = csharpType match {
         case "long" | "int" | "uint" | "byte" | "ulong" => c.asLong.toString
@@ -58,7 +45,7 @@ class CSharpCodeGenerator(withLabel: Boolean = true) {
         }
       }
       if(withLabel) {
-        meta.name + ":" + v
+        c.header.name + ":" + v
       }else {
         v
       }

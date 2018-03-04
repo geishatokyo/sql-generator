@@ -18,7 +18,19 @@ class Sheet(private[core] var _parent : Workbook,
 
   def name = _name
   def name_=(newName: String) = {
+    // Workbook内ではListで持っているため、
+    // 名前を変更してもWorkbookへの通知は不要
     _name = newName
+  }
+
+  def getMetadata(metadataName: String) = {
+    if(_parent == null ) None
+    else {
+      for{
+        wbMeta <- _parent.metadatas.get(metadataName)
+        sheetMeta <- wbMeta.getSheetMeta(name)
+      } yield sheetMeta
+    }
   }
 
   def address = {
@@ -64,7 +76,7 @@ class Sheet(private[core] var _parent : Workbook,
   val note = mutable.Map.empty[String,Any]
 
   def ids = {
-    columns.filter(_.header.isId)
+    columns.filter(c => !c.header.isIgnore && c.header.isId)
   }
 
   def apply(columnIndex: Int, rowIndex: Int): Cell = {
@@ -224,6 +236,24 @@ class Sheet(private[core] var _parent : Workbook,
     columns.takeRight(headerNames.size)
   }
 
+  def removeColumn(name: String) = {
+    removeColumns(name)
+  }
+
+
+  def removeColumns(names: String*) = {
+    val removes = names.count(hasColumn(_))
+
+    val cols = columns.filter(c => !names.contains(c.name))
+    if(cols.size != columns.size) {
+      this._headers = cols.map(_.header)
+      this._cells = (0 until rowSize).map(i => {
+        cols.map(c => c(i))
+      }).toArray
+      recalculate()
+    }
+
+  }
 
 
 

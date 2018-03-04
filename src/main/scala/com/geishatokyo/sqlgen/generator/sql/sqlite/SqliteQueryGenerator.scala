@@ -11,9 +11,10 @@ import com.geishatokyo.sqlgen.meta.Metadata
   */
 class SqliteQueryGenerator(val throwExceptionWhenMetaNotFound: Boolean = false) extends SQLQueryGenerator{
 
-  override def toValue(cell: Cell, className: String): String = {
+
+  override def toValue(cell: Cell, className: Option[String]): String = {
     className match{
-      case Metadata.AutoClass => {
+      case None | Some(Metadata.AutoClass) => {
         cell.dataType match{
           case DataType.Integer => cell.asLong.toString
           case DataType.Number => cell.asDouble.toString
@@ -24,16 +25,16 @@ class SqliteQueryGenerator(val throwExceptionWhenMetaNotFound: Boolean = false) 
           case _ => escape(cell.asString)
         }
       }
-      case SqliteColumnKind.Integer => {
+      case Some(SqliteColumnKind.Integer) => {
         cell.asLong.toString
       }
-      case SqliteColumnKind.Date => {
+      case Some(SqliteColumnKind.Date) => {
         cell.asDate.toInstant.toEpochMilli.toString
       }
-      case SqliteColumnKind.Number => {
+      case Some(SqliteColumnKind.Number) => {
         cell.asDouble.toString
       }
-      case SqliteColumnKind.String => {
+      case Some(SqliteColumnKind.String) => {
         escape(cell.asString)
       }
       case _ => {

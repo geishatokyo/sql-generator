@@ -2,7 +2,6 @@ package com.geishatokyo.sqlgen.setting
 
 import java.util.Comparator
 
-import scala.Boolean
 
 /**
   * Workbook単位のコンフィグ
@@ -61,6 +60,17 @@ object CaseInsensitiveStringComp extends Comparator[String] {
     if(o1 == null && o2 == null) 0
     else if(o1 != null && o2 != null) {
       o1.toUpperCase.compare(o2.toUpperCase)
+    } else {
+      -1
+    }
+  }
+}
+
+object CaseSensitiveStringComp extends Comparator[String] {
+  override def compare(o1: String, o2: String): Int = {
+    if(o1 == null && o2 == null) 0
+    else if(o1 != null && o2 != null) {
+      o1.compare(o2)
     } else {
       -1
     }

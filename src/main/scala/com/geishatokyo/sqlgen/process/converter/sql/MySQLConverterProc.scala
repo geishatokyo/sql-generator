@@ -15,9 +15,10 @@ import com.geishatokyo.sqlgen.process.{Context, Key}
 class MySQLConverterProc(val queryType: QueryType) extends SQLConverterProc {
 
 
+  override def metadataName: String = "MySQL"
+
   override def dbType: String = "mysql"
 
-  override def metadataKey: Key[Metadata] = MySQLConverterProc.MetadataKey
 
   override def forType(queryType: QueryType): SQLConverterProc = {
     new MySQLConverterProc(queryType)

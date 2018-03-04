@@ -5,6 +5,8 @@ package com.geishatokyo.sqlgen.core
   */
 class Column(val parent: Sheet, columnIndex: Int) {
 
+  def address = s"${parent.address}-${name}"
+
   val column = columnIndex
 
   def name = header.name
