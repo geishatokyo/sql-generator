@@ -29,6 +29,8 @@ trait Context
   def get[T](key: Key[T]): Option[T]
   def update[T](key: Key[T], a:T): Unit
 
+  def copy(): Context
+
 }
 
 
@@ -49,4 +51,18 @@ class DefaultContext extends Context{
   override def get[T](key: Key[T]): Option[T] = values.get(key.key).asInstanceOf[Option[T]]
 
   override def update[T](key: Key[T], a: T): Unit = values(key.key) = a
+
+  override def copy(): Context = {
+    val c = new DefaultContext()
+    c.values ++= this.values
+
+    if(c.has(Context.Workbook)) {
+      c.update(Context.Workbook, c.workbook.copy())
+    }
+    if(c.has(Context.Import)) {
+      c.update(Context.Import, c(Context.Import).map(_.copy()))
+    }
+
+    c
+  }
 }

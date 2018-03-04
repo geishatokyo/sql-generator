@@ -43,12 +43,9 @@ trait Proc  {
   }
 
   def execute(c: Context): Context = {
-    // Workbookをコピーし、他のProcessからの影響を消す
-    if(c.has(Context.Workbook)) {
-      val wb = c.workbook.copy()
-      c.update(Context.Workbook, wb)
-    }
-    thisProc.apply(c)
+    // Contextをコピーし、他のProcessからの影響を消す
+    val newC = c.copy()
+    thisProc.apply(newC)
   }
 
 
