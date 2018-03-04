@@ -11,11 +11,11 @@ import com.geishatokyo.sqlgen.process.{Context, Proc}
   */
 trait FileListUpSupport { self: Proc =>
 
+  def excludeDirs: Set[String]
   def fileOrDirs: Seq[String]
   def filter: File => Boolean
   def loader: Loader
 
-  def excludeDirs = Set("target","output","input","conf","configure")
 
   def load(c: Context): Option[Workbook] = {
 

@@ -16,7 +16,8 @@ import scala.util.matching.Regex
 class FileLoaderInput(val loader: Loader,
                       _workingDir: String,
                       val filter: File => Boolean,
-                      val fileOrDirs: Seq[String]) extends InputProc with FileListUpSupport{
+                      val fileOrDirs: Seq[String],
+                      val excludeDirs: Set[String]) extends InputProc with FileListUpSupport{
 
 
 
@@ -35,25 +36,29 @@ object FileLoaderInput {
 
     new FileLoaderInput(AutoFileDetectionLoader.default, dir,f => {
       !isExcludeFile(f) && isTargetFile(f)
-    }, files)
+    }, files, DefaultRule.excludeDirs)
   }
 
   def csv(files: String*): Proc = {
     if(files.size == 0) return EmptyProc
     val dir = new File(files.head).getParent
-    new FileLoaderInput(new CSVLoader(), dir,f => f.getName.endsWith(".csv"), files)
+    new FileLoaderInput(
+      new CSVLoader(),
+      dir,f => f.getName.endsWith(".csv"),
+      files,
+      DefaultRule.excludeDirs)
   }
 
-  lazy val isExcludeFile: File => Boolean = {
+  def isExcludeFile: File => Boolean = {
     SettingLoader.getString("SG_EXCLUDE_FILE_REGEX") match{
       case Some(regex) => {
         isMatchRegex(regex.r) _
       }
-      case _ => DefaultRule.isBackUpFile _
+      case _ => DefaultRule.isBackUpFile
     }
   }
 
-  lazy val isTargetFile: File => Boolean = {
+  def isTargetFile: File => Boolean = {
     SettingLoader.getString("SG_TARGET_FILE_REGEX") match{
       case Some(regex) => {
         isMatchRegex(regex.r) _
@@ -66,19 +71,21 @@ object FileLoaderInput {
 
 
   object DefaultRule {
-    def isBackUpFile(f: File) = {
+    var isBackUpFile: Function1[File,Boolean] = (f: File) => {
       f.getName.startsWith("~") //エクセルのバックアップファイル
     }
 
-    def isAnyCSV(f: File) = {
+    var isAnyCSV = (f: File) => {
       f.getName.endsWith(".csv")
     }
 
-    def isAnyXLS(f: File) = {
+    var isAnyXLS = (f: File) => {
       f.getName.endsWith(".xlsx") ||
         f.getName.endsWith(".xlsm") || // マクロ入り
         f.getName.endsWith(".xls")
     }
+
+    var excludeDirs = Set("target","output","input","conf","configure")
   }
 
 

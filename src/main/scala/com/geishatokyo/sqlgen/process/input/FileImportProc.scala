@@ -9,7 +9,8 @@ import com.geishatokyo.sqlgen.loader.{AutoFileDetectionLoader, Loader}
   */
 class FileImportProc(val loader: Loader,
                      val filter: File => Boolean,
-                     val fileOrDirs: Seq[String]) extends LoaderImportProc with FileListUpSupport {
+                     val fileOrDirs: Seq[String],
+                     val excludeDirs: Set[String]) extends LoaderImportProc with FileListUpSupport {
 
 }
 
@@ -17,6 +18,12 @@ class FileImportProc(val loader: Loader,
 object FileImportProc {
 
   def auto(fileOrDirs: String*) = {
-    new FileImportProc(AutoFileDetectionLoader.default, _ => true, fileOrDirs)
+    new FileImportProc(AutoFileDetectionLoader.default, _ => true, fileOrDirs, DefaultRule.excludeDirs)
   }
+
+  object DefaultRule {
+
+    var excludeDirs = Set("target","output","input","conf","configure")
+  }
+
 }

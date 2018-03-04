@@ -130,4 +130,14 @@ package object sqlgen {
     new RenameWorkbookProc(workbookName)
   }
 
+  object FileSetting {
+
+    val DefaultExcludeDirs = FileLoaderInput.DefaultRule.excludeDirs
+
+    def setExcludeDirs(dirs: String*) = {
+      FileImportProc.DefaultRule.excludeDirs = dirs.toSet
+      FileLoaderInput.DefaultRule.excludeDirs = dirs.toSet
+    }
+  }
+
 }
