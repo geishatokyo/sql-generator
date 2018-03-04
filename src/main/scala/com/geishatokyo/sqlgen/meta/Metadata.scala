@@ -3,7 +3,7 @@ package com.geishatokyo.sqlgen.meta
 import java.util.Comparator
 
 import com.geishatokyo.sqlgen.SQLGenException
-import com.geishatokyo.sqlgen.setting.CaseSensitiveStringComp
+import com.geishatokyo.sqlgen.setting.{CaseInsensitiveStringComp, CaseSensitiveStringComp}
 
 /**
   * Created by takezoux2 on 2017/07/05.
@@ -12,7 +12,7 @@ case class Metadata(name: String, sheetMetas: List[SheetMeta]) {
 
   sheetMetas.foreach(_.parent = this)
 
-  var stringComparator: Comparator[String] = CaseSensitiveStringComp
+  var stringComparator: Comparator[String] = CaseInsensitiveStringComp
 
   // デフォルトの挙動は、
   // * Metadataに存在しないシート、カラムは出力されない

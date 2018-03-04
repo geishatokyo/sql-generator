@@ -84,9 +84,12 @@ package object sqlgen {
     * @return
     */
   def csv: ConverterProc[String] = {
-    csv(true)
+    csv(false)
   }
 
+  def singleCsv = {
+    csv(true)
+  }
   def csv(singleFile: Boolean = true): ConverterProc[String] = {
     if(singleFile) {
       new SingleFileCSVConverterProc()

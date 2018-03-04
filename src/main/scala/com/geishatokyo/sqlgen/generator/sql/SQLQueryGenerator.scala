@@ -25,7 +25,6 @@ trait SQLQueryGenerator {
   protected def getIds(row: Row): List[String] = {
     val ids = row.parent.ids.map(_.name).toList
     if(ids.size == 0) {
-      println(row.parent.headers.map(_.name).toList)
       if(row.parent.hasColumn("id")) {
         List("id")
       } else {
